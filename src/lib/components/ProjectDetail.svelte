@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { selectedProject } from '$lib/stores';
-	import { STATUS_CONFIG, CATEGORY_CONFIG, FUNDING_CONFIG, type Project } from '$lib/types';
+	import { STATUS_CONFIG, CATEGORY_CONFIG, FUNDING_CONFIG, GOVERNMENT_LEVEL_CONFIG, type Project } from '$lib/types';
 
 	function formatCurrency(n: number): string {
 		if (n >= 1_000_000_000) return `$${(n / 1_000_000_000).toFixed(2)}B`;
@@ -30,6 +30,7 @@
 	{@const cfg = STATUS_CONFIG[p.status]}
 	{@const catCfg = CATEGORY_CONFIG[p.category]}
 	{@const fundCfg = FUNDING_CONFIG[p.funding_type]}
+	{@const govCfg = GOVERNMENT_LEVEL_CONFIG[p.government_level]}
 	{@const pct = budgetPercent(p)}
 	{@const v = variance(p)}
 
@@ -40,18 +41,23 @@
 				<div>
 					<div class="text-xs text-[var(--color-text-muted)] uppercase tracking-wider mb-1">{catCfg.icon} {catCfg.label}</div>
 					<h2 class="text-base font-bold leading-tight">{p.name}</h2>
-					<div class="text-xs text-[var(--color-text-muted)] mt-1">{p.location_name}</div>
+					<div class="text-xs text-[var(--color-text-muted)] mt-1">
+					{p.council ? `${p.council} · ` : ''}{p.location_name}
+				</div>
 				</div>
 				<button
 					onclick={close}
 					class="text-[var(--color-text-muted)] hover:text-[var(--color-text)] text-lg leading-none cursor-pointer"
 				>✕</button>
 			</div>
-			<div class="flex gap-1.5 mt-2">
+			<div class="flex flex-wrap gap-1.5 mt-2">
 				<span class="text-xs px-2 py-0.5 rounded-full font-medium {cfg.bgClass}">
 					{cfg.label}
 				</span>
-				<span class="text-xs px-2 py-0.5 rounded-full font-medium bg-amber-500/15 text-amber-400">
+				<span class="text-xs px-2 py-0.5 rounded-full font-medium" style="background: {govCfg.color}20; color: {govCfg.color};">
+					{govCfg.shortLabel}
+				</span>
+				<span class="text-xs px-2 py-0.5 rounded-full font-medium bg-slate-500/20 text-slate-400">
 					{fundCfg.label}
 				</span>
 			</div>
