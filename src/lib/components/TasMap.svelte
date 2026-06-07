@@ -2,10 +2,10 @@
 	import { onMount } from 'svelte';
 	import {
 		projects, selectedProject, filterCategory, filterStatus,
-		filterFunding, searchQuery, timelineRange, showHeatmap,
+		filterFunding, filterGovernmentLevel, searchQuery, timelineRange, showHeatmap,
 		showConnections, mapStyle
 	} from '$lib/stores';
-	import { STATUS_CONFIG, CATEGORY_CONFIG, FUNDING_CONFIG, type Project } from '$lib/types';
+	import { STATUS_CONFIG, CATEGORY_CONFIG, FUNDING_CONFIG, GOVERNMENT_LEVEL_CONFIG, type Project } from '$lib/types';
 	import { TASMANIA_CENTER, TASMANIA_ZOOM } from '$lib/tasmania-geo';
 	import tasmaniaGeoJson from '$lib/tasmania-boundary.json';
 
@@ -30,12 +30,13 @@
 
 	function getFilteredProjects(
 		all: Project[], cat: string, status: string, funding: string,
-		query: string, range: [number, number]
+		govLevel: string, query: string, range: [number, number]
 	): Project[] {
 		return all.filter((p) => {
 			if (cat !== 'all' && p.category !== cat) return false;
 			if (status !== 'all' && p.status !== status) return false;
 			if (funding !== 'all' && p.funding_type !== funding) return false;
+			if (govLevel !== 'all' && p.government_level !== govLevel) return false;
 			if (query && !p.name.toLowerCase().includes(query.toLowerCase())) return false;
 			const startYear = new Date(p.start_date).getFullYear();
 			if (startYear < range[0] || startYear > range[1]) return false;
@@ -48,11 +49,13 @@
 		const fundCfg = FUNDING_CONFIG[p.funding_type];
 		const catCfg = CATEGORY_CONFIG[p.category];
 
+		const govCfg = GOVERNMENT_LEVEL_CONFIG[p.government_level];
+
 		const marker = L.circleMarker([p.lat, p.lng], {
 			radius: Math.max(8, Math.min(20, Math.sqrt(p.budget / 1_000_000) * 1.8)),
 			fillColor: cfg.color,
 			fillOpacity: 0.8,
-			color: '#fff',
+			color: govCfg.color,
 			weight: 2.5,
 			opacity: 0.9,
 			dashArray: fundCfg.dashArray
@@ -75,7 +78,8 @@
 		marker.bindPopup(`
 			<div style="font-family: Inter, system-ui; min-width: 220px; color: #1e293b;">
 				<div style="font-size: 14px; font-weight: 700; margin-bottom: 4px;">${catCfg.icon} ${p.name}</div>
-				<div style="font-size: 12px; color: #64748b; margin-bottom: 4px;">${p.location_name}</div>
+				<div style="font-size: 12px; color: #64748b; margin-bottom: 2px;">${p.council ?? p.location_name}</div>
+				${p.council ? `<div style="font-size: 11px; color: #94a3b8; margin-bottom: 4px;">${p.location_name}</div>` : ''}
 				<div style="display: flex; gap: 6px; margin-bottom: 8px;">
 					<span style="font-size: 10px; padding: 1px 6px; border-radius: 9999px; background: ${cfg.color}20; color: ${cfg.color}; font-weight: 600;">${cfg.label}</span>
 					<span style="font-size: 10px; padding: 1px 6px; border-radius: 9999px; background: #64748b20; color: #64748b; font-weight: 600;">${fundCfg.shortLabel}</span>
@@ -100,7 +104,7 @@
 
 	function updateMap(
 		all: Project[], cat: string, status: string, funding: string,
-		query: string, range: [number, number], heatmap: boolean,
+		govLevel: string, query: string, range: [number, number], heatmap: boolean,
 		connections: boolean
 	) {
 		if (!markersLayer || !L) return;
@@ -108,7 +112,7 @@
 		if (heatLayer) map.removeLayer(heatLayer);
 		if (connectionsLayer) connectionsLayer.clearLayers();
 
-		const filtered = getFilteredProjects(all, cat, status, funding, query, range);
+		const filtered = getFilteredProjects(all, cat, status, funding, govLevel, query, range);
 
 		if (heatmap) {
 			const heatData = filtered.map((p) => [p.lat, p.lng, p.spent / 1_000_000]);
@@ -226,15 +230,20 @@
 
 		connectionsLayer = L.layerGroup().addTo(map);
 
+		function redraw() {
+			updateMap($projects, $filterCategory, $filterStatus, $filterFunding, $filterGovernmentLevel, $searchQuery, $timelineRange, $showHeatmap, $showConnections);
+		}
+
 		const unsubs = [
-			projects.subscribe(() => updateMap($projects, $filterCategory, $filterStatus, $filterFunding, $searchQuery, $timelineRange, $showHeatmap, $showConnections)),
-			filterCategory.subscribe(() => updateMap($projects, $filterCategory, $filterStatus, $filterFunding, $searchQuery, $timelineRange, $showHeatmap, $showConnections)),
-			filterStatus.subscribe(() => updateMap($projects, $filterCategory, $filterStatus, $filterFunding, $searchQuery, $timelineRange, $showHeatmap, $showConnections)),
-			filterFunding.subscribe(() => updateMap($projects, $filterCategory, $filterStatus, $filterFunding, $searchQuery, $timelineRange, $showHeatmap, $showConnections)),
-			searchQuery.subscribe(() => updateMap($projects, $filterCategory, $filterStatus, $filterFunding, $searchQuery, $timelineRange, $showHeatmap, $showConnections)),
-			timelineRange.subscribe(() => updateMap($projects, $filterCategory, $filterStatus, $filterFunding, $searchQuery, $timelineRange, $showHeatmap, $showConnections)),
-			showHeatmap.subscribe(() => updateMap($projects, $filterCategory, $filterStatus, $filterFunding, $searchQuery, $timelineRange, $showHeatmap, $showConnections)),
-			showConnections.subscribe(() => updateMap($projects, $filterCategory, $filterStatus, $filterFunding, $searchQuery, $timelineRange, $showHeatmap, $showConnections)),
+			projects.subscribe(redraw),
+			filterCategory.subscribe(redraw),
+			filterStatus.subscribe(redraw),
+			filterFunding.subscribe(redraw),
+			filterGovernmentLevel.subscribe(redraw),
+			searchQuery.subscribe(redraw),
+			timelineRange.subscribe(redraw),
+			showHeatmap.subscribe(redraw),
+			showConnections.subscribe(redraw),
 			mapStyle.subscribe((s) => switchTiles(s))
 		];
 

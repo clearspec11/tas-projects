@@ -1,8 +1,11 @@
 export type ProjectStatus = 'on_budget' | 'over_budget' | 'under_budget' | 'completed' | 'cancelled';
-export type ProjectCategory = 'transport' | 'health' | 'education' | 'utilities' | 'housing' | 'environment' | 'other';
+export type ProjectCategory = 'transport' | 'health' | 'education' | 'utilities' | 'housing' | 'environment' | 'community' | 'other';
 export type FundingType = 'public' | 'ppp' | 'gov_funded_private' | 'gov_contracted';
+export type GovernmentLevel = 'federal' | 'state' | 'local';
 
 export interface Project {
+	government_level: GovernmentLevel;
+	council?: string;
 	id: string;
 	name: string;
 	description: string;
@@ -37,7 +40,14 @@ export const CATEGORY_CONFIG: Record<ProjectCategory, { label: string; icon: str
 	utilities: { label: 'Utilities', icon: '⚡' },
 	housing: { label: 'Housing', icon: '🏘️' },
 	environment: { label: 'Environment', icon: '🌿' },
+	community: { label: 'Community', icon: '🏛️' },
 	other: { label: 'Other', icon: '📋' }
+};
+
+export const GOVERNMENT_LEVEL_CONFIG: Record<GovernmentLevel, { label: string; shortLabel: string; color: string }> = {
+	federal: { label: 'Federal Government', shortLabel: 'Federal', color: '#818cf8' },
+	state: { label: 'State Government', shortLabel: 'State', color: '#38bdf8' },
+	local: { label: 'Local Council', shortLabel: 'Council', color: '#34d399' }
 };
 
 export const FUNDING_CONFIG: Record<FundingType, { label: string; shortLabel: string; dashArray: string; borderStyle: string }> = {
