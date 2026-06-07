@@ -1,0 +1,120 @@
+<script lang="ts">
+	import { selectedProject } from '$lib/stores';
+	import { STATUS_CONFIG, CATEGORY_CONFIG, FUNDING_CONFIG, type Project } from '$lib/types';
+
+	function formatCurrency(n: number): string {
+		if (n >= 1_000_000_000) return `$${(n / 1_000_000_000).toFixed(2)}B`;
+		if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
+		return `$${(n / 1_000).toFixed(0)}K`;
+	}
+
+	function budgetPercent(p: Project): number {
+		return Math.round((p.spent / p.budget) * 100);
+	}
+
+	function variance(p: Project): number {
+		return p.spent - p.budget;
+	}
+
+	function formatDate(d: string): string {
+		return new Date(d).toLocaleDateString('en-AU', { year: 'numeric', month: 'short', day: 'numeric' });
+	}
+
+	function close() {
+		selectedProject.set(null);
+	}
+</script>
+
+{#if $selectedProject}
+	{@const p = $selectedProject}
+	{@const cfg = STATUS_CONFIG[p.status]}
+	{@const catCfg = CATEGORY_CONFIG[p.category]}
+	{@const fundCfg = FUNDING_CONFIG[p.funding_type]}
+	{@const pct = budgetPercent(p)}
+	{@const v = variance(p)}
+
+	<div class="absolute top-14 right-4 w-96 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl shadow-2xl z-[1000] overflow-hidden">
+		<!-- Header -->
+		<div class="p-4 border-b border-[var(--color-border)]">
+			<div class="flex items-start justify-between">
+				<div>
+					<div class="text-xs text-[var(--color-text-muted)] uppercase tracking-wider mb-1">{catCfg.icon} {catCfg.label}</div>
+					<h2 class="text-base font-bold leading-tight">{p.name}</h2>
+					<div class="text-xs text-[var(--color-text-muted)] mt-1">{p.location_name}</div>
+				</div>
+				<button
+					onclick={close}
+					class="text-[var(--color-text-muted)] hover:text-[var(--color-text)] text-lg leading-none cursor-pointer"
+				>✕</button>
+			</div>
+			<div class="flex gap-1.5 mt-2">
+				<span class="text-xs px-2 py-0.5 rounded-full font-medium {cfg.bgClass}">
+					{cfg.label}
+				</span>
+				<span class="text-xs px-2 py-0.5 rounded-full font-medium bg-amber-500/15 text-amber-400">
+					{fundCfg.label}
+				</span>
+			</div>
+		</div>
+
+		<!-- Budget breakdown -->
+		<div class="p-4 space-y-3">
+			<div>
+				<div class="flex justify-between text-xs mb-1">
+					<span class="text-[var(--color-text-muted)]">Budget Usage</span>
+					<span class="font-mono font-bold" style="color: {cfg.color}">{pct}%</span>
+				</div>
+				<div class="bg-[var(--color-bg)] rounded-full h-3">
+					<div
+						class="h-full rounded-full transition-all"
+						style="width: {Math.min(100, pct)}%; background: {cfg.color};"
+					></div>
+				</div>
+			</div>
+
+			<div class="grid grid-cols-2 gap-3">
+				<div class="bg-[var(--color-bg)] rounded-lg p-3">
+					<div class="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">Budget</div>
+					<div class="text-lg font-bold mt-0.5">{formatCurrency(p.budget)}</div>
+				</div>
+				<div class="bg-[var(--color-bg)] rounded-lg p-3">
+					<div class="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">Spent</div>
+					<div class="text-lg font-bold mt-0.5" style="color: {cfg.color}">{formatCurrency(p.spent)}</div>
+				</div>
+			</div>
+
+			{#if v !== 0}
+				<div class="bg-[var(--color-bg)] rounded-lg p-3 text-center">
+					<div class="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">Variance</div>
+					<div class="text-lg font-bold mt-0.5" style="color: {v > 0 ? 'var(--color-danger)' : 'var(--color-success)'}">
+						{v > 0 ? '+' : ''}{formatCurrency(Math.abs(v))}
+					</div>
+				</div>
+			{/if}
+		</div>
+
+		<!-- Details -->
+		<div class="px-4 pb-4 space-y-2 text-xs">
+			<p class="text-[var(--color-text-muted)] leading-relaxed">{p.description}</p>
+
+			<div class="grid grid-cols-2 gap-x-4 gap-y-1 pt-2 border-t border-[var(--color-border)]">
+				<div>
+					<span class="text-[var(--color-text-muted)]">Started</span>
+					<span class="ml-1 font-medium">{formatDate(p.start_date)}</span>
+				</div>
+				{#if p.expected_end_date}
+					<div>
+						<span class="text-[var(--color-text-muted)]">Expected</span>
+						<span class="ml-1 font-medium">{formatDate(p.expected_end_date)}</span>
+					</div>
+				{/if}
+				{#if p.contractor}
+					<div class="col-span-2">
+						<span class="text-[var(--color-text-muted)]">Contractor</span>
+						<span class="ml-1 font-medium">{p.contractor}</span>
+					</div>
+				{/if}
+			</div>
+		</div>
+	</div>
+{/if}
