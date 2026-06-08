@@ -44,6 +44,23 @@ directly (or load from Supabase — see [`src/lib/supabase.ts`](src/lib/supabase
 - Infrastructure Tasmania — infrastructure.tas.gov.au
 - Project-specific official sites listed above
 
+## Funding breakdown (the "Who pays" bar)
+
+Each project can carry an explicit `funding_breakdown` (federal / state / local /
+private dollars). Where one is **not** supplied, the detail panel shows an
+**estimated** split derived from the project's governing tier
+(`government_level`) and delivery model (`funding_type`) — see
+`resolveFundingBreakdown` in [`src/lib/metrics.ts`](src/lib/metrics.ts). Estimated
+splits are labelled "est." in the UI and must not be cited as actual funding
+shares; follow the project's `source_url` for real figures.
+
+## Source links
+
+Every project has a `source_url` pointing to the official site or responsible
+agency (see `PROJECT_SOURCES` in [`src/lib/seed-data.ts`](src/lib/seed-data.ts)).
+These are real top-level domains; the authoritative dollar figures live on those
+pages, not in this seed data.
+
 ## Schema
 
 Project shape defined in [`src/lib/types.ts`](src/lib/types.ts). Geographic

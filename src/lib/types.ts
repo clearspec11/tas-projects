@@ -3,6 +3,13 @@ export type ProjectCategory = 'transport' | 'health' | 'education' | 'utilities'
 export type FundingType = 'public' | 'ppp' | 'gov_funded_private' | 'gov_contracted';
 export type GovernmentLevel = 'federal' | 'state' | 'local';
 
+export interface FundingBreakdown {
+	federal: number;
+	state: number;
+	local: number;
+	private: number;
+}
+
 export interface Project {
 	government_level: GovernmentLevel;
 	council?: string;
@@ -21,9 +28,18 @@ export interface Project {
 	expected_end_date: string | null;
 	contractor: string | null;
 	related_project_ids: string[];
+	source_url?: string;
+	funding_breakdown?: FundingBreakdown;
 	created_at: string;
 	updated_at: string;
 }
+
+export const FUNDER_CONFIG: Record<keyof FundingBreakdown, { label: string; color: string }> = {
+	federal: { label: 'Federal', color: '#6366f1' },
+	state: { label: 'State', color: '#38bdf8' },
+	local: { label: 'Local', color: '#34d399' },
+	private: { label: 'Private', color: '#f59e0b' }
+};
 
 export const STATUS_CONFIG: Record<ProjectStatus, { label: string; color: string; bgClass: string }> = {
 	on_budget: { label: 'On Budget', color: '#22c55e', bgClass: 'bg-green-500/20 text-green-400' },

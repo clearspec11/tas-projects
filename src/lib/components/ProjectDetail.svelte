@@ -1,7 +1,17 @@
 <script lang="ts">
 	import { selectedProject } from '$lib/stores';
-	import { STATUS_CONFIG, CATEGORY_CONFIG, FUNDING_CONFIG, GOVERNMENT_LEVEL_CONFIG } from '$lib/types';
-	import { formatCurrencyPrecise as formatCurrency, formatDate, budgetPercent, variance, variancePct, delayMonths, isRedFlag } from '$lib/metrics';
+	import { STATUS_CONFIG, CATEGORY_CONFIG, FUNDING_CONFIG, GOVERNMENT_LEVEL_CONFIG, FUNDER_CONFIG, type FundingBreakdown } from '$lib/types';
+	import { formatCurrencyPrecise as formatCurrency, formatDate, budgetPercent, variance, variancePct, delayMonths, isRedFlag, resolveFundingBreakdown } from '$lib/metrics';
+
+	const FUNDER_KEYS: (keyof FundingBreakdown)[] = ['federal', 'state', 'local', 'private'];
+
+	function hostname(url: string): string {
+		try {
+			return new URL(url).hostname.replace(/^www\./, '');
+		} catch {
+			return url;
+		}
+	}
 
 	function close() {
 		selectedProject.set(null);
@@ -18,8 +28,9 @@
 	{@const v = variance(p)}
 	{@const late = delayMonths(p)}
 	{@const flagged = isRedFlag(p)}
+	{@const funding = resolveFundingBreakdown(p)}
 
-	<div class="absolute top-14 right-4 w-96 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl shadow-2xl z-[1000] overflow-hidden">
+	<div class="absolute top-14 right-4 w-96 max-h-[calc(100vh-5rem)] overflow-y-auto bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl shadow-2xl z-[1000]">
 		<!-- Header -->
 		<div class="p-4 border-b border-[var(--color-border)]">
 			<div class="flex items-start justify-between">
@@ -94,6 +105,41 @@
 					</div>
 				{/if}
 			</div>
+
+			<!-- Funding split: who pays -->
+			<div>
+				<div class="flex justify-between items-baseline mb-1.5">
+					<span class="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">
+						Who pays {funding.estimated ? '· est.' : ''}
+					</span>
+				</div>
+				<div class="flex h-3 rounded-full overflow-hidden bg-[var(--color-bg)]">
+					{#each FUNDER_KEYS as key}
+						{@const amount = funding.breakdown[key]}
+						{#if amount > 0}
+							<div
+								style="width: {(amount / p.budget) * 100}%; background: {FUNDER_CONFIG[key].color};"
+								title="{FUNDER_CONFIG[key].label}: {formatCurrency(amount)}"
+							></div>
+						{/if}
+					{/each}
+				</div>
+				<div class="flex flex-wrap gap-x-3 gap-y-1 mt-2">
+					{#each FUNDER_KEYS as key}
+						{@const amount = funding.breakdown[key]}
+						{#if amount > 0}
+							<div class="flex items-center gap-1 text-[10px]">
+								<span class="w-2 h-2 rounded-full inline-block" style="background: {FUNDER_CONFIG[key].color};"></span>
+								<span class="text-[var(--color-text)]">{FUNDER_CONFIG[key].label}</span>
+								<span class="text-[var(--color-text-muted)]">{formatCurrency(amount)} ({Math.round((amount / p.budget) * 100)}%)</span>
+							</div>
+						{/if}
+					{/each}
+				</div>
+				{#if funding.estimated}
+					<p class="text-[9px] text-[var(--color-text-muted)] mt-1.5 italic">Estimated from governing tier &amp; delivery model — see source for actual figures.</p>
+				{/if}
+			</div>
 		</div>
 
 		<!-- Details -->
@@ -118,6 +164,20 @@
 					</div>
 				{/if}
 			</div>
+
+			{#if p.source_url}
+				<a
+					href={p.source_url}
+					target="_blank"
+					rel="noopener noreferrer"
+					class="flex items-center justify-between mt-2 px-3 py-2 rounded-lg bg-[var(--color-bg)] border border-[var(--color-border)] hover:border-[var(--color-accent)] transition-colors group"
+				>
+					<span class="text-[var(--color-text-muted)] group-hover:text-[var(--color-text)]">
+						Source: <span class="font-medium">{hostname(p.source_url)}</span>
+					</span>
+					<span class="text-[var(--color-accent)]">↗</span>
+				</a>
+			{/if}
 		</div>
 	</div>
 {/if}

@@ -1,4 +1,4 @@
-import type { Project, ProjectCategory, ProjectStatus, FundingType, GovernmentLevel } from './types';
+import type { Project, ProjectCategory, ProjectStatus, FundingType, GovernmentLevel, FundingBreakdown } from './types';
 
 // ---- Money / dates ----
 export function formatCurrency(n: number): string {
@@ -50,6 +50,47 @@ export function isRedFlag(p: Project, now: Date = new Date()): boolean {
 	if (variancePct(p) > 0.15) return true;
 	if (delayMonths(p, now) !== null) return true;
 	return false;
+}
+
+// ---- Funding breakdown ----
+// Share of project cost carried by the private sector, by delivery model.
+const PRIVATE_SHARE: Record<FundingType, number> = {
+	public: 0,
+	gov_contracted: 0, // privately built, but publicly funded
+	gov_funded_private: 0.35,
+	ppp: 0.45
+};
+
+// Returns the funding split. Uses an explicit `funding_breakdown` when the
+// project provides one; otherwise derives a plausible split from the governing
+// tier and delivery model (flagged `estimated: true` so the UI can label it).
+export function resolveFundingBreakdown(p: Project): { breakdown: FundingBreakdown; estimated: boolean } {
+	if (p.funding_breakdown) return { breakdown: p.funding_breakdown, estimated: false };
+
+	const priv = PRIVATE_SHARE[p.funding_type] * p.budget;
+	const gov = p.budget - priv;
+
+	let federal = 0, state = 0, local = 0;
+	if (p.government_level === 'federal') {
+		federal = gov * 0.7;
+		state = gov * 0.3;
+	} else if (p.government_level === 'state') {
+		federal = gov * 0.2;
+		state = gov * 0.8;
+	} else {
+		federal = gov * 0.1;
+		state = gov * 0.3;
+		local = gov * 0.6;
+	}
+	return {
+		breakdown: {
+			federal: Math.round(federal),
+			state: Math.round(state),
+			local: Math.round(local),
+			private: Math.round(priv)
+		},
+		estimated: true
+	};
 }
 
 // ---- Filtering (shared by sidebar + map so they never diverge) ----
@@ -104,21 +145,26 @@ export function projectsToCsv(list: Project[]): string {
 	const cols: (keyof Project)[] = [
 		'id', 'name', 'category', 'status', 'funding_type', 'government_level',
 		'council', 'location_name', 'budget', 'spent', 'contractor',
-		'start_date', 'expected_end_date', 'lat', 'lng'
+		'start_date', 'expected_end_date', 'lat', 'lng', 'source_url'
 	];
 	const esc = (v: unknown) => {
 		const s = v == null ? '' : String(v);
 		return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 	};
-	const header = [...cols, 'variance', 'variance_pct', 'delay_months'].join(',');
-	const rows = list.map((p) =>
-		[
+	const header = [
+		...cols, 'variance', 'variance_pct', 'delay_months',
+		'fund_federal', 'fund_state', 'fund_local', 'fund_private'
+	].join(',');
+	const rows = list.map((p) => {
+		const fb = resolveFundingBreakdown(p).breakdown;
+		return [
 			...cols.map((c) => esc(p[c])),
 			esc(variance(p)),
 			esc((variancePct(p) * 100).toFixed(1)),
-			esc(delayMonths(p) ?? '')
-		].join(',')
-	);
+			esc(delayMonths(p) ?? ''),
+			esc(fb.federal), esc(fb.state), esc(fb.local), esc(fb.private)
+		].join(',');
+	});
 	return [header, ...rows].join('\n');
 }
 

@@ -1,6 +1,6 @@
 import type { Project } from './types';
 
-export const SEED_PROJECTS: Project[] = [
+const RAW_PROJECTS: Project[] = [
 	{
 		id: '1',
 		name: 'Bridgewater Bridge Replacement',
@@ -597,3 +597,43 @@ export const SEED_PROJECTS: Project[] = [
 		updated_at: '2024-06-01T00:00:00Z'
 	}
 ];
+
+// Reference links for each project (official sites / responsible agencies).
+// Real, top-level domains — figures on those pages are the authoritative source;
+// the dollar values in this seed data are illustrative. See DATA_SOURCES.md.
+const PROJECT_SOURCES: Record<string, string> = {
+	'1': 'https://www.newbridgewaterbridge.com.au',
+	'2': 'https://www.health.tas.gov.au',
+	'3': 'https://www.health.tas.gov.au',
+	'4': 'https://parks.tas.gov.au',
+	'5': 'https://www.stategrowth.tas.gov.au',
+	'6': 'https://www.livingcity.com.au',
+	'7': 'https://www.hobartcitydeal.com.au',
+	'8': 'https://www.tasmanianirrigation.com.au',
+	'9': 'https://www.cradlecoast.com',
+	'10': 'https://www.stategrowth.tas.gov.au',
+	'11': 'https://www.wcwr.com.au',
+	'12': 'https://www.homestasmania.com.au',
+	'13': 'https://www.marinuslink.com.au',
+	'14': 'https://www.hydro.com.au',
+	'15': 'https://www.hobartairport.com.au',
+	'16': 'https://www.macquariepoint.com',
+	'17': 'https://www.tasnetworks.com.au',
+	c01: 'https://www.launceston.tas.gov.au',
+	c02: 'https://www.launceston.tas.gov.au',
+	c03: 'https://www.wtc.tas.gov.au',
+	c04: 'https://www.wtc.tas.gov.au',
+	c05: 'https://www.launceston.tas.gov.au',
+	c06: 'https://www.georgetown.tas.gov.au',
+	c07: 'https://www.wtc.tas.gov.au',
+	c08: 'https://www.georgetown.tas.gov.au',
+	c09: 'https://www.launceston.tas.gov.au',
+	c10: 'https://www.launceston.tas.gov.au',
+	c11: 'https://www.northernmidlands.tas.gov.au',
+	c12: 'https://www.wtc.tas.gov.au'
+};
+
+export const SEED_PROJECTS: Project[] = RAW_PROJECTS.map((p) => ({
+	...p,
+	source_url: p.source_url ?? PROJECT_SOURCES[p.id]
+}));
