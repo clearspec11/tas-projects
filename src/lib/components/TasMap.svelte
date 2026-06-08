@@ -7,41 +7,21 @@
 	} from '$lib/stores';
 	import { STATUS_CONFIG, CATEGORY_CONFIG, FUNDING_CONFIG, GOVERNMENT_LEVEL_CONFIG, type Project } from '$lib/types';
 	import { TASMANIA_CENTER, TASMANIA_ZOOM } from '$lib/tasmania-geo';
+	import { formatCurrency, budgetPercent, filterProjects, isRedFlag, delayMonths } from '$lib/metrics';
 	import tasmaniaGeoJson from '$lib/tasmania-boundary.json';
 
 	let mapContainer: HTMLDivElement;
 	let map: any;
 	let markersLayer: any;
+	let flagsLayer: any;
 	let heatLayer: any;
 	let connectionsLayer: any;
 	let darkTiles: any;
 	let satTiles: any;
 	let L: any;
 
-	function formatCurrency(n: number): string {
-		if (n >= 1_000_000_000) return `$${(n / 1_000_000_000).toFixed(1)}B`;
-		if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(0)}M`;
-		return `$${(n / 1_000).toFixed(0)}K`;
-	}
-
-	function budgetPercent(p: Project): number {
-		return Math.round((p.spent / p.budget) * 100);
-	}
-
-	function getFilteredProjects(
-		all: Project[], cat: string, status: string, funding: string,
-		govLevel: string, query: string, range: [number, number]
-	): Project[] {
-		return all.filter((p) => {
-			if (cat !== 'all' && p.category !== cat) return false;
-			if (status !== 'all' && p.status !== status) return false;
-			if (funding !== 'all' && p.funding_type !== funding) return false;
-			if (govLevel !== 'all' && p.government_level !== govLevel) return false;
-			if (query && !p.name.toLowerCase().includes(query.toLowerCase())) return false;
-			const startYear = new Date(p.start_date).getFullYear();
-			if (startYear < range[0] || startYear > range[1]) return false;
-			return true;
-		});
+	function markerRadius(p: Project): number {
+		return Math.max(8, Math.min(20, Math.sqrt(p.budget / 1_000_000) * 1.8));
 	}
 
 	function createMarker(p: Project) {
@@ -50,9 +30,10 @@
 		const catCfg = CATEGORY_CONFIG[p.category];
 
 		const govCfg = GOVERNMENT_LEVEL_CONFIG[p.government_level];
+		const late = delayMonths(p);
 
 		const marker = L.circleMarker([p.lat, p.lng], {
-			radius: Math.max(8, Math.min(20, Math.sqrt(p.budget / 1_000_000) * 1.8)),
+			radius: markerRadius(p),
 			fillColor: cfg.color,
 			fillOpacity: 0.8,
 			color: govCfg.color,
@@ -64,9 +45,9 @@
 		// Hover tooltip
 		marker.bindTooltip(`
 			<div style="font-family: Inter, system-ui; font-size: 12px; line-height: 1.4;">
-				<strong>${p.name}</strong><br/>
+				<strong>${isRedFlag(p) ? '🚩 ' : ''}${p.name}</strong><br/>
 				<span style="color: ${cfg.color};">${cfg.label}</span> · ${fundCfg.shortLabel}<br/>
-				${formatCurrency(p.spent)} / ${formatCurrency(p.budget)} (${budgetPercent(p)}%)
+				${formatCurrency(p.spent)} / ${formatCurrency(p.budget)} (${budgetPercent(p)}%)${late ? ` · <span style="color:#f59e0b;">${late}mo late</span>` : ''}
 			</div>
 		`, {
 			direction: 'top',
@@ -109,10 +90,14 @@
 	) {
 		if (!markersLayer || !L) return;
 		markersLayer.clearLayers();
+		if (flagsLayer) flagsLayer.clearLayers();
 		if (heatLayer) map.removeLayer(heatLayer);
 		if (connectionsLayer) connectionsLayer.clearLayers();
 
-		const filtered = getFilteredProjects(all, cat, status, funding, govLevel, query, range);
+		const filtered = filterProjects(all, {
+			category: cat as any, status: status as any, funding: funding as any,
+			governmentLevel: govLevel as any, query, range
+		});
 
 		if (heatmap) {
 			const heatData = filtered.map((p) => [p.lat, p.lng, p.spent / 1_000_000]);
@@ -129,6 +114,17 @@
 		}
 
 		filtered.forEach((p) => {
+			// Red-flag halo behind the marker (own layer so it doesn't affect cluster counts)
+			if (flagsLayer && isRedFlag(p)) {
+				L.circleMarker([p.lat, p.lng], {
+					radius: markerRadius(p) + 5,
+					fill: false,
+					color: '#ef4444',
+					weight: 2,
+					opacity: 0.75,
+					dashArray: '2 3'
+				}).addTo(flagsLayer);
+			}
 			const marker = createMarker(p);
 			markersLayer.addLayer(marker);
 		});
@@ -202,6 +198,9 @@
 				dashArray: '6 4'
 			}
 		}).addTo(map);
+
+		// Red-flag halos sit beneath the markers
+		flagsLayer = L.layerGroup().addTo(map);
 
 		// Use MarkerClusterGroup if available, else plain LayerGroup
 		try {

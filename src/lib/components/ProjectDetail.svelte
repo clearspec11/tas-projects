@@ -1,24 +1,7 @@
 <script lang="ts">
 	import { selectedProject } from '$lib/stores';
-	import { STATUS_CONFIG, CATEGORY_CONFIG, FUNDING_CONFIG, GOVERNMENT_LEVEL_CONFIG, type Project } from '$lib/types';
-
-	function formatCurrency(n: number): string {
-		if (n >= 1_000_000_000) return `$${(n / 1_000_000_000).toFixed(2)}B`;
-		if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
-		return `$${(n / 1_000).toFixed(0)}K`;
-	}
-
-	function budgetPercent(p: Project): number {
-		return Math.round((p.spent / p.budget) * 100);
-	}
-
-	function variance(p: Project): number {
-		return p.spent - p.budget;
-	}
-
-	function formatDate(d: string): string {
-		return new Date(d).toLocaleDateString('en-AU', { year: 'numeric', month: 'short', day: 'numeric' });
-	}
+	import { STATUS_CONFIG, CATEGORY_CONFIG, FUNDING_CONFIG, GOVERNMENT_LEVEL_CONFIG } from '$lib/types';
+	import { formatCurrencyPrecise as formatCurrency, formatDate, budgetPercent, variance, variancePct, delayMonths, isRedFlag } from '$lib/metrics';
 
 	function close() {
 		selectedProject.set(null);
@@ -33,6 +16,8 @@
 	{@const govCfg = GOVERNMENT_LEVEL_CONFIG[p.government_level]}
 	{@const pct = budgetPercent(p)}
 	{@const v = variance(p)}
+	{@const late = delayMonths(p)}
+	{@const flagged = isRedFlag(p)}
 
 	<div class="absolute top-14 right-4 w-96 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl shadow-2xl z-[1000] overflow-hidden">
 		<!-- Header -->
@@ -40,7 +25,7 @@
 			<div class="flex items-start justify-between">
 				<div>
 					<div class="text-xs text-[var(--color-text-muted)] uppercase tracking-wider mb-1">{catCfg.icon} {catCfg.label}</div>
-					<h2 class="text-base font-bold leading-tight">{p.name}</h2>
+					<h2 class="text-base font-bold leading-tight">{#if flagged}🚩 {/if}{p.name}</h2>
 					<div class="text-xs text-[var(--color-text-muted)] mt-1">
 					{p.council ? `${p.council} · ` : ''}{p.location_name}
 				</div>
@@ -89,14 +74,26 @@
 				</div>
 			</div>
 
-			{#if v !== 0}
-				<div class="bg-[var(--color-bg)] rounded-lg p-3 text-center">
-					<div class="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">Variance</div>
-					<div class="text-lg font-bold mt-0.5" style="color: {v > 0 ? 'var(--color-danger)' : 'var(--color-success)'}">
-						{v > 0 ? '+' : ''}{formatCurrency(Math.abs(v))}
+			<div class="grid {late ? 'grid-cols-2' : 'grid-cols-1'} gap-3">
+				{#if v !== 0}
+					<div class="bg-[var(--color-bg)] rounded-lg p-3 text-center">
+						<div class="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">Variance</div>
+						<div class="text-lg font-bold mt-0.5" style="color: {v > 0 ? 'var(--color-danger)' : 'var(--color-success)'}">
+							{v > 0 ? '+' : ''}{formatCurrency(Math.abs(v))}
+						</div>
+						<div class="text-[10px] mt-0.5" style="color: {v > 0 ? 'var(--color-danger)' : 'var(--color-success)'}">
+							{v > 0 ? '+' : ''}{Math.round(variancePct(p) * 100)}%
+						</div>
 					</div>
-				</div>
-			{/if}
+				{/if}
+				{#if late}
+					<div class="bg-[var(--color-bg)] rounded-lg p-3 text-center">
+						<div class="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">Schedule</div>
+						<div class="text-lg font-bold mt-0.5 text-[var(--color-warning)]">{late}mo late</div>
+						<div class="text-[10px] mt-0.5 text-[var(--color-warning)]">past due date</div>
+					</div>
+				{/if}
+			</div>
 		</div>
 
 		<!-- Details -->
