@@ -1,5 +1,10 @@
 @import 'tailwindcss';
 
+@theme {
+	--font-sans: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+	--font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
 :root {
 	--color-bg: #0f172a;
 	--color-surface: #1e293b;
@@ -16,7 +21,16 @@
 body {
 	background: var(--color-bg);
 	color: var(--color-text);
-	font-family: 'Inter', system-ui, -apple-system, sans-serif;
+	font-family: var(--font-sans);
+	font-feature-settings: 'cv05' 1; /* IBM Plex single-storey-ish refinements where available */
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+}
+
+/* Figures align as data, not prose */
+.font-mono {
+	font-variant-numeric: tabular-nums;
+	letter-spacing: -0.01em;
 }
 
 .leaflet-container {

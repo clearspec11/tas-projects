@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-08T00:00:00.000Z",
+  "title": "Design System: TAS Project Tracker",
+  "extensions": {
+    "colorMeta": {
+      "bg": { "role": "neutral", "displayName": "Workspace Slate", "canonical": "oklch(20.8% 0.04 265.8)", "tonalRamp": ["#020617", "#0f172a", "#1e293b", "#334155", "#475569", "#64748b", "#94a3b8", "#cbd5e1"] },
+      "surface": { "role": "neutral", "displayName": "Panel Slate", "canonical": "oklch(27.9% 0.04 260)", "tonalRamp": ["#0f172a", "#1e293b", "#334155", "#475569", "#64748b", "#94a3b8", "#cbd5e1", "#e2e8f0"] },
+      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "oklch(96.7% 0.003 247)", "tonalRamp": ["#475569", "#64748b", "#94a3b8", "#cbd5e1", "#e2e8f0", "#f1f5f9", "#f8fafc", "#ffffff"] },
+      "muted": { "role": "neutral", "displayName": "Muted Slate", "canonical": "oklch(70.4% 0.04 257)", "tonalRamp": ["#334155", "#475569", "#64748b", "#94a3b8", "#cbd5e1", "#e2e8f0", "#f1f5f9", "#f8fafc"] },
+      "accent": { "role": "primary", "displayName": "Sky Accent", "canonical": "oklch(74.6% 0.13 232.7)", "tonalRamp": ["#0c4a6e", "#075985", "#0369a1", "#0284c7", "#0ea5e9", "#38bdf8", "#7dd3fc", "#bae6fd"] },
+      "on-budget": { "role": "secondary", "displayName": "On-Budget Green", "canonical": "oklch(72.3% 0.19 149.6)", "tonalRamp": ["#14532d", "#166534", "#15803d", "#16a34a", "#22c55e", "#4ade80", "#86efac", "#bbf7d0"] },
+      "over-budget": { "role": "secondary", "displayName": "Over-Budget Red", "canonical": "oklch(63.7% 0.21 25.3)", "tonalRamp": ["#7f1d1d", "#991b1b", "#b91c1c", "#dc2626", "#ef4444", "#f87171", "#fca5a5", "#fecaca"] },
+      "completed": { "role": "secondary", "displayName": "Completed Violet", "canonical": "oklch(70.6% 0.16 293.5)", "tonalRamp": ["#4c1d95", "#5b21b6", "#6d28d9", "#7c3aed", "#8b5cf6", "#a78bfa", "#c4b5fd", "#ddd6fe"] },
+      "fund-federal": { "role": "tertiary", "displayName": "Federal Indigo", "canonical": "oklch(58.5% 0.2 277)", "tonalRamp": ["#312e81", "#3730a3", "#4338ca", "#4f46e5", "#6366f1", "#818cf8", "#a5b4fc", "#c7d2fe"] },
+      "fund-local": { "role": "tertiary", "displayName": "Local Emerald", "canonical": "oklch(76.5% 0.15 163)", "tonalRamp": ["#065f46", "#047857", "#059669", "#10b981", "#34d399", "#6ee7b7", "#a7f3d0", "#d1fae5"] },
+      "fund-private": { "role": "tertiary", "displayName": "Private Amber", "canonical": "oklch(76.9% 0.16 70)", "tonalRamp": ["#78350f", "#92400e", "#b45309", "#d97706", "#f59e0b", "#fbbf24", "#fcd34d", "#fde68a"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "App title and detail-panel headlines. The largest type; ~18px, no hero scale." },
+      "title": { "displayName": "Title", "purpose": "Project names in the sidebar list." },
+      "body": { "displayName": "Body", "purpose": "Descriptions and detail prose; ~65ch measure." },
+      "label": { "displayName": "Label", "purpose": "Uppercase micro labels (BUDGET, WHO PAYS); two words max." },
+      "mono": { "displayName": "Mono", "purpose": "Percentages, variance, and budget-usage figures only." }
+    },
+    "shadows": [
+      { "name": "floating-panel", "value": "0 25px 50px -12px rgba(0,0,0,0.5)", "purpose": "Project detail card floating over the map." },
+      { "name": "overlay-control", "value": "0 10px 15px -3px rgba(0,0,0,0.3)", "purpose": "Legend and map-control clusters resting on the map." }
+    ],
+    "motion": [
+      { "name": "transition-colors", "value": "150ms ease", "purpose": "Hover/active colour shifts on rows, toggles, links." },
+      { "name": "map-flyto", "value": "800ms ease", "purpose": "Leaflet flyTo when a project is selected." },
+      { "name": "bar-fill", "value": "300ms ease", "purpose": "Budget-usage progress bar width." }
+    ],
+    "breakpoints": [
+      { "name": "sidebar", "value": "384px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Map Toggle (active)",
+      "kind": "button",
+      "refersTo": "toggle-map-active",
+      "description": "Map overlay control (Satellite / Heatmap / Links); active state in sky accent.",
+      "html": "<button class=\"ds-toggle ds-toggle-active\">🔥 Heatmap</button>",
+      "css": ".ds-toggle { background: rgba(30,41,59,0.95); backdrop-filter: blur(4px); color: #f1f5f9; border: 1px solid #334155; border-radius: 8px; padding: 8px 12px; font: 600 12px 'IBM Plex Sans', system-ui, sans-serif; cursor: pointer; transition: color .15s ease, border-color .15s ease; } .ds-toggle:hover { background: #334155; } .ds-toggle-active { color: #38bdf8; border-color: #38bdf8; }"
+    },
+    {
+      "name": "Export Button (ghost)",
+      "kind": "button",
+      "refersTo": "button-export",
+      "description": "Ghost export chip in the sidebar header (CSV / JSON).",
+      "html": "<button class=\"ds-export\">CSV</button>",
+      "css": ".ds-export { background: transparent; color: #94a3b8; border: 1px solid #334155; border-radius: 6px; padding: 4px 8px; font: 500 10px 'IBM Plex Sans', system-ui, sans-serif; cursor: pointer; transition: color .15s ease, border-color .15s ease; } .ds-export:hover { color: #f1f5f9; border-color: #38bdf8; }"
+    },
+    {
+      "name": "Filter Select",
+      "kind": "input",
+      "refersTo": "input-filter",
+      "description": "Category / status / funding / level / sort dropdowns.",
+      "html": "<select class=\"ds-select\"><option>All Categories</option><option>Transport</option></select>",
+      "css": ".ds-select { background: #0f172a; color: #f1f5f9; border: 1px solid #334155; border-radius: 8px; padding: 6px 8px; font: 400 12px 'IBM Plex Sans', system-ui, sans-serif; outline: none; transition: border-color .15s ease; } .ds-select:focus { border-color: #38bdf8; }"
+    },
+    {
+      "name": "Search Input",
+      "kind": "input",
+      "refersTo": "input-filter",
+      "description": "Project search field at the top of the sidebar filters.",
+      "html": "<input class=\"ds-input\" placeholder=\"Search projects...\" />",
+      "css": ".ds-input { width: 100%; background: #0f172a; color: #f1f5f9; border: 1px solid #334155; border-radius: 8px; padding: 6px 12px; font: 400 14px 'IBM Plex Sans', system-ui, sans-serif; outline: none; transition: border-color .15s ease; } .ds-input::placeholder { color: #94a3b8; } .ds-input:focus { border-color: #38bdf8; }"
+    },
+    {
+      "name": "Status Chip",
+      "kind": "chip",
+      "refersTo": "chip-status",
+      "description": "Read-only budget-status encoder; tinted-translucent over matching text.",
+      "html": "<span class=\"ds-chip-over\">Over Budget</span>",
+      "css": ".ds-chip-over { display: inline-block; background: rgba(239,68,68,0.2); color: #f87171; border-radius: 9999px; padding: 2px 8px; font: 500 10px 'IBM Plex Sans', system-ui, sans-serif; }"
+    },
+    {
+      "name": "Project List Row",
+      "kind": "card",
+      "refersTo": "list-row",
+      "description": "Sidebar project row with name, council, budget bar and status chip.",
+      "html": "<button class=\"ds-row\"><div class=\"ds-row-top\"><span class=\"ds-row-name\">🚩 🛣️ Bridgewater Bridge Replacement</span><span class=\"ds-chip-over\">Over Budget</span></div><div class=\"ds-row-meta\"><span>$748M / $576M</span><span class=\"ds-bar\"><span class=\"ds-bar-fill\"></span></span><span class=\"ds-pct\">130%</span></div></button>",
+      "css": ".ds-row { display: block; width: 320px; text-align: left; background: #1e293b; border: none; border-bottom: 1px solid #334155; padding: 12px; cursor: pointer; transition: background .15s ease; } .ds-row:hover { background: #334155; } .ds-row-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; } .ds-row-name { font: 600 14px 'IBM Plex Sans', system-ui, sans-serif; color: #f1f5f9; } .ds-chip-over { background: rgba(239,68,68,0.2); color: #f87171; border-radius: 9999px; padding: 2px 8px; font: 500 10px 'IBM Plex Sans', system-ui, sans-serif; white-space: nowrap; } .ds-row-meta { display: flex; align-items: center; gap: 8px; margin-top: 8px; font: 400 12px 'IBM Plex Sans', system-ui, sans-serif; color: #94a3b8; } .ds-bar { flex: 1; height: 6px; background: #0f172a; border-radius: 9999px; overflow: hidden; } .ds-bar-fill { display: block; width: 100%; height: 100%; background: #ef4444; } .ds-pct { font: 500 12px 'IBM Plex Mono', ui-monospace, monospace; }"
+    },
+    {
+      "name": "Funding Split Bar",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Flat stacked bar showing who pays (federal/state/local/private), with legend.",
+      "html": "<div class=\"ds-fund\"><div class=\"ds-fund-bar\"><span style=\"width:39%;background:#6366f1\"></span><span style=\"width:17%;background:#38bdf8\"></span><span style=\"width:44%;background:#f59e0b\"></span></div><div class=\"ds-fund-legend\"><span><i style=\"background:#6366f1\"></i>Federal $1.35B (39%)</span><span><i style=\"background:#38bdf8\"></i>State $577.5M (17%)</span><span><i style=\"background:#f59e0b\"></i>Private $1.57B (45%)</span></div></div>",
+      "css": ".ds-fund { font: 400 10px 'IBM Plex Sans', system-ui, sans-serif; color: #f1f5f9; } .ds-fund-bar { display: flex; height: 12px; border-radius: 9999px; overflow: hidden; background: #0f172a; } .ds-fund-bar span { display: block; height: 100%; } .ds-fund-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 8px; } .ds-fund-legend span { display: inline-flex; align-items: center; gap: 4px; } .ds-fund-legend i { width: 8px; height: 8px; border-radius: 9999px; display: inline-block; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Quiet Auditor",
+    "overview": "The interface is calm and legible on the surface and rigorous underneath. A Tasmanian with no finance background should read which projects are over budget or overdue, who funds them, and follow any figure to its source within seconds. It is a dark slate workspace so the map and its coloured markers carry the signal; colour is functional, never decorative. The one place the auditor raises its voice is accountability. It explicitly rejects the dry-government-website look and the crypto/fintech dark-glass look.",
+    "keyCharacteristics": [
+      "Dark slate workspace; map and markers carry the colour signal.",
+      "Colour is encoding, not decoration. Neutrals everywhere else.",
+      "High information density, generous within it.",
+      "Accountability is allowed to be loud; everything else stays quiet.",
+      "Every figure is traceable; estimates are visibly marked as estimates."
+    ],
+    "rules": [
+      { "name": "The Encoding-Only Rule", "body": "Saturated colour is forbidden as decoration. Every saturated hue on screen must mean something decodable from the legend. If a colour isn't carrying data, it is a neutral.", "section": "colors" },
+      { "name": "The Contrast Floor Rule", "body": "Body and muted text must clear 4.5:1 against their surface. Muted #94a3b8 on surface #1e293b is the known risk; never drop secondary text below this value for elegance.", "section": "colors" },
+      { "name": "The Status-Plus-Label Rule", "body": "Budget state is never encoded by colour alone. A red dot always travels with the word 'Over Budget' and, when flagged, a flag icon.", "section": "colors" },
+      { "name": "The Numbers-Are-Mono Rule", "body": "Percentages, dollar variances, and budget-usage readouts render in the mono face so figures align and read as data.", "section": "typography" },
+      { "name": "The No-Hero Rule", "body": "Nothing exceeds ~18px. This is a working tracker; a display headline would be the brochure the product refuses to be.", "section": "typography" },
+      { "name": "The Floats-Over-Map Rule", "body": "A shadow is permitted only when an element literally floats above the Leaflet canvas (panel, legend, controls). In-flow surfaces stay flat.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep saturated colour strictly for data encoding (status, funder, flag); everything else is slate neutral.",
+      "Do pair every status colour with a text label, and every red flag with the flag icon, so meaning survives greyscale and colour blindness.",
+      "Do render figures (%, $ variance, budget usage) in the mono face.",
+      "Do keep muted text (#94a3b8) at >=4.5:1 on its surface; bump toward ink if a caption sits on a lighter tone.",
+      "Do reserve shadows for elements that float above the map; keep in-flow rows and tiles flat.",
+      "Do mark estimated funding splits as estimates, with a path to the source."
+    ],
+    "donts": [
+      "Don't build a dry government website: no dense bureaucratic tables, no blue underlined links, no flat hierarchy or portal coldness.",
+      "Don't drift into crypto/fintech dark glass: no neon-on-black, no decorative glassmorphism, no gradient text, no trader-dashboard flourishes.",
+      "Don't use the generic SaaS look: identical card grids, the big-number hero-metric template, or icon-heading-text cards repeated endlessly.",
+      "Don't let motion or gradients bury the figures; motion is feedback, not choreography.",
+      "Don't add a display/hero type scale; nothing exceeds ~18px.",
+      "Don't nest cards inside cards, or give an in-flow surface its own shadow.",
+      "Don't use a colored border-left/border-right stripe as an accent on rows, panels, or callouts."
+    ]
+  }
+}

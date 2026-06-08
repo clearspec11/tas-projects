@@ -19,7 +19,7 @@
 
 <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-[1000] bg-[var(--color-surface)]/95 backdrop-blur border border-[var(--color-border)] rounded-xl px-4 py-3 shadow-lg">
 	<div class="flex items-center gap-3">
-		<span class="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">Timeline</span>
+		<span class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider">Timeline</span>
 		<span class="text-xs font-mono font-bold text-[var(--color-accent)]">{startYear}</span>
 		<div class="relative w-48 h-6 flex items-center">
 			<input

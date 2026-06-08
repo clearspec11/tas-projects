@@ -44,7 +44,7 @@
 
 		// Hover tooltip
 		marker.bindTooltip(`
-			<div style="font-family: Inter, system-ui; font-size: 12px; line-height: 1.4;">
+			<div style="font-family: 'IBM Plex Sans', system-ui; font-size: 12px; line-height: 1.4;">
 				<strong>${isRedFlag(p) ? '🚩 ' : ''}${p.name}</strong><br/>
 				<span style="color: ${cfg.color};">${cfg.label}</span> · ${fundCfg.shortLabel}<br/>
 				${formatCurrency(p.spent)} / ${formatCurrency(p.budget)} (${budgetPercent(p)}%)${late ? ` · <span style="color:#f59e0b;">${late}mo late</span>` : ''}
@@ -57,7 +57,7 @@
 
 		// Click popup
 		marker.bindPopup(`
-			<div style="font-family: Inter, system-ui; min-width: 220px; color: #1e293b;">
+			<div style="font-family: 'IBM Plex Sans', system-ui; min-width: 220px; color: #1e293b;">
 				<div style="font-size: 14px; font-weight: 700; margin-bottom: 4px;">${catCfg.icon} ${p.name}</div>
 				<div style="font-size: 12px; color: #64748b; margin-bottom: 2px;">${p.council ?? p.location_name}</div>
 				${p.council ? `<div style="font-size: 11px; color: #94a3b8; margin-bottom: 4px;">${p.location_name}</div>` : ''}
@@ -216,7 +216,7 @@
 							display:flex;align-items:center;justify-content:center;
 							width:${size}px;height:${size}px;border-radius:50%;
 							background:rgba(56,189,248,0.25);border:2px solid #38bdf8;
-							color:#f1f5f9;font-weight:700;font-size:13px;font-family:Inter,system-ui;
+							color:#f1f5f9;font-weight:700;font-size:13px;font-family:'IBM Plex Sans',system-ui;
 						">${count}</div>`,
 						className: '',
 						iconSize: [size, size]

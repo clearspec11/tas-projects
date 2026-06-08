@@ -36,7 +36,7 @@
 			<div class="flex items-start justify-between">
 				<div>
 					<div class="text-xs text-[var(--color-text-muted)] uppercase tracking-wider mb-1">{catCfg.icon} {catCfg.label}</div>
-					<h2 class="text-base font-bold leading-tight">{#if flagged}🚩 {/if}{p.name}</h2>
+					<h2 class="text-xl font-bold leading-tight [text-wrap:balance]">{#if flagged}🚩 {/if}{p.name}</h2>
 					<div class="text-xs text-[var(--color-text-muted)] mt-1">
 					{p.council ? `${p.council} · ` : ''}{p.location_name}
 				</div>
@@ -76,32 +76,32 @@
 
 			<div class="grid grid-cols-2 gap-3">
 				<div class="bg-[var(--color-bg)] rounded-lg p-3">
-					<div class="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">Budget</div>
-					<div class="text-lg font-bold mt-0.5">{formatCurrency(p.budget)}</div>
+					<div class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider">Budget</div>
+					<div class="text-xl font-bold tabular-nums mt-0.5">{formatCurrency(p.budget)}</div>
 				</div>
 				<div class="bg-[var(--color-bg)] rounded-lg p-3">
-					<div class="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">Spent</div>
-					<div class="text-lg font-bold mt-0.5" style="color: {cfg.color}">{formatCurrency(p.spent)}</div>
+					<div class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider">Spent</div>
+					<div class="text-xl font-bold tabular-nums mt-0.5" style="color: {cfg.color}">{formatCurrency(p.spent)}</div>
 				</div>
 			</div>
 
 			<div class="grid {late ? 'grid-cols-2' : 'grid-cols-1'} gap-3">
 				{#if v !== 0}
 					<div class="bg-[var(--color-bg)] rounded-lg p-3 text-center">
-						<div class="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">Variance</div>
-						<div class="text-lg font-bold mt-0.5" style="color: {v > 0 ? 'var(--color-danger)' : 'var(--color-success)'}">
+						<div class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider">Variance</div>
+						<div class="text-xl font-bold tabular-nums mt-0.5" style="color: {v > 0 ? 'var(--color-danger)' : 'var(--color-success)'}">
 							{v > 0 ? '+' : ''}{formatCurrency(Math.abs(v))}
 						</div>
-						<div class="text-[10px] mt-0.5" style="color: {v > 0 ? 'var(--color-danger)' : 'var(--color-success)'}">
+						<div class="text-[0.6875rem] font-mono mt-0.5" style="color: {v > 0 ? 'var(--color-danger)' : 'var(--color-success)'}">
 							{v > 0 ? '+' : ''}{Math.round(variancePct(p) * 100)}%
 						</div>
 					</div>
 				{/if}
 				{#if late}
 					<div class="bg-[var(--color-bg)] rounded-lg p-3 text-center">
-						<div class="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">Schedule</div>
-						<div class="text-lg font-bold mt-0.5 text-[var(--color-warning)]">{late}mo late</div>
-						<div class="text-[10px] mt-0.5 text-[var(--color-warning)]">past due date</div>
+						<div class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider">Schedule</div>
+						<div class="text-xl font-bold mt-0.5 text-[var(--color-warning)]">{late}mo late</div>
+						<div class="text-[0.6875rem] mt-0.5 text-[var(--color-warning)]">past due date</div>
 					</div>
 				{/if}
 			</div>
@@ -109,7 +109,7 @@
 			<!-- Funding split: who pays -->
 			<div>
 				<div class="flex justify-between items-baseline mb-1.5">
-					<span class="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">
+					<span class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider">
 						Who pays {funding.estimated ? '· est.' : ''}
 					</span>
 				</div>
@@ -128,7 +128,7 @@
 					{#each FUNDER_KEYS as key}
 						{@const amount = funding.breakdown[key]}
 						{#if amount > 0}
-							<div class="flex items-center gap-1 text-[10px]">
+							<div class="flex items-center gap-1 text-[0.6875rem]">
 								<span class="w-2 h-2 rounded-full inline-block" style="background: {FUNDER_CONFIG[key].color};"></span>
 								<span class="text-[var(--color-text)]">{FUNDER_CONFIG[key].label}</span>
 								<span class="text-[var(--color-text-muted)]">{formatCurrency(amount)} ({Math.round((amount / p.budget) * 100)}%)</span>
@@ -137,14 +137,14 @@
 					{/each}
 				</div>
 				{#if funding.estimated}
-					<p class="text-[9px] text-[var(--color-text-muted)] mt-1.5 italic">Estimated from governing tier &amp; delivery model — see source for actual figures.</p>
+					<p class="text-[0.625rem] text-[var(--color-text-muted)] mt-1.5 italic">Estimated from governing tier and delivery model. See source for actual figures.</p>
 				{/if}
 			</div>
 		</div>
 
 		<!-- Details -->
-		<div class="px-4 pb-4 space-y-2 text-xs">
-			<p class="text-[var(--color-text-muted)] leading-relaxed">{p.description}</p>
+		<div class="px-4 pb-4 space-y-2 text-[0.8125rem]">
+			<p class="text-[var(--color-text)]/85 leading-relaxed [text-wrap:pretty]">{p.description}</p>
 
 			<div class="grid grid-cols-2 gap-x-4 gap-y-1 pt-2 border-t border-[var(--color-border)]">
 				<div>

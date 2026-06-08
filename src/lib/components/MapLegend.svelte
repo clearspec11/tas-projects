@@ -22,7 +22,7 @@
 
 			<!-- Status colors -->
 			<div class="mb-2">
-				<div class="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Status</div>
+				<div class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Status</div>
 				{#each Object.entries(STATUS_CONFIG) as [, cfg]}
 					<div class="flex items-center gap-2 py-0.5">
 						<span class="w-3 h-3 rounded-full inline-block" style="background: {cfg.color};"></span>
@@ -33,7 +33,7 @@
 
 			<!-- Funding type borders -->
 			<div class="mb-2">
-				<div class="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Funding</div>
+				<div class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Funding</div>
 				{#each Object.entries(FUNDING_CONFIG) as [, cfg]}
 					<div class="flex items-center gap-2 py-0.5">
 						<span class="w-3 h-3 rounded-full inline-block border-2 border-[var(--color-text)]" style="border-style: {cfg.borderStyle};"></span>
@@ -44,12 +44,12 @@
 
 			<!-- Size -->
 			<div>
-				<div class="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Size = Budget</div>
+				<div class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Size = Budget</div>
 				<div class="flex items-end gap-2 px-1">
 					<span class="w-2 h-2 rounded-full bg-[var(--color-text-muted)] inline-block"></span>
 					<span class="w-3.5 h-3.5 rounded-full bg-[var(--color-text-muted)] inline-block"></span>
 					<span class="w-5 h-5 rounded-full bg-[var(--color-text-muted)] inline-block"></span>
-					<span class="text-[10px] text-[var(--color-text-muted)] ml-1">Small → Large</span>
+					<span class="text-[0.6875rem] text-[var(--color-text-muted)] ml-1">Small → Large</span>
 				</div>
 			</div>
 		</div>
