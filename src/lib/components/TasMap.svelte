@@ -48,21 +48,22 @@
 		const govCfg = GOVERNMENT_LEVEL_CONFIG[p.government_level];
 		const late = delayMonths(p);
 
+		// Two codes on the mark (status fill, tier border) plus the flag halo;
+		// funding/delivery model lives in the tooltip, chips and detail panel.
 		const marker = L.circleMarker([p.lat, p.lng], {
 			radius: markerRadius(p),
 			fillColor: cfg.color,
 			fillOpacity: 0.8,
 			color: govCfg.color,
 			weight: 2.5,
-			opacity: 0.9,
-			dashArray: fundCfg.dashArray
+			opacity: 0.9
 		});
 
 		// Hover tooltip
 		marker.bindTooltip(`
 			<div style="font-family: 'IBM Plex Sans', system-ui; font-size: 12px; line-height: 1.4;">
 				<strong>${isRedFlag(p) ? '🚩 ' : ''}${p.name}</strong><br/>
-				<span style="color: ${cfg.color};">${cfg.label}</span> · ${fundCfg.shortLabel}<br/>
+				<span style="color: ${cfg.color};">${cfg.label}</span> · ${govCfg.shortLabel} · ${fundCfg.shortLabel}<br/>
 				${formatCurrency(p.spent)} / ${formatCurrency(p.budget)} (${budgetPercent(p)}%)${late ? ` · <span style="color:#f59e0b;">${late}mo late</span>` : ''}
 			</div>
 		`, {

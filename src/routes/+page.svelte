@@ -14,6 +14,7 @@
 	import MapLegend from '$lib/components/MapLegend.svelte';
 	import MapControls from '$lib/components/MapControls.svelte';
 	import TimelineSlider from '$lib/components/TimelineSlider.svelte';
+	import StoryBanner from '$lib/components/StoryBanner.svelte';
 
 	let mapComponent: TasMap;
 
@@ -102,6 +103,7 @@
 	<!-- On phones the map stacks on top at fixed height; the list fills the rest -->
 	<main class="flex-1 relative max-md:order-first max-md:flex-none max-md:h-[52dvh]">
 		<TasMap bind:this={mapComponent} />
+		<StoryBanner />
 		<MapControls />
 		<!-- Legend and timeline are desktop affordances; they'd bury a phone-sized map -->
 		<div class="contents max-md:hidden">

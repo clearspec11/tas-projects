@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { STATUS_CONFIG, FUNDING_CONFIG } from '$lib/types';
+	import { STATUS_CONFIG, GOVERNMENT_LEVEL_CONFIG } from '$lib/types';
 
 	let expanded = $state(true);
 </script>
@@ -29,14 +29,18 @@
 						<span class="text-[11px] text-[var(--color-text)]">{cfg.label}</span>
 					</div>
 				{/each}
+				<div class="flex items-center gap-2 py-0.5">
+					<span class="w-3 h-3 rounded-full inline-block border-2 border-dashed border-[var(--color-danger)]"></span>
+					<span class="text-[11px] text-[var(--color-text)]">🚩 Over budget or overdue</span>
+				</div>
 			</div>
 
-			<!-- Funding type borders -->
+			<!-- Governing tier (marker border colour) -->
 			<div class="mb-2">
-				<div class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Funding</div>
-				{#each Object.entries(FUNDING_CONFIG) as [, cfg]}
+				<div class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Border = Tier</div>
+				{#each Object.entries(GOVERNMENT_LEVEL_CONFIG) as [, cfg]}
 					<div class="flex items-center gap-2 py-0.5">
-						<span class="w-3 h-3 rounded-full inline-block border-2 border-[var(--color-text)]" style="border-style: {cfg.borderStyle};"></span>
+						<span class="w-3 h-3 rounded-full inline-block border-2" style="border-color: {cfg.color};"></span>
 						<span class="text-[11px] text-[var(--color-text)]">{cfg.shortLabel}</span>
 					</div>
 				{/each}

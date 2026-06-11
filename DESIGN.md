@@ -288,15 +288,24 @@ is doing decoration rather than separating from the map, delete it.
   accent-active treatment as the map toggles; do not introduce a new nav idiom.
 
 ### Map markers (signature component)
-- **Circle marker:** Fill encodes budget **status**; the 2.5px border encodes
-  **governing tier** (federal/state/local colour); the border `dashArray`
-  encodes **funding type** (solid public, dashed PPP, dotted gov-funded, etc.).
-  Radius scales with budget. Three independent encodings on one mark; the legend
-  is mandatory.
+- **Circle marker:** Two codes on the mark, no more. Fill encodes budget
+  **status**; the 2.5px border colour encodes **governing tier**
+  (federal/state/local). Radius scales with budget. Funding/delivery model is
+  deliberately NOT marker-encoded (dash patterns proved illegible at marker
+  sizes); it lives one hover away in the tooltip and fully in the chips and
+  detail panel. The legend is mandatory and must list exactly what the marks
+  encode: status colours, the flag halo, tier borders, and the size scale.
 - **Red-flag halo:** A separate dashed red (`#ef4444`) ring drawn beneath flagged
   markers, on its own layer so it never inflates cluster counts.
 - **Cluster badge:** Translucent sky (`rgba(56,189,248,0.25)`) disc with a 2px
   accent border and ink count. Sized in three steps by child count.
+
+### Story banner (signature component)
+- A dismissible one-line orientation pinned top-centre over the map:
+  "**N projects** are a combined **$X** over budget." with a ghost-accent
+  "See them" action that applies the over-budget filter. It retires when
+  dismissed (per session) or as soon as a project is selected; once the
+  visitor is engaged, its job is done. Plain sentence, red figures, no slogan.
 
 ### Funding split bar (signature component)
 - A single flat stacked bar (federal/state/local/private), full-width, 12px tall,
