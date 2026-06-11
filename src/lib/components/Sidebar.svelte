@@ -9,6 +9,11 @@
 
 	let { onFlyTo }: { onFlyTo: (lat: number, lng: number) => void } = $props();
 
+	// Mobile-only filter disclosure; ignored at md+ where filters are always shown
+	let showFilters = $state(false);
+
+	const DEFAULT_RANGE: [number, number] = [2017, 2036];
+
 	const list = $derived(
 		sortProjects(
 			filterProjects($projects, {
@@ -22,6 +27,30 @@
 			$sortKey
 		)
 	);
+
+	const hasActiveFilters = $derived(
+		$filterCategory !== 'all' || $filterStatus !== 'all' || $filterFunding !== 'all' ||
+		$filterGovernmentLevel !== 'all' || $searchQuery !== '' ||
+		$timelineRange[0] !== DEFAULT_RANGE[0] || $timelineRange[1] !== DEFAULT_RANGE[1]
+	);
+
+	function clearFilters() {
+		filterCategory.set('all');
+		filterStatus.set('all');
+		filterFunding.set('all');
+		filterGovernmentLevel.set('all');
+		searchQuery.set('');
+		timelineRange.set([...DEFAULT_RANGE]);
+	}
+
+	// Drop the selection when filtering removes it from the visible set,
+	// so the detail panel never shows a project the list/map no longer do.
+	$effect(() => {
+		const sel = $selectedProject;
+		if (sel && $projects.length > 0 && !list.some((p) => p.id === sel.id)) {
+			selectedProject.set(null);
+		}
+	});
 
 	function totalBudget(list: Project[]): number {
 		return list.reduce((s, p) => s + p.budget, 0);
@@ -66,7 +95,7 @@
 	];
 </script>
 
-<aside class="w-96 h-full flex flex-col bg-[var(--color-surface)] border-r border-[var(--color-border)] overflow-hidden">
+<aside class="w-96 h-full max-md:w-full max-md:h-auto max-md:flex-1 max-md:min-h-0 flex flex-col bg-[var(--color-surface)] border-r max-md:border-r-0 max-md:border-t border-[var(--color-border)] overflow-hidden">
 	<!-- Header -->
 	<div class="p-4 border-b border-[var(--color-border)] flex items-start justify-between">
 		<div>
@@ -79,12 +108,12 @@
 			<button
 				onclick={exportCsv}
 				title="Export filtered projects as CSV"
-				class="text-[0.6875rem] px-2 py-1 rounded-md border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:border-[var(--color-accent)] transition-colors cursor-pointer"
+				class="text-[0.6875rem] px-2.5 py-1.5 rounded-md border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:border-[var(--color-accent)] transition-colors cursor-pointer"
 			>CSV</button>
 			<button
 				onclick={exportJson}
 				title="Export filtered projects as JSON"
-				class="text-[0.6875rem] px-2 py-1 rounded-md border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:border-[var(--color-accent)] transition-colors cursor-pointer"
+				class="text-[0.6875rem] px-2.5 py-1.5 rounded-md border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:border-[var(--color-accent)] transition-colors cursor-pointer"
 			>JSON</button>
 		</div>
 	</div>
@@ -109,18 +138,34 @@
 		</div>
 	</div>
 
+	<!-- Mobile filter disclosure -->
+	<div class="md:hidden flex gap-2 p-3 border-b border-[var(--color-border)]">
+		<button
+			onclick={() => (showFilters = !showFilters)}
+			class="flex-1 text-xs font-medium px-3 py-2 rounded-lg border border-[var(--color-border)] text-[var(--color-text)] hover:border-[var(--color-accent)] transition-colors cursor-pointer {showFilters ? 'border-[var(--color-accent)] text-[var(--color-accent)]' : ''}"
+		>
+			{showFilters ? 'Hide filters' : 'Show filters'}{hasActiveFilters ? ' •' : ''}
+		</button>
+		{#if hasActiveFilters}
+			<button
+				onclick={clearFilters}
+				class="text-xs font-medium px-3 py-2 rounded-lg border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:border-[var(--color-accent)] transition-colors cursor-pointer"
+			>Clear all</button>
+		{/if}
+	</div>
+
 	<!-- Filters -->
-	<div class="p-3 space-y-2 border-b border-[var(--color-border)]">
+	<div class="p-3 space-y-2 border-b border-[var(--color-border)] {showFilters ? '' : 'max-md:hidden'}">
 		<input
 			type="text"
 			placeholder="Search projects..."
 			value={$searchQuery}
-			class="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-3 py-1.5 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-accent)]"
+			class="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-3 py-1.5 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-accent)]"
 			oninput={(e) => searchQuery.set((e.target as HTMLInputElement).value)}
 		/>
 		<div class="flex gap-2">
 			<select
-				class="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 text-xs text-[var(--color-text)] focus:outline-none focus:border-[var(--color-accent)]"
+				class="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 text-xs text-[var(--color-text)] focus:border-[var(--color-accent)]"
 				value={$filterCategory}
 				onchange={(e) => filterCategory.set((e.target as HTMLSelectElement).value as ProjectCategory | 'all')}
 			>
@@ -129,7 +174,7 @@
 				{/each}
 			</select>
 			<select
-				class="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 text-xs text-[var(--color-text)] focus:outline-none focus:border-[var(--color-accent)]"
+				class="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 text-xs text-[var(--color-text)] focus:border-[var(--color-accent)]"
 				value={$filterStatus}
 				onchange={(e) => filterStatus.set((e.target as HTMLSelectElement).value as ProjectStatus | 'all')}
 			>
@@ -140,7 +185,7 @@
 		</div>
 		<div class="flex gap-2">
 			<select
-				class="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 text-xs text-[var(--color-text)] focus:outline-none focus:border-[var(--color-accent)]"
+				class="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 text-xs text-[var(--color-text)] focus:border-[var(--color-accent)]"
 				value={$filterFunding}
 				onchange={(e) => filterFunding.set((e.target as HTMLSelectElement).value as FundingType | 'all')}
 			>
@@ -149,7 +194,7 @@
 				{/each}
 			</select>
 			<select
-				class="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 text-xs text-[var(--color-text)] focus:outline-none focus:border-[var(--color-accent)]"
+				class="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 text-xs text-[var(--color-text)] focus:border-[var(--color-accent)]"
 				value={$filterGovernmentLevel}
 				onchange={(e) => filterGovernmentLevel.set((e.target as HTMLSelectElement).value as GovernmentLevel | 'all')}
 			>
@@ -161,7 +206,7 @@
 		<div class="flex items-center gap-2">
 			<span class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider whitespace-nowrap">Sort</span>
 			<select
-				class="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 text-xs text-[var(--color-text)] focus:outline-none focus:border-[var(--color-accent)]"
+				class="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 text-xs text-[var(--color-text)] focus:border-[var(--color-accent)]"
 				value={$sortKey}
 				onchange={(e) => sortKey.set((e.target as HTMLSelectElement).value as SortKey)}
 			>
@@ -169,6 +214,13 @@
 					<option value={o.value}>{o.label}</option>
 				{/each}
 			</select>
+			{#if hasActiveFilters}
+				<button
+					onclick={clearFilters}
+					title="Reset all filters, search and timeline"
+					class="max-md:hidden text-[0.6875rem] px-2.5 py-1.5 rounded-md border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:border-[var(--color-accent)] transition-colors cursor-pointer whitespace-nowrap"
+				>Clear</button>
+			{/if}
 		</div>
 	</div>
 
@@ -217,7 +269,7 @@
 				{#if v > 0 || late}
 					<div class="mt-1 flex items-center gap-2 text-[0.6875rem]">
 						{#if v > 0}
-							<span class="text-[var(--color-danger)] font-medium">+{formatCurrency(v)} ({Math.round(variancePct(project) * 100)}%)</span>
+							<span class="text-red-400 font-medium">+{formatCurrency(v)} ({Math.round(variancePct(project) * 100)}%)</span>
 						{/if}
 						{#if late}
 							<span class="text-[var(--color-warning)] font-medium">{late}mo late</span>
@@ -226,7 +278,13 @@
 				{/if}
 			</button>
 		{:else}
-			<div class="p-6 text-center text-sm text-[var(--color-text-muted)]">No projects match filters</div>
+			<div class="p-6 text-center space-y-3">
+				<p class="text-sm text-[var(--color-text-muted)]">No projects match your filters.</p>
+				<button
+					onclick={clearFilters}
+					class="text-sm font-medium px-4 py-2 rounded-lg border border-[var(--color-accent)] text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 transition-colors cursor-pointer"
+				>Clear all filters</button>
+			</div>
 		{/each}
 	</div>
 </aside>

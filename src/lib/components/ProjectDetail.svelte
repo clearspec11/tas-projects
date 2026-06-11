@@ -30,7 +30,7 @@
 	{@const flagged = isRedFlag(p)}
 	{@const funding = resolveFundingBreakdown(p)}
 
-	<div class="absolute top-14 right-4 w-96 max-h-[calc(100vh-5rem)] overflow-y-auto bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl shadow-2xl z-[1000]">
+	<div class="absolute top-14 right-4 w-96 max-h-[calc(100vh-5rem)] max-md:inset-x-2 max-md:top-2 max-md:w-auto max-md:max-h-[46dvh] overflow-y-auto bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl shadow-2xl z-[1000]">
 		<!-- Header -->
 		<div class="p-4 border-b border-[var(--color-border)]">
 			<div class="flex items-start justify-between">
@@ -92,7 +92,7 @@
 						<div class="text-xl font-bold tabular-nums mt-0.5" style="color: {v > 0 ? 'var(--color-danger)' : 'var(--color-success)'}">
 							{v > 0 ? '+' : ''}{formatCurrency(Math.abs(v))}
 						</div>
-						<div class="text-[0.6875rem] font-mono mt-0.5" style="color: {v > 0 ? 'var(--color-danger)' : 'var(--color-success)'}">
+						<div class="text-[0.6875rem] font-mono mt-0.5" style="color: {v > 0 ? '#f87171' : 'var(--color-success)'}">
 							{v > 0 ? '+' : ''}{Math.round(variancePct(p) * 100)}%
 						</div>
 					</div>

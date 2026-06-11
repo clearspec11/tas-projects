@@ -7,6 +7,14 @@
 	let startYear = $state($timelineRange[0]);
 	let endYear = $state($timelineRange[1]);
 
+	// Follow external resets (e.g. "Clear all filters") without fighting drags:
+	// after updateRange the store equals local state, so this no-ops mid-drag.
+	$effect(() => {
+		const [s, e] = $timelineRange;
+		if (s !== startYear) startYear = s;
+		if (e !== endYear) endYear = e;
+	});
+
 	function updateRange() {
 		if (startYear > endYear) {
 			const tmp = startYear;
@@ -58,22 +66,22 @@
 	.timeline-range::-webkit-slider-thumb {
 		-webkit-appearance: none;
 		appearance: none;
-		width: 14px;
-		height: 14px;
+		width: 24px;
+		height: 24px;
 		border-radius: 50%;
 		background: var(--color-accent);
-		border: 2px solid #fff;
+		border: 3px solid #fff;
 		cursor: pointer;
 		pointer-events: all;
 		position: relative;
 		z-index: 30;
 	}
 	.timeline-range::-moz-range-thumb {
-		width: 14px;
-		height: 14px;
+		width: 24px;
+		height: 24px;
 		border-radius: 50%;
 		background: var(--color-accent);
-		border: 2px solid #fff;
+		border: 3px solid #fff;
 		cursor: pointer;
 		pointer-events: all;
 	}

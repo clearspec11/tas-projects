@@ -14,11 +14,27 @@
 	let map: any;
 	let markersLayer: any;
 	let flagsLayer: any;
+	let selectionLayer: any;
 	let heatLayer: any;
 	let connectionsLayer: any;
 	let darkTiles: any;
 	let satTiles: any;
 	let L: any;
+
+	// Accent ring marking the currently selected project on the map
+	function drawSelection(p: Project | null) {
+		if (!selectionLayer || !L) return;
+		selectionLayer.clearLayers();
+		if (!p) return;
+		L.circleMarker([p.lat, p.lng], {
+			radius: markerRadius(p) + 8,
+			fill: false,
+			color: '#38bdf8',
+			weight: 3,
+			opacity: 0.95,
+			className: 'tas-selected-ring'
+		}).addTo(selectionLayer);
+	}
 
 	function markerRadius(p: Project): number {
 		return Math.max(8, Math.min(20, Math.sqrt(p.budget / 1_000_000) * 1.8));
@@ -79,6 +95,21 @@
 		`, { closeButton: false });
 
 		marker.on('click', () => selectedProject.set(p));
+
+		// Keyboard access: circle markers aren't focusable by default
+		marker.on('add', () => {
+			const el = marker.getElement?.();
+			if (!el) return;
+			el.setAttribute('tabindex', '0');
+			el.setAttribute('role', 'button');
+			el.setAttribute('aria-label', `${p.name}, ${cfg.label}, ${formatCurrency(p.spent)} of ${formatCurrency(p.budget)}`);
+			el.addEventListener('keydown', (e: KeyboardEvent) => {
+				if (e.key === 'Enter' || e.key === ' ') {
+					e.preventDefault();
+					selectedProject.set(p);
+				}
+			});
+		});
 
 		return marker;
 	}
@@ -228,6 +259,12 @@
 		}
 
 		connectionsLayer = L.layerGroup().addTo(map);
+		selectionLayer = L.layerGroup().addTo(map);
+
+		// Keep Leaflet's internal size in sync with the container (stacked
+		// mobile layout, window resizes) so panes never render at stale sizes.
+		const resizeObserver = new ResizeObserver(() => map?.invalidateSize());
+		resizeObserver.observe(mapContainer);
 
 		function redraw() {
 			updateMap($projects, $filterCategory, $filterStatus, $filterFunding, $filterGovernmentLevel, $searchQuery, $timelineRange, $showHeatmap, $showConnections);
@@ -243,11 +280,13 @@
 			timelineRange.subscribe(redraw),
 			showHeatmap.subscribe(redraw),
 			showConnections.subscribe(redraw),
-			mapStyle.subscribe((s) => switchTiles(s))
+			mapStyle.subscribe((s) => switchTiles(s)),
+			selectedProject.subscribe((p) => drawSelection(p))
 		];
 
 		return () => {
 			unsubs.forEach((u) => u());
+			resizeObserver.disconnect();
 			map.remove();
 		};
 	});
@@ -273,5 +312,21 @@
 	}
 	:global(.leaflet-popup-content-wrapper) {
 		border-radius: 12px !important;
+	}
+	:global(.tas-selected-ring) {
+		animation: tas-ring-pulse 1.6s ease-out infinite;
+	}
+	@keyframes tas-ring-pulse {
+		0%, 100% { stroke-opacity: 0.95; }
+		50% { stroke-opacity: 0.35; }
+	}
+	@media (prefers-reduced-motion: reduce) {
+		:global(.tas-selected-ring) {
+			animation: none;
+		}
+	}
+	:global(.leaflet-interactive:focus-visible) {
+		outline: 2px solid var(--color-accent);
+		outline-offset: 2px;
 	}
 </style>

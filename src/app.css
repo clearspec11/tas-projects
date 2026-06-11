@@ -33,6 +33,12 @@ body {
 	letter-spacing: -0.01em;
 }
 
+/* Keyboard users always get a visible accent ring */
+:focus-visible {
+	outline: 2px solid var(--color-accent);
+	outline-offset: 2px;
+}
+
 .leaflet-container {
 	background: var(--color-bg) !important;
 }

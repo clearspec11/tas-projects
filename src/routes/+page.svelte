@@ -97,13 +97,17 @@
 	<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 </svelte:head>
 
-<div class="flex h-full">
+<div class="flex h-full max-md:flex-col">
 	<Sidebar onFlyTo={handleFlyTo} />
-	<main class="flex-1 relative">
+	<!-- On phones the map stacks on top at fixed height; the list fills the rest -->
+	<main class="flex-1 relative max-md:order-first max-md:flex-none max-md:h-[52dvh]">
 		<TasMap bind:this={mapComponent} />
 		<MapControls />
-		<MapLegend />
-		<TimelineSlider />
+		<!-- Legend and timeline are desktop affordances; they'd bury a phone-sized map -->
+		<div class="contents max-md:hidden">
+			<MapLegend />
+			<TimelineSlider />
+		</div>
 		<ProjectDetail />
 	</main>
 </div>
