@@ -221,13 +221,23 @@
 			attribution: '&copy; Esri'
 		});
 
+		// Luminous coastline: a wide soft glow under a thin bright stroke,
+		// so the island reads as a lit shoreline rather than a CAD outline.
 		L.geoJSON(tasmaniaGeoJson, {
 			style: {
-				color: '#38bdf8',
-				weight: 2,
-				fillColor: '#38bdf8',
-				fillOpacity: 0.06,
-				dashArray: '6 4'
+				color: '#2dd4bf',
+				weight: 7,
+				opacity: 0.14,
+				fillColor: '#2dd4bf',
+				fillOpacity: 0.05
+			}
+		}).addTo(map);
+		L.geoJSON(tasmaniaGeoJson, {
+			style: {
+				color: '#7ee8da',
+				weight: 1.25,
+				opacity: 0.85,
+				fill: false
 			}
 		}).addTo(map);
 
@@ -297,19 +307,44 @@
 	}
 </script>
 
-<div bind:this={mapContainer} class="w-full h-full"></div>
+<div class="relative w-full h-full">
+	<div bind:this={mapContainer} class="w-full h-full"></div>
+	<!-- Aurora australis over the Southern Ocean: atmosphere, not data -->
+	<div class="tas-aurora" aria-hidden="true"></div>
+</div>
 
 <style>
+	.tas-aurora {
+		position: absolute;
+		inset: auto 0 0 0;
+		height: 42%;
+		pointer-events: none;
+		z-index: 1;
+		background:
+			radial-gradient(120% 90% at 35% 115%, rgba(45, 212, 191, 0.10), transparent 55%),
+			radial-gradient(90% 80% at 70% 120%, rgba(74, 222, 128, 0.07), transparent 50%),
+			radial-gradient(70% 60% at 55% 125%, rgba(167, 139, 250, 0.05), transparent 55%);
+		animation: tas-aurora-breathe 26s ease-in-out infinite;
+	}
+	@keyframes tas-aurora-breathe {
+		0%, 100% { opacity: 0.65; }
+		50% { opacity: 1; }
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.tas-aurora {
+			animation: none;
+		}
+	}
 	:global(.tas-tooltip) {
-		background: rgba(15, 23, 42, 0.95) !important;
-		color: #f1f5f9 !important;
-		border: 1px solid #334155 !important;
+		background: rgba(10, 24, 29, 0.95) !important;
+		color: #eef6f6 !important;
+		border: 1px solid #22424c !important;
 		border-radius: 8px !important;
 		padding: 8px 12px !important;
 		box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
 	}
 	:global(.tas-tooltip::before) {
-		border-top-color: rgba(15, 23, 42, 0.95) !important;
+		border-top-color: rgba(10, 24, 29, 0.95) !important;
 	}
 	:global(.leaflet-popup-content-wrapper) {
 		border-radius: 12px !important;

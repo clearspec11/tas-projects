@@ -2,12 +2,12 @@
 name: TAS Project Tracker
 description: A map-led accountability tracker for Tasmanian public infrastructure.
 colors:
-  bg: "#0f172a"
-  surface: "#1e293b"
-  surface-hover: "#334155"
-  border: "#334155"
-  ink: "#f1f5f9"
-  muted: "#94a3b8"
+  bg: "#0a181d"
+  surface: "#102329"
+  surface-hover: "#173138"
+  border: "#22424c"
+  ink: "#eef6f6"
+  muted: "#9bb8bc"
   accent: "#38bdf8"
   on-budget: "#22c55e"
   over-budget: "#ef4444"
@@ -111,8 +111,11 @@ plainly and lets the red flags be the loud moments. Density is high (this is a
 working instrument, not a brochure) but never cramped: the data leads, the chrome
 recedes.
 
-The system is a dark, slate-toned workspace so the map and its coloured markers
-carry the signal. Colour is functional, never decorative: green/red/blue/violet
+The system is "The Island at Night": a dark workspace whose neutrals are tinted
+toward the Tasman sea rather than generic blue-slate, with a luminous teal
+coastline, a faint aurora australis over the Southern Ocean, and the island
+silhouette as the brand mark. The map and its coloured markers carry the
+signal. Colour is functional, never decorative: green/red/blue/violet
 encode budget state, four distinct hues encode who pays, and a single sky accent
 marks interactive and selected elements. Everything that isn't data is a quiet
 neutral. The one place the auditor raises its voice is accountability: red-flag
@@ -158,19 +161,30 @@ strictly for data encoding.
   stacked bar and the governing-tier chips. Chosen to stay distinct from the
   green/red budget-status hues so funding and budget never read as the same axis.
 
-### Neutral
-- **Workspace BG** (`#0f172a`, slate-900): The base canvas and map background.
-- **Surface** (`#1e293b`, slate-800): Sidebar, panels, legend, controls.
-- **Surface Hover / Border** (`#334155`, slate-700): Row hover, selected row,
-  and all 1px borders/dividers.
-- **Ink** (`#f1f5f9`, slate-100): Primary text.
-- **Muted** (`#94a3b8`, slate-400): Secondary text, labels, captions.
+### Neutral (The Island at Night)
+The neutrals are tinted toward the Tasman sea (hue ~200), not generic
+blue-slate: the workspace is the Southern Ocean after dark, and the basemap is
+cast the same way (`sepia + hue-rotate` on the tile pane).
+- **Southern Ocean** (`#0a181d`): The base canvas and map background.
+- **Sea Surface** (`#102329`): Sidebar, panels, legend, controls.
+- **Shallows** (`#173138`): Row hover and selected-row tone.
+- **Kelp Line** (`#22424c`): All 1px borders/dividers.
+- **Ink** (`#eef6f6`): Primary text.
+- **Sea Mist** (`#9bb8bc`, 7.7:1 on Sea Surface): Secondary text, labels.
 
 ### Named Rules
 **The Encoding-Only Rule.** Saturated colour is forbidden as decoration. Every
 green, red, blue, violet, indigo, emerald, or amber on screen must mean
 something a reader can decode from the legend. If a colour isn't carrying data,
 it is a neutral.
+
+**The Southern Sky Exception.** Exactly one non-encoding colour moment exists:
+the aurora australis wash over the Southern Ocean at the bottom of the map
+(layered teal/green/violet radial gradients, each ≤10% opacity, 26s breathe,
+static under reduced motion). It is geography-anchored atmosphere, never UI
+chrome, and it does not grow. The luminous teal coastline (`#2dd4bf` glow +
+`#7ee8da` line) is part of the same identity: it marks the island itself, the
+one geographic constant.
 
 **The Contrast Floor Rule.** Body and muted text must clear 4.5:1 against their
 surface. `--color-muted` (`#94a3b8`) on `--color-surface` (`#1e293b`) is the
