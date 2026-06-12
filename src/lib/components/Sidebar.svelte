@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { projects, selectedProject, filterCategory, filterStatus, filterFunding, filterGovernmentLevel, filterFlagged, searchQuery, sortKey } from '$lib/stores';
+	import { projects, selectedProject, filterCategory, filterStatus, filterFunding, filterGovernmentLevel, filterFlagged, filterContractor, searchQuery, sortKey } from '$lib/stores';
 	import { STATUS_CONFIG, CATEGORY_CONFIG, FUNDING_CONFIG, GOVERNMENT_LEVEL_CONFIG, type Project, type ProjectCategory, type ProjectStatus, type FundingType, type GovernmentLevel } from '$lib/types';
 	import { timelineRange } from '$lib/stores';
 	import {
@@ -24,7 +24,8 @@
 				governmentLevel: $filterGovernmentLevel,
 				query: $searchQuery,
 				range: $timelineRange,
-				flaggedOnly: $filterFlagged
+				flaggedOnly: $filterFlagged,
+				contractor: $filterContractor
 			}),
 			$sortKey
 		)
@@ -40,7 +41,8 @@
 	);
 
 	const hasActiveFilters = $derived(
-		advancedCount > 0 || $filterStatus !== 'all' || $searchQuery !== '' || $filterFlagged
+		advancedCount > 0 || $filterStatus !== 'all' || $searchQuery !== '' || $filterFlagged ||
+		$filterContractor !== null
 	);
 
 	function clearFilters() {
@@ -49,6 +51,7 @@
 		filterFunding.set('all');
 		filterGovernmentLevel.set('all');
 		filterFlagged.set(false);
+		filterContractor.set(null);
 		searchQuery.set('');
 		timelineRange.set([...DEFAULT_RANGE]);
 	}
@@ -113,22 +116,9 @@
 </script>
 
 <aside class="w-96 h-full max-md:w-full max-md:h-auto max-md:flex-1 max-md:min-h-0 flex flex-col bg-[var(--color-surface)] border-r max-md:border-r-0 max-md:border-t border-[var(--color-border)] overflow-hidden">
-	<!-- Header -->
-	<div class="p-4 border-b border-[var(--color-border)] flex items-start justify-between">
-		<div>
-			<h1 class="text-xl font-bold tracking-tight flex items-center gap-2">
-				<!-- Tasmania silhouette, generated from the live boundary data -->
-				<svg viewBox="0 0 20.1 24" class="h-6 w-auto shrink-0" aria-hidden="true">
-					<path
-						d="M0.0 1.7L0.5 2.0L0.6 3.6L0.1 4.8L0.8 7.7L1.7 9.8L3.4 12.1L3.4 12.6L2.9 13.0L3.5 16.0L4.0 16.4L4.7 18.6L5.5 19.1L7.5 22.7L9.6 24.0L9.8 23.4L14.4 22.5L18.2 20.4L20.1 12.8L19.6 10.3L19.9 8.9L19.6 7.9L20.1 6.7L19.6 5.5L20.1 4.6L19.5 3.3L18.8 3.1L18.8 2.5L17.6 2.4L17.0 3.5L15.9 2.8L15.0 4.3L14.0 3.2L13.8 3.5L14.0 3.9L13.5 4.3L12.6 3.9L12.3 4.5L9.5 5.4L6.8 4.5L5.3 3.2L4.3 3.2L2.3 0.1L1.0 0.4L0.5 0.0L0.5 0.7L0.0 1.7Z"
-						fill="var(--color-accent)" fill-opacity="0.22"
-						stroke="var(--color-accent)" stroke-width="1" stroke-linejoin="round"
-					/>
-				</svg>
-				<span><span class="text-[var(--color-accent)]">TAS</span> Project Tracker</span>
-			</h1>
-			<p class="text-[0.8125rem] text-[var(--color-text-muted)] mt-0.5">Tasmanian Public Infrastructure Monitor</p>
-		</div>
+	<!-- Header row: brand lives in the top nav; this keeps the export actions -->
+	<div class="px-3 pt-3 flex items-center justify-between">
+		<span class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider">Projects</span>
 		<div class="flex gap-1">
 			<button
 				onclick={exportCsv}
@@ -208,6 +198,19 @@
 				>Clear</button>
 			{/if}
 		</div>
+
+		{#if $filterContractor}
+			<div class="flex items-center gap-2 text-xs">
+				<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--color-accent)]/15 text-[var(--color-accent)] font-medium">
+					Contractor: {$filterContractor}
+					<button
+						onclick={() => filterContractor.set(null)}
+						aria-label="Remove contractor filter"
+						class="hover:text-[var(--color-text)] leading-none cursor-pointer"
+					>✕</button>
+				</span>
+			</div>
+		{/if}
 
 		{#if showAdvanced}
 			<div class="space-y-2 pt-1">

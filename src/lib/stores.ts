@@ -9,6 +9,8 @@ export const filterStatus = writable<ProjectStatus | 'all'>('all');
 export const filterFunding = writable<FundingType | 'all'>('all');
 export const filterGovernmentLevel = writable<GovernmentLevel | 'all'>('all');
 export const filterFlagged = writable(false);
+// Set from the contractor scorecard, not the filter UI; shown as a dismissible chip
+export const filterContractor = writable<string | null>(null);
 export const searchQuery = writable('');
 export const sortKey = writable<SortKey>('variance');
 export const timelineRange = writable<[number, number]>([2017, 2036]);

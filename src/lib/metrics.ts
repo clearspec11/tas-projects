@@ -102,6 +102,7 @@ export interface FilterCriteria {
 	query: string;
 	range: [number, number];
 	flaggedOnly?: boolean;
+	contractor?: string | null;
 }
 
 export function filterProjects(list: Project[], f: FilterCriteria): Project[] {
@@ -111,11 +112,56 @@ export function filterProjects(list: Project[], f: FilterCriteria): Project[] {
 		if (f.funding !== 'all' && p.funding_type !== f.funding) return false;
 		if (f.governmentLevel !== 'all' && p.government_level !== f.governmentLevel) return false;
 		if (f.flaggedOnly && !isRedFlag(p)) return false;
+		if (f.contractor && p.contractor !== f.contractor) return false;
 		if (f.query && !p.name.toLowerCase().includes(f.query.toLowerCase())) return false;
 		const startYear = new Date(p.start_date).getFullYear();
 		if (startYear < f.range[0] || startYear > f.range[1]) return false;
 		return true;
 	});
+}
+
+// ---- Contractor scorecards ----
+export interface ContractorStats {
+	name: string;
+	projects: number;
+	totalBudget: number;
+	totalSpent: number;
+	// Money-weighted: (sum spent - sum budget) / sum budget, so one large
+	// blowout outweighs several small on-budget jobs.
+	overrunPct: number;
+	flagged: number;
+	cleanPct: number; // share of their projects not red-flagged
+}
+
+export function contractorStats(list: Project[]): { ranked: ContractorStats[]; unattributed: number } {
+	const groups = new Map<string, Project[]>();
+	let unattributed = 0;
+	for (const p of list) {
+		if (!p.contractor) {
+			unattributed++;
+			continue;
+		}
+		const arr = groups.get(p.contractor) ?? [];
+		arr.push(p);
+		groups.set(p.contractor, arr);
+	}
+	const ranked = [...groups.entries()]
+		.map(([name, ps]) => {
+			const totalBudget = ps.reduce((s, p) => s + p.budget, 0);
+			const totalSpent = ps.reduce((s, p) => s + p.spent, 0);
+			const flagged = ps.filter((p) => isRedFlag(p)).length;
+			return {
+				name,
+				projects: ps.length,
+				totalBudget,
+				totalSpent,
+				overrunPct: totalBudget ? (totalSpent - totalBudget) / totalBudget : 0,
+				flagged,
+				cleanPct: ps.length ? (ps.length - flagged) / ps.length : 0
+			};
+		})
+		.sort((a, b) => b.overrunPct - a.overrunPct);
+	return { ranked, unattributed };
 }
 
 // ---- Sorting ----

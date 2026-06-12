@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import {
 		projects, selectedProject, filterCategory, filterStatus,
-		filterFunding, filterGovernmentLevel, filterFlagged, searchQuery, timelineRange, showHeatmap,
+		filterFunding, filterGovernmentLevel, filterFlagged, filterContractor, searchQuery, timelineRange, showHeatmap,
 		showConnections, mapStyle
 	} from '$lib/stores';
 	import { STATUS_CONFIG, CATEGORY_CONFIG, FUNDING_CONFIG, GOVERNMENT_LEVEL_CONFIG, type Project } from '$lib/types';
@@ -129,7 +129,7 @@
 		const filtered = filterProjects(all, {
 			category: cat as any, status: status as any, funding: funding as any,
 			governmentLevel: govLevel as any, query, range,
-			flaggedOnly: flagged
+			flaggedOnly: flagged, contractor: $filterContractor
 		});
 
 		if (heatmap) {
@@ -289,6 +289,7 @@
 			filterFunding.subscribe(redraw),
 			filterGovernmentLevel.subscribe(redraw),
 			filterFlagged.subscribe(redraw),
+			filterContractor.subscribe(redraw),
 			searchQuery.subscribe(redraw),
 			timelineRange.subscribe(redraw),
 			showHeatmap.subscribe(redraw),

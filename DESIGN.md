@@ -295,11 +295,21 @@ is doing decoration rather than separating from the map, delete it.
   treatment.
 
 ### Navigation
-- Currently a single-screen app: the sidebar is the primary nav surface (header,
-  stats, filters, scrollable project list). Selecting a row drives the map and
-  detail panel and writes URL state for shareable deep links. Any future top nav
-  (Map / Contractors / Dashboard) must adopt the same surface + 1px border +
-  accent-active treatment as the map toggles; do not introduce a new nav idiom.
+- A slim 48px top bar carries the brand (island mark + wordmark) and the route
+  links (Map / Contractors): Sea Surface fill, 1px Kelp Line bottom border,
+  accent text + accent border on the active route, muted-to-ink hover on the
+  rest. Any new route joins this bar; do not introduce a second nav idiom.
+- Within the map route the sidebar remains the working nav surface (stats,
+  filters, scrollable list); row selection drives the map, detail panel and URL.
+
+### Contractor scorecard (signature component)
+- A sortable accountability table at `/contractors`: contractor, project count,
+  total budget, money-weighted overrun, flags, clean-record share. Default sort
+  is overrun descending so repeat offenders lead. Overrun cells pair a red mini
+  bar with the mono figure; **negative spend-to-date is shown as "none", never
+  as a green number** (earliness is not an achievement). Rows are links back to
+  the map filtered to that contractor (`?contractor=`), surfaced there as a
+  dismissible accent chip. Unattributed projects are footnoted, not ranked.
 
 ### Map markers (signature component)
 - **Circle marker:** Two codes on the mark, no more. Fill encodes budget

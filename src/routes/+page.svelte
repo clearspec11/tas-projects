@@ -4,7 +4,7 @@
 	import { replaceState } from '$app/navigation';
 	import {
 		projects, selectedProject, filterCategory, filterStatus, filterFunding,
-		filterGovernmentLevel, filterFlagged, searchQuery, sortKey, timelineRange
+		filterGovernmentLevel, filterFlagged, filterContractor, searchQuery, sortKey, timelineRange
 	} from '$lib/stores';
 	import { SEED_PROJECTS } from '$lib/seed-data';
 	import type { SortKey } from '$lib/metrics';
@@ -31,6 +31,7 @@
 		if (sp.get('gov')) filterGovernmentLevel.set(sp.get('gov') as any);
 		if (sp.get('q')) searchQuery.set(sp.get('q')!);
 		if (sp.get('flag') === '1') filterFlagged.set(true);
+		if (sp.get('contractor')) filterContractor.set(sp.get('contractor'));
 		if (sp.get('sort')) sortKey.set(sp.get('sort') as SortKey);
 		const y0 = Number(sp.get('y0')), y1 = Number(sp.get('y1'));
 		if (y0 && y1) timelineRange.set([y0, y1]);
@@ -55,6 +56,8 @@
 		set('gov', get(filterGovernmentLevel), DEFAULTS.gov);
 		set('q', get(searchQuery), DEFAULTS.q);
 		if (get(filterFlagged)) sp.set('flag', '1');
+		const contractor = get(filterContractor);
+		if (contractor) sp.set('contractor', contractor);
 		set('sort', get(sortKey), DEFAULTS.sort);
 		const range = get(timelineRange);
 		set('y0', range[0], DEFAULTS.y0);
@@ -79,7 +82,7 @@
 		let ready = false;
 		const stores = [
 			filterCategory, filterStatus, filterFunding, filterGovernmentLevel,
-			filterFlagged, searchQuery, sortKey, timelineRange, selectedProject
+			filterFlagged, filterContractor, searchQuery, sortKey, timelineRange, selectedProject
 		];
 		const unsubs = stores.map((s) => s.subscribe(() => ready && syncUrl()));
 		ready = true;
