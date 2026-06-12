@@ -8,6 +8,7 @@ export const filterCategory = writable<ProjectCategory | 'all'>('all');
 export const filterStatus = writable<ProjectStatus | 'all'>('all');
 export const filterFunding = writable<FundingType | 'all'>('all');
 export const filterGovernmentLevel = writable<GovernmentLevel | 'all'>('all');
+export const filterFlagged = writable(false);
 export const searchQuery = writable('');
 export const sortKey = writable<SortKey>('variance');
 export const timelineRange = writable<[number, number]>([2017, 2036]);

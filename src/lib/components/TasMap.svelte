@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import {
 		projects, selectedProject, filterCategory, filterStatus,
-		filterFunding, filterGovernmentLevel, searchQuery, timelineRange, showHeatmap,
+		filterFunding, filterGovernmentLevel, filterFlagged, searchQuery, timelineRange, showHeatmap,
 		showConnections, mapStyle
 	} from '$lib/stores';
 	import { STATUS_CONFIG, CATEGORY_CONFIG, FUNDING_CONFIG, GOVERNMENT_LEVEL_CONFIG, type Project } from '$lib/types';
@@ -118,7 +118,7 @@
 	function updateMap(
 		all: Project[], cat: string, status: string, funding: string,
 		govLevel: string, query: string, range: [number, number], heatmap: boolean,
-		connections: boolean
+		connections: boolean, flagged: boolean
 	) {
 		if (!markersLayer || !L) return;
 		markersLayer.clearLayers();
@@ -128,7 +128,8 @@
 
 		const filtered = filterProjects(all, {
 			category: cat as any, status: status as any, funding: funding as any,
-			governmentLevel: govLevel as any, query, range
+			governmentLevel: govLevel as any, query, range,
+			flaggedOnly: flagged
 		});
 
 		if (heatmap) {
@@ -278,7 +279,7 @@
 		resizeObserver.observe(mapContainer);
 
 		function redraw() {
-			updateMap($projects, $filterCategory, $filterStatus, $filterFunding, $filterGovernmentLevel, $searchQuery, $timelineRange, $showHeatmap, $showConnections);
+			updateMap($projects, $filterCategory, $filterStatus, $filterFunding, $filterGovernmentLevel, $searchQuery, $timelineRange, $showHeatmap, $showConnections, $filterFlagged);
 		}
 
 		const unsubs = [
@@ -287,6 +288,7 @@
 			filterStatus.subscribe(redraw),
 			filterFunding.subscribe(redraw),
 			filterGovernmentLevel.subscribe(redraw),
+			filterFlagged.subscribe(redraw),
 			searchQuery.subscribe(redraw),
 			timelineRange.subscribe(redraw),
 			showHeatmap.subscribe(redraw),

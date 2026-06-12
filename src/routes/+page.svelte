@@ -4,7 +4,7 @@
 	import { replaceState } from '$app/navigation';
 	import {
 		projects, selectedProject, filterCategory, filterStatus, filterFunding,
-		filterGovernmentLevel, searchQuery, sortKey, timelineRange
+		filterGovernmentLevel, filterFlagged, searchQuery, sortKey, timelineRange
 	} from '$lib/stores';
 	import { SEED_PROJECTS } from '$lib/seed-data';
 	import type { SortKey } from '$lib/metrics';
@@ -30,6 +30,7 @@
 		if (sp.get('funding')) filterFunding.set(sp.get('funding') as any);
 		if (sp.get('gov')) filterGovernmentLevel.set(sp.get('gov') as any);
 		if (sp.get('q')) searchQuery.set(sp.get('q')!);
+		if (sp.get('flag') === '1') filterFlagged.set(true);
 		if (sp.get('sort')) sortKey.set(sp.get('sort') as SortKey);
 		const y0 = Number(sp.get('y0')), y1 = Number(sp.get('y1'));
 		if (y0 && y1) timelineRange.set([y0, y1]);
@@ -53,6 +54,7 @@
 		set('funding', get(filterFunding), DEFAULTS.funding);
 		set('gov', get(filterGovernmentLevel), DEFAULTS.gov);
 		set('q', get(searchQuery), DEFAULTS.q);
+		if (get(filterFlagged)) sp.set('flag', '1');
 		set('sort', get(sortKey), DEFAULTS.sort);
 		const range = get(timelineRange);
 		set('y0', range[0], DEFAULTS.y0);
@@ -77,7 +79,7 @@
 		let ready = false;
 		const stores = [
 			filterCategory, filterStatus, filterFunding, filterGovernmentLevel,
-			searchQuery, sortKey, timelineRange, selectedProject
+			filterFlagged, searchQuery, sortKey, timelineRange, selectedProject
 		];
 		const unsubs = stores.map((s) => s.subscribe(() => ready && syncUrl()));
 		ready = true;
@@ -89,7 +91,21 @@
 	function handleFlyTo(lat: number, lng: number) {
 		mapComponent?.flyTo(lat, lng);
 	}
+
+	// "/" focuses search, Escape closes the detail panel
+	function handleKeydown(e: KeyboardEvent) {
+		const target = e.target as HTMLElement;
+		const typing = ['INPUT', 'SELECT', 'TEXTAREA'].includes(target?.tagName);
+		if (e.key === '/' && !typing) {
+			e.preventDefault();
+			document.getElementById('project-search')?.focus();
+		} else if (e.key === 'Escape' && !typing) {
+			selectedProject.set(null);
+		}
+	}
 </script>
+
+<svelte:window onkeydown={handleKeydown} />
 
 <svelte:head>
 	<title>TAS Project Tracker — Tasmanian Public Infrastructure</title>

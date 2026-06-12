@@ -314,6 +314,12 @@ is doing decoration rather than separating from the map, delete it.
 - **Cluster badge:** Translucent sky (`rgba(56,189,248,0.25)`) disc with a 2px
   accent border and ink count. Sized in three steps by child count.
 
+### Stat tiles (header)
+- Four tiles; Projects and Budget are read-only, **Over and Flags are filter
+  toggles** (aria-pressed, active state = status-coloured border). Clicking
+  Flags applies the flagged-only cut, which catches late-but-under-budget
+  projects the plain Over filter misses.
+
 ### Story banner (signature component)
 - A dismissible one-line orientation pinned top-centre over the map:
   "**N projects** are a combined **$X** over budget." with a ghost-accent

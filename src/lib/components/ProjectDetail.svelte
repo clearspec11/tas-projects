@@ -50,13 +50,16 @@
 				<span class="text-xs px-2 py-0.5 rounded-full font-medium {cfg.bgClass}">
 					{cfg.label}
 				</span>
-				<span class="text-xs px-2 py-0.5 rounded-full font-medium" style="background: {govCfg.color}20; color: {govCfg.color};">
+				<span title={govCfg.description} class="text-xs px-2 py-0.5 rounded-full font-medium" style="background: {govCfg.color}20; color: {govCfg.color};">
 					{govCfg.shortLabel}
 				</span>
-				<span class="text-xs px-2 py-0.5 rounded-full font-medium bg-slate-500/20 text-slate-400">
+				<span title={fundCfg.description} class="text-xs px-2 py-0.5 rounded-full font-medium bg-slate-500/20 text-slate-400">
 					{fundCfg.label}
 				</span>
 			</div>
+			<p class="text-[0.6875rem] text-[var(--color-text-muted)] mt-1.5 leading-snug">
+				{fundCfg.description}.
+			</p>
 		</div>
 
 		<!-- Budget breakdown -->
@@ -88,7 +91,7 @@
 			<div class="grid {late ? 'grid-cols-2' : 'grid-cols-1'} gap-3">
 				{#if v !== 0}
 					<div class="bg-[var(--color-bg)] rounded-lg p-3 text-center">
-						<div class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider">Variance</div>
+						<div title="How far spending is above or below the budget" class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider">Variance</div>
 						<div class="text-xl font-bold tabular-nums mt-0.5" style="color: {v > 0 ? 'var(--color-danger)' : 'var(--color-success)'}">
 							{v > 0 ? '+' : ''}{formatCurrency(Math.abs(v))}
 						</div>

@@ -60,15 +60,15 @@ export const CATEGORY_CONFIG: Record<ProjectCategory, { label: string; icon: str
 	other: { label: 'Other', icon: '📋' }
 };
 
-export const GOVERNMENT_LEVEL_CONFIG: Record<GovernmentLevel, { label: string; shortLabel: string; color: string }> = {
-	federal: { label: 'Federal Government', shortLabel: 'Federal', color: '#818cf8' },
-	state: { label: 'State Government', shortLabel: 'State', color: '#38bdf8' },
-	local: { label: 'Local Council', shortLabel: 'Council', color: '#34d399' }
+export const GOVERNMENT_LEVEL_CONFIG: Record<GovernmentLevel, { label: string; shortLabel: string; color: string; description: string }> = {
+	federal: { label: 'Federal Government', shortLabel: 'Federal', color: '#818cf8', description: 'Led and mainly funded by the Australian Government' },
+	state: { label: 'State Government', shortLabel: 'State', color: '#38bdf8', description: 'Led by the Tasmanian state government' },
+	local: { label: 'Local Council', shortLabel: 'Council', color: '#34d399', description: 'Led by a local council' }
 };
 
-export const FUNDING_CONFIG: Record<FundingType, { label: string; shortLabel: string; dashArray: string; borderStyle: string }> = {
-	public: { label: 'Fully Public', shortLabel: 'Public', dashArray: '', borderStyle: 'solid' },
-	ppp: { label: 'Public-Private Partnership', shortLabel: 'PPP', dashArray: '8 4', borderStyle: 'dashed' },
-	gov_funded_private: { label: 'Government-Funded Private', shortLabel: 'Gov Funded', dashArray: '3 3', borderStyle: 'dotted' },
-	gov_contracted: { label: 'Government-Contracted', shortLabel: 'Contracted', dashArray: '12 4 3 4', borderStyle: 'dashed' }
+export const FUNDING_CONFIG: Record<FundingType, { label: string; shortLabel: string; dashArray: string; borderStyle: string; description: string }> = {
+	public: { label: 'Fully Public', shortLabel: 'Public', dashArray: '', borderStyle: 'solid', description: 'Paid for and delivered by government' },
+	ppp: { label: 'Public-Private Partnership', shortLabel: 'PPP', dashArray: '8 4', borderStyle: 'dashed', description: 'Government and private investors share the cost and the risk' },
+	gov_funded_private: { label: 'Government-Funded Private', shortLabel: 'Gov Funded', dashArray: '3 3', borderStyle: 'dotted', description: 'A privately owned project built with public money' },
+	gov_contracted: { label: 'Government-Contracted', shortLabel: 'Contracted', dashArray: '12 4 3 4', borderStyle: 'dashed', description: 'Paid for by government, built by a private contractor' }
 };

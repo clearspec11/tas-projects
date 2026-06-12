@@ -101,6 +101,7 @@ export interface FilterCriteria {
 	governmentLevel: GovernmentLevel | 'all';
 	query: string;
 	range: [number, number];
+	flaggedOnly?: boolean;
 }
 
 export function filterProjects(list: Project[], f: FilterCriteria): Project[] {
@@ -109,6 +110,7 @@ export function filterProjects(list: Project[], f: FilterCriteria): Project[] {
 		if (f.status !== 'all' && p.status !== f.status) return false;
 		if (f.funding !== 'all' && p.funding_type !== f.funding) return false;
 		if (f.governmentLevel !== 'all' && p.government_level !== f.governmentLevel) return false;
+		if (f.flaggedOnly && !isRedFlag(p)) return false;
 		if (f.query && !p.name.toLowerCase().includes(f.query.toLowerCase())) return false;
 		const startYear = new Date(p.start_date).getFullYear();
 		if (startYear < f.range[0] || startYear > f.range[1]) return false;
