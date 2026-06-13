@@ -3,11 +3,15 @@
 	import { goto } from '$app/navigation';
 	import { projects, filterContractor } from '$lib/stores';
 	import { SEED_PROJECTS } from '$lib/seed-data';
+	import { loadProjects } from '$lib/data';
 	import { contractorStats, formatCurrency, type ContractorStats } from '$lib/metrics';
 
 	onMount(() => {
 		// Direct-load support: the map page normally seeds the store
 		if ($projects.length === 0) projects.set(SEED_PROJECTS);
+		loadProjects().then(({ projects: rows, source }) => {
+			if (source === 'supabase') projects.set(rows);
+		});
 	});
 
 	type Col = 'name' | 'projects' | 'budget' | 'overrun' | 'flagged' | 'clean';

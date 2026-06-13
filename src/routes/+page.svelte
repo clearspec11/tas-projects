@@ -7,6 +7,7 @@
 		filterGovernmentLevel, filterFlagged, filterContractor, searchQuery, sortKey, timelineRange
 	} from '$lib/stores';
 	import { SEED_PROJECTS } from '$lib/seed-data';
+	import { loadProjects } from '$lib/data';
 	import type { SortKey } from '$lib/metrics';
 	import TasMap from '$lib/components/TasMap.svelte';
 	import Sidebar from '$lib/components/Sidebar.svelte';
@@ -37,7 +38,7 @@
 		if (y0 && y1) timelineRange.set([y0, y1]);
 		const pid = sp.get('p');
 		if (pid) {
-			const proj = SEED_PROJECTS.find((p) => p.id === pid);
+			const proj = get(projects).find((p) => p.id === pid);
 			if (proj) {
 				selectedProject.set(proj);
 				setTimeout(() => mapComponent?.flyTo(proj.lat, proj.lng), 300);
@@ -75,7 +76,13 @@
 	}
 
 	onMount(() => {
-		projects.set(SEED_PROJECTS);
+		// Seed immediately so the UI renders, then swap in Supabase data if a
+		// project is configured (falls back to seed on any failure).
+		if (get(projects).length === 0) projects.set(SEED_PROJECTS);
+		loadProjects().then(({ projects: rows, source, error }) => {
+			if (source === 'supabase') projects.set(rows);
+			if (error) console.warn('[tas] Supabase load failed, using seed data:', error);
+		});
 		applyFromUrl();
 
 		// Write URL on any state change (replaceState — no navigation/reload)

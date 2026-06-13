@@ -1,0 +1,212 @@
+import { describe, it, expect } from 'vitest';
+import type { Project } from './types';
+import {
+	formatCurrency,
+	budgetPercent,
+	variance,
+	variancePct,
+	delayMonths,
+	isRedFlag,
+	filterProjects,
+	sortProjects,
+	resolveFundingBreakdown,
+	contractorStats,
+	projectsToCsv,
+	type FilterCriteria
+} from './metrics';
+
+function makeProject(overrides: Partial<Project> = {}): Project {
+	return {
+		id: 'x',
+		name: 'Test Project',
+		description: '',
+		category: 'transport',
+		status: 'on_budget',
+		funding_type: 'public',
+		government_level: 'state',
+		budget: 100_000_000,
+		spent: 100_000_000,
+		lat: -42,
+		lng: 147,
+		location_name: 'Hobart',
+		start_date: '2023-01-01',
+		expected_end_date: '2030-01-01',
+		contractor: null,
+		related_project_ids: [],
+		created_at: '2024-01-01T00:00:00Z',
+		updated_at: '2024-01-01T00:00:00Z',
+		...overrides
+	};
+}
+
+const NOW = new Date('2026-06-01T00:00:00Z');
+
+const ALL_FILTERS: FilterCriteria = {
+	category: 'all',
+	status: 'all',
+	funding: 'all',
+	governmentLevel: 'all',
+	query: '',
+	range: [2000, 2100]
+};
+
+describe('formatCurrency', () => {
+	it('formats billions, millions, thousands', () => {
+		expect(formatCurrency(3_500_000_000)).toBe('$3.5B');
+		expect(formatCurrency(265_000_000)).toBe('$265M');
+		expect(formatCurrency(28_000)).toBe('$28K');
+	});
+	it('keeps the sign for negatives', () => {
+		expect(formatCurrency(-65_000_000)).toBe('-$65M');
+	});
+});
+
+describe('budget metrics', () => {
+	it('computes percent, variance and variance %', () => {
+		const p = makeProject({ budget: 200_000_000, spent: 265_000_000 });
+		expect(budgetPercent(p)).toBe(133);
+		expect(variance(p)).toBe(65_000_000);
+		expect(variancePct(p)).toBeCloseTo(0.325, 3);
+	});
+	it('never divides by a zero budget', () => {
+		const p = makeProject({ budget: 0, spent: 0 });
+		expect(budgetPercent(p)).toBe(0);
+		expect(variancePct(p)).toBe(0);
+	});
+});
+
+describe('delayMonths', () => {
+	it('is null for completed or cancelled projects', () => {
+		expect(delayMonths(makeProject({ status: 'completed', expected_end_date: '2020-01-01' }), NOW)).toBeNull();
+		expect(delayMonths(makeProject({ status: 'cancelled', expected_end_date: '2020-01-01' }), NOW)).toBeNull();
+	});
+	it('is null when there is no end date or the date is in the future', () => {
+		expect(delayMonths(makeProject({ expected_end_date: null }), NOW)).toBeNull();
+		expect(delayMonths(makeProject({ expected_end_date: '2030-01-01' }), NOW)).toBeNull();
+	});
+	it('counts whole months past an overdue end date', () => {
+		expect(delayMonths(makeProject({ expected_end_date: '2026-03-01' }), NOW)).toBe(3);
+	});
+});
+
+describe('isRedFlag', () => {
+	it('flags materially over budget', () => {
+		expect(isRedFlag(makeProject({ budget: 100, spent: 116 }), NOW)).toBe(true);
+		expect(isRedFlag(makeProject({ budget: 100, spent: 114 }), NOW)).toBe(false);
+	});
+	it('flags overdue active projects', () => {
+		expect(isRedFlag(makeProject({ expected_end_date: '2026-03-01' }), NOW)).toBe(true);
+	});
+	it('never flags cancelled projects', () => {
+		expect(isRedFlag(makeProject({ status: 'cancelled', budget: 100, spent: 300 }), NOW)).toBe(false);
+	});
+});
+
+describe('filterProjects', () => {
+	const list = [
+		makeProject({ id: 'a', category: 'health', status: 'over_budget', budget: 100, spent: 150, name: 'Hospital', contractor: 'Acme' }),
+		makeProject({ id: 'b', category: 'transport', status: 'on_budget', name: 'Bridge', contractor: 'Bolt', government_level: 'local', funding_type: 'ppp' }),
+		makeProject({ id: 'c', category: 'transport', status: 'completed', name: 'Path', start_date: '2010-01-01' })
+	];
+
+	it('matches everything with the all-filters baseline', () => {
+		expect(filterProjects(list, ALL_FILTERS)).toHaveLength(3);
+	});
+	it('filters by category, status, funding and tier', () => {
+		expect(filterProjects(list, { ...ALL_FILTERS, category: 'transport' }).map((p) => p.id)).toEqual(['b', 'c']);
+		expect(filterProjects(list, { ...ALL_FILTERS, status: 'over_budget' }).map((p) => p.id)).toEqual(['a']);
+		expect(filterProjects(list, { ...ALL_FILTERS, funding: 'ppp' }).map((p) => p.id)).toEqual(['b']);
+		expect(filterProjects(list, { ...ALL_FILTERS, governmentLevel: 'local' }).map((p) => p.id)).toEqual(['b']);
+	});
+	it('matches the search query case-insensitively on name', () => {
+		expect(filterProjects(list, { ...ALL_FILTERS, query: 'brid' }).map((p) => p.id)).toEqual(['b']);
+	});
+	it('filters by start-year range', () => {
+		expect(filterProjects(list, { ...ALL_FILTERS, range: [2015, 2100] }).map((p) => p.id)).toEqual(['a', 'b']);
+	});
+	it('applies flaggedOnly and contractor', () => {
+		expect(filterProjects(list, { ...ALL_FILTERS, flaggedOnly: true }).map((p) => p.id)).toEqual(['a']);
+		expect(filterProjects(list, { ...ALL_FILTERS, contractor: 'Bolt' }).map((p) => p.id)).toEqual(['b']);
+	});
+});
+
+describe('sortProjects', () => {
+	const list = [
+		makeProject({ id: 'low', name: 'Zeta', budget: 100, spent: 100 }),
+		makeProject({ id: 'over', name: 'Alpha', budget: 100, spent: 200 }),
+		makeProject({ id: 'big', name: 'Mid', budget: 999, spent: 999 })
+	];
+	it('sorts most-over-budget first', () => {
+		expect(sortProjects(list, 'variance')[0].id).toBe('over');
+	});
+	it('sorts largest budget first', () => {
+		expect(sortProjects(list, 'budget')[0].id).toBe('big');
+	});
+	it('sorts by name A-Z', () => {
+		expect(sortProjects(list, 'name').map((p) => p.name)).toEqual(['Alpha', 'Mid', 'Zeta']);
+	});
+	it('does not mutate the input array', () => {
+		const before = list.map((p) => p.id);
+		sortProjects(list, 'budget');
+		expect(list.map((p) => p.id)).toEqual(before);
+	});
+});
+
+describe('resolveFundingBreakdown', () => {
+	it('returns the explicit breakdown when present', () => {
+		const fb = { federal: 10, state: 20, local: 30, private: 40 };
+		const r = resolveFundingBreakdown(makeProject({ budget: 100, funding_breakdown: fb }));
+		expect(r.estimated).toBe(false);
+		expect(r.breakdown).toEqual(fb);
+	});
+	it('derives a split that sums to the budget and flags it estimated', () => {
+		const p = makeProject({ budget: 1000, funding_type: 'ppp', government_level: 'federal' });
+		const { breakdown, estimated } = resolveFundingBreakdown(p);
+		expect(estimated).toBe(true);
+		expect(breakdown.private).toBe(450); // ppp = 45% private
+		const sum = breakdown.federal + breakdown.state + breakdown.local + breakdown.private;
+		expect(sum).toBe(1000);
+	});
+	it('puts no private money on fully public projects', () => {
+		const { breakdown } = resolveFundingBreakdown(makeProject({ budget: 1000, funding_type: 'public', government_level: 'local' }));
+		expect(breakdown.private).toBe(0);
+		expect(breakdown.local).toBeGreaterThan(breakdown.federal);
+	});
+});
+
+describe('contractorStats', () => {
+	const list = [
+		makeProject({ contractor: 'Acme', budget: 100, spent: 150 }),
+		makeProject({ contractor: 'Acme', budget: 100, spent: 90 }),
+		makeProject({ contractor: 'Bolt', budget: 100, spent: 100 }),
+		makeProject({ contractor: null, budget: 100, spent: 100 })
+	];
+	it('groups by contractor and counts the unattributed', () => {
+		const { ranked, unattributed } = contractorStats(list);
+		expect(unattributed).toBe(1);
+		expect(ranked).toHaveLength(2);
+	});
+	it('uses a money-weighted overrun', () => {
+		const acme = contractorStats(list).ranked.find((c) => c.name === 'Acme')!;
+		// (150 + 90) vs (100 + 100) = 240/200 = +20%
+		expect(acme.overrunPct).toBeCloseTo(0.2, 5);
+		expect(acme.projects).toBe(2);
+	});
+	it('ranks the worst overrun first', () => {
+		expect(contractorStats(list).ranked[0].name).toBe('Acme');
+	});
+});
+
+describe('projectsToCsv', () => {
+	it('emits a header with funder columns and one row per project', () => {
+		const csv = projectsToCsv([makeProject({ id: '1', name: 'Bridge' })]);
+		const lines = csv.split('\n');
+		expect(lines[0]).toContain('fund_federal');
+		expect(lines[0]).toContain('source_url');
+		expect(lines).toHaveLength(2);
+	});
+	it('quotes fields that contain commas', () => {
+		const csv = projectsToCsv([makeProject({ name: 'Road, Stage 2' })]);
+		expect(csv).toContain('"Road, Stage 2"');
+	});
+});
