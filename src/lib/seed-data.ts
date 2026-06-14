@@ -10,14 +10,26 @@ const RAW_PROJECTS: Project[] = [
 		funding_type: 'ppp',
 		government_level: 'state',
 		budget: 576_000_000,
-		spent: 748_000_000,
+		spent: 786_000_000,
+		original_budget: 576_000_000,
 		lat: -42.7344,
 		lng: 147.2333,
 		location_name: 'Bridgewater',
 		start_date: '2022-01-15',
-		expected_end_date: '2028-06-30',
+		expected_end_date: '2026-12-31',
 		contractor: 'McConnell Dowell',
 		related_project_ids: ['10'],
+		// Verified from Tasmanian Budget Papers BP1 Ch6 (Estimated Total Cost),
+		// 2019-20 through 2023-24. Held at $576M, revised to $786M in 2022-23.
+		source_url: 'https://www.treasury.tas.gov.au/BudgetPapersHTML/Budget2023/BP1/2023-24-BP1-6-Infrastructure-Investment.htm',
+		budget_history: [
+			{ fiscal_year: '2019-20', estimated_total_cost: 576_000_000 },
+			{ fiscal_year: '2020-21', estimated_total_cost: 576_000_000 },
+			{ fiscal_year: '2021-22', estimated_total_cost: 576_000_000 },
+			{ fiscal_year: '2022-23', estimated_total_cost: 786_000_000 },
+			{ fiscal_year: '2023-24', estimated_total_cost: 786_000_000 }
+		],
+		last_verified: '2026-06-14',
 		created_at: '2024-01-01T00:00:00Z',
 		updated_at: '2024-06-01T00:00:00Z'
 	},
