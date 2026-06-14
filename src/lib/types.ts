@@ -10,6 +10,12 @@ export interface FundingBreakdown {
 	private: number;
 }
 
+// One announced estimated total cost as recorded in a given budget paper / source.
+export interface BudgetSnapshot {
+	fiscal_year: string; // e.g. "2023-24"
+	estimated_total_cost: number;
+}
+
 export interface Project {
 	government_level: GovernmentLevel;
 	council?: string;
@@ -21,15 +27,23 @@ export interface Project {
 	funding_type: FundingType;
 	budget: number;
 	spent: number;
+	// First publicly announced total cost, for original-vs-current comparison.
+	original_budget?: number;
 	lat: number;
 	lng: number;
 	location_name: string;
 	start_date: string;
 	expected_end_date: string | null;
+	// When a completed project actually finished (vs the promised expected_end_date).
+	actual_end_date?: string | null;
 	contractor: string | null;
 	related_project_ids: string[];
 	source_url?: string;
 	funding_breakdown?: FundingBreakdown;
+	// Cost-escalation trail from successive budget papers, oldest first.
+	budget_history?: BudgetSnapshot[];
+	// Date this row's figures were last checked against the cited source.
+	last_verified?: string;
 	created_at: string;
 	updated_at: string;
 }

@@ -17,15 +17,20 @@ create table if not exists projects (
   council text,
   budget bigint not null,
   spent bigint not null default 0,
+  original_budget bigint,
   lat double precision not null,
   lng double precision not null,
   location_name text not null,
   start_date date not null,
   expected_end_date date,
+  actual_end_date date,
   contractor text,
   related_project_ids text[] not null default '{}',
   source_url text,
   funding_breakdown jsonb,
+  -- Cost-escalation trail: [{ "fiscal_year": "2023-24", "estimated_total_cost": 786000000 }, ...]
+  budget_history jsonb,
+  last_verified date,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
