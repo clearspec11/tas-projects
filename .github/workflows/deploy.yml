@@ -30,8 +30,11 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          # SvelteKit reads these via $env/dynamic/public; the PUBLIC_ prefix is
+          # required. The anon/publishable key is safe to expose (RLS is
+          # read-only) — it ships in the client bundle either way.
+          PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
+          PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}
 
       - name: Publish build to the hostinger branch
         uses: peaceiris/actions-gh-pages@v4
