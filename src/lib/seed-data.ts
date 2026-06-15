@@ -81,8 +81,9 @@ const RAW_PROJECTS: Project[] = [
 		status: 'on_budget',
 		funding_type: 'ppp',
 		government_level: 'state',
-		budget: 162_000_000,
-		spent: 98_000_000,
+		budget: 65_000_000,
+		spent: 61_000_000,
+		original_budget: 65_000_000,
 		lat: -41.6371,
 		lng: 145.9427,
 		location_name: 'Cradle Mountain',
@@ -90,6 +91,17 @@ const RAW_PROJECTS: Project[] = [
 		expected_end_date: '2026-12-31',
 		contractor: null,
 		related_project_ids: ['11'],
+		// Verified from Budget Papers BP1 Ch6 ("Cradle Mountain Experience").
+		// Estimate eased $65M -> $61M; completion slipped from 2022 to 2026.
+		source_url: 'https://www.treasury.tas.gov.au/BudgetPapersHTML/Budget2023/BP1/2023-24-BP1-6-Infrastructure-Investment.htm',
+		budget_history: [
+			{ fiscal_year: '2019-20', estimated_total_cost: 65_000_000 },
+			{ fiscal_year: '2020-21', estimated_total_cost: 61_000_000 },
+			{ fiscal_year: '2021-22', estimated_total_cost: 61_000_000 },
+			{ fiscal_year: '2022-23', estimated_total_cost: 61_000_000 },
+			{ fiscal_year: '2023-24', estimated_total_cost: 61_000_000 }
+		],
+		last_verified: '2026-06-14',
 		created_at: '2024-01-01T00:00:00Z',
 		updated_at: '2024-06-01T00:00:00Z'
 	},

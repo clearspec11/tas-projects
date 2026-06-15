@@ -177,10 +177,11 @@ export function contractorStats(list: Project[]): { ranked: ContractorStats[]; u
 }
 
 // ---- Sorting ----
-export type SortKey = 'variance' | 'budget' | 'delay' | 'name';
+export type SortKey = 'variance' | 'growth' | 'budget' | 'delay' | 'name';
 
 export const SORT_OPTIONS: { value: SortKey; label: string }[] = [
 	{ value: 'variance', label: 'Most over budget' },
+	{ value: 'growth', label: 'Most cost growth' },
 	{ value: 'budget', label: 'Largest budget' },
 	{ value: 'delay', label: 'Most delayed' },
 	{ value: 'name', label: 'Name (A–Z)' }
@@ -191,6 +192,12 @@ export function sortProjects(list: Project[], key: SortKey): Project[] {
 	switch (key) {
 		case 'variance':
 			return copy.sort((a, b) => variancePct(b) - variancePct(a));
+		case 'growth': {
+			// Projects with a verified cost-growth trail first, biggest growth on
+			// top; those without history sink to the bottom.
+			const g = (p: Project) => budgetGrowth(p)?.pct ?? -Infinity;
+			return copy.sort((a, b) => g(b) - g(a));
+		}
 		case 'budget':
 			return copy.sort((a, b) => b.budget - a.budget);
 		case 'delay':

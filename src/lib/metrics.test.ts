@@ -151,6 +151,18 @@ describe('sortProjects', () => {
 		sortProjects(list, 'budget');
 		expect(list.map((p) => p.id)).toEqual(before);
 	});
+	it('sorts most cost growth first, history-less projects last', () => {
+		const grown = makeProject({
+			id: 'grown',
+			budget_history: [
+				{ fiscal_year: '2019-20', estimated_total_cost: 100 },
+				{ fiscal_year: '2020-21', estimated_total_cost: 200 }
+			]
+		});
+		const flat = makeProject({ id: 'flat' });
+		const ordered = sortProjects([flat, grown], 'growth');
+		expect(ordered.map((p) => p.id)).toEqual(['grown', 'flat']);
+	});
 });
 
 describe('resolveFundingBreakdown', () => {
