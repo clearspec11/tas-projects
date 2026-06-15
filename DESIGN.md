@@ -337,6 +337,15 @@ is doing decoration rather than separating from the map, delete it.
   dismissed (per session) or as soon as a project is selected; once the
   visitor is engaged, its job is done. Plain sentence, red figures, no slogan.
 
+### Cost-over-time sparkline (signature component)
+- In the detail panel, when a project has a `budget_history` of 2+ snapshots: a
+  small inline SVG sparkline of the announced Estimated Total Cost across budget
+  papers, with the rising segment in over-budget red (flat/down in on-budget
+  green), end labels (fiscal year + $), and a "+N% since YYYY-YY" growth chip.
+  This carries the original-vs-revised accountability story (e.g. Bridgewater
+  $576M → $786M, +36%) that spend-vs-budget alone can't. Renders only when the
+  data is verified; absent for illustrative rows.
+
 ### Funding split bar (signature component)
 - A single flat stacked bar (federal/state/local/private), full-width, 12px tall,
   `rounded-full`, with a legend of `$amount (percent)` below. Marked "· est."

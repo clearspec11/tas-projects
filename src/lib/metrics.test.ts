@@ -12,6 +12,7 @@ import {
 	resolveFundingBreakdown,
 	contractorStats,
 	projectsToCsv,
+	budgetGrowth,
 	type FilterCriteria
 } from './metrics';
 
@@ -194,6 +195,35 @@ describe('contractorStats', () => {
 	});
 	it('ranks the worst overrun first', () => {
 		expect(contractorStats(list).ranked[0].name).toBe('Acme');
+	});
+});
+
+describe('budgetGrowth', () => {
+	it('is null without at least two snapshots', () => {
+		expect(budgetGrowth(makeProject())).toBeNull();
+		expect(budgetGrowth(makeProject({ budget_history: [{ fiscal_year: '2020-21', estimated_total_cost: 100 }] }))).toBeNull();
+	});
+	it('measures first-to-last escalation', () => {
+		const p = makeProject({
+			budget_history: [
+				{ fiscal_year: '2019-20', estimated_total_cost: 576_000_000 },
+				{ fiscal_year: '2021-22', estimated_total_cost: 576_000_000 },
+				{ fiscal_year: '2023-24', estimated_total_cost: 786_000_000 }
+			]
+		});
+		const g = budgetGrowth(p)!;
+		expect(g.first).toBe(576_000_000);
+		expect(g.last).toBe(786_000_000);
+		expect(g.pct).toBeCloseTo(0.3646, 3);
+	});
+	it('is null when the cost never moved', () => {
+		const flat = makeProject({
+			budget_history: [
+				{ fiscal_year: '2019-20', estimated_total_cost: 100 },
+				{ fiscal_year: '2020-21', estimated_total_cost: 100 }
+			]
+		});
+		expect(budgetGrowth(flat)).toBeNull();
 	});
 });
 

@@ -93,6 +93,18 @@ export function resolveFundingBreakdown(p: Project): { breakdown: FundingBreakdo
 	};
 }
 
+// Growth in announced total cost from the first recorded budget paper to the
+// latest. null when there's no usable history. This is the original-vs-revised
+// accountability signal, distinct from spend-vs-budget.
+export function budgetGrowth(p: Project): { first: number; last: number; pct: number } | null {
+	const h = p.budget_history;
+	if (!h || h.length < 2) return null;
+	const first = h[0].estimated_total_cost;
+	const last = h[h.length - 1].estimated_total_cost;
+	if (!first || first === last) return null;
+	return { first, last, pct: (last - first) / first };
+}
+
 // ---- Filtering (shared by sidebar + map so they never diverge) ----
 export interface FilterCriteria {
 	category: ProjectCategory | 'all';

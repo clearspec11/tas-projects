@@ -2,6 +2,7 @@
 	import { selectedProject } from '$lib/stores';
 	import { STATUS_CONFIG, CATEGORY_CONFIG, FUNDING_CONFIG, GOVERNMENT_LEVEL_CONFIG, FUNDER_CONFIG, type FundingBreakdown } from '$lib/types';
 	import { formatCurrencyPrecise as formatCurrency, formatDate, budgetPercent, variance, variancePct, delayMonths, isRedFlag, resolveFundingBreakdown } from '$lib/metrics';
+	import BudgetHistory from './BudgetHistory.svelte';
 
 	const FUNDER_KEYS: (keyof FundingBreakdown)[] = ['federal', 'state', 'local', 'private'];
 
@@ -108,6 +109,13 @@
 					</div>
 				{/if}
 			</div>
+
+			<!-- Cost-over-time trail from successive budget papers (when we have it) -->
+			{#if p.budget_history && p.budget_history.length >= 2}
+				<div class="bg-[var(--color-bg)] rounded-lg p-3">
+					<BudgetHistory history={p.budget_history} original={p.original_budget} />
+				</div>
+			{/if}
 
 			<!-- Funding split: who pays -->
 			<div>
