@@ -21,7 +21,7 @@
 
 	const DEFAULTS = {
 		cat: 'all', status: 'all', funding: 'all', gov: 'all',
-		q: '', sort: 'variance', y0: 2017, y1: 2036
+		q: '', sort: 'variance', y0: 2008, y1: 2036
 	};
 
 	function applyFromUrl() {

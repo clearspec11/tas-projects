@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { timelineRange } from '$lib/stores';
 
-	const MIN_YEAR = 2017;
+	const MIN_YEAR = 2008;
 	const MAX_YEAR = 2036;
 
 	let startYear = $state($timelineRange[0]);

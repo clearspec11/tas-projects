@@ -13,7 +13,7 @@
 	// search + status stay in view as the primary accountability controls.
 	let showAdvanced = $state(false);
 
-	const DEFAULT_RANGE: [number, number] = [2017, 2036];
+	const DEFAULT_RANGE: [number, number] = [2008, 2036];
 
 	const list = $derived(
 		sortProjects(
