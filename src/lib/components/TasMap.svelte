@@ -74,29 +74,6 @@
 			className: 'tas-tooltip'
 		});
 
-		// Click popup
-		marker.bindPopup(`
-			<div style="font-family: Inter, system-ui; min-width: 220px; color: #1e293b;">
-				<div style="font-size: 14px; font-weight: 700; margin-bottom: 4px;">${catCfg.icon} ${p.name}</div>
-				<div style="font-size: 12px; color: #64748b; margin-bottom: 2px;">${p.council ?? p.location_name}</div>
-				${p.council ? `<div style="font-size: 11px; color: #94a3b8; margin-bottom: 4px;">${p.location_name}</div>` : ''}
-				<div style="display: flex; gap: 6px; margin-bottom: 8px;">
-					<span style="font-size: 10px; padding: 1px 6px; border-radius: 9999px; background: ${cfg.color}20; color: ${cfg.color}; font-weight: 600;">${cfg.label}</span>
-					<span style="font-size: 10px; padding: 1px 6px; border-radius: 9999px; background: #64748b20; color: #64748b; font-weight: 600;">${fundCfg.shortLabel}</span>
-				</div>
-				<div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
-					<span>Budget: <strong>${formatCurrency(p.budget)}</strong></span>
-					<span>Spent: <strong>${formatCurrency(p.spent)}</strong></span>
-				</div>
-				<div style="background: #e2e8f0; border-radius: 4px; height: 6px; margin-bottom: 6px;">
-					<div style="background: ${cfg.color}; height: 100%; border-radius: 4px; width: ${Math.min(100, budgetPercent(p))}%;"></div>
-				</div>
-				<div style="text-align: center;">
-					<span style="font-size: 11px; font-weight: 600; color: ${cfg.color};">${budgetPercent(p)}%</span>
-				</div>
-			</div>
-		`, { closeButton: false });
-
 		marker.on('click', () => selectedProject.set(p));
 
 		return marker;

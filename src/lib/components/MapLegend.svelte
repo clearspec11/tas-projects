@@ -17,7 +17,7 @@
 				<button
 					class="text-[var(--color-text-muted)] hover:text-[var(--color-text)] text-xs cursor-pointer"
 					onclick={() => expanded = false}
-				>_</button>
+				>−</button>
 			</div>
 
 			<!-- Status colors -->

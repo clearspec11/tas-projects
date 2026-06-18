@@ -64,6 +64,27 @@
 		{ value: 'all', label: 'All Levels' },
 		...Object.entries(GOVERNMENT_LEVEL_CONFIG).map(([k, v]) => ({ value: k as GovernmentLevel, label: v.label }))
 	];
+
+	const DEFAULT_TIMELINE: [number, number] = [2017, 2036];
+
+	let hasActiveFilters = $derived(
+		$filterCategory !== 'all' ||
+		$filterStatus !== 'all' ||
+		$filterFunding !== 'all' ||
+		$filterGovernmentLevel !== 'all' ||
+		$searchQuery !== '' ||
+		$timelineRange[0] !== DEFAULT_TIMELINE[0] ||
+		$timelineRange[1] !== DEFAULT_TIMELINE[1]
+	);
+
+	function clearFilters() {
+		filterCategory.set('all');
+		filterStatus.set('all');
+		filterFunding.set('all');
+		filterGovernmentLevel.set('all');
+		searchQuery.set('');
+		timelineRange.set([2017, 2036]);
+	}
 </script>
 
 <aside class="w-96 h-full flex flex-col bg-[var(--color-surface)] border-r border-[var(--color-border)] overflow-hidden">
@@ -82,16 +103,17 @@
 			<div class="text-[9px] text-[var(--color-text-muted)] uppercase tracking-wider">Projects</div>
 		</div>
 		<div class="bg-[var(--color-bg)] rounded-lg p-2 text-center">
-			<div class="text-base font-bold text-[var(--color-text)]">{formatCurrency(totalBudget())}</div>
-			<div class="text-[9px] text-[var(--color-text-muted)] uppercase tracking-wider">Budget</div>
+			<div class="text-base font-bold text-[var(--color-text)]">{formatCurrency(totalSpent())}</div>
+			<div class="text-[9px] text-[var(--color-text-muted)] uppercase tracking-wider">Spent</div>
+			<div class="text-[8px] text-[var(--color-text-muted)]">of {formatCurrency(totalBudget())}</div>
 		</div>
 		<div class="bg-[var(--color-bg)] rounded-lg p-2 text-center">
 			<div class="text-base font-bold text-[var(--color-danger)]">{overBudgetCount()}</div>
-			<div class="text-[9px] text-[var(--color-text-muted)] uppercase tracking-wider">Over</div>
+			<div class="text-[9px] text-[var(--color-text-muted)] uppercase tracking-wider">Over Budget</div>
 		</div>
 		<div class="bg-[var(--color-bg)] rounded-lg p-2 text-center">
 			<div class="text-base font-bold text-[var(--color-warning)]">{pppCount()}</div>
-			<div class="text-[9px] text-[var(--color-text-muted)] uppercase tracking-wider">Private</div>
+			<div class="text-[9px] text-[var(--color-text-muted)] uppercase tracking-wider">Non-Public</div>
 		</div>
 	</div>
 
@@ -100,12 +122,13 @@
 		<input
 			type="text"
 			placeholder="Search projects..."
-			class="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-3 py-1.5 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-accent)]"
+			value={$searchQuery}
+			class="w-full bg-[var(--color-bg)] border rounded-lg px-3 py-1.5 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-accent)] {$searchQuery !== '' ? 'border-[var(--color-accent)]' : 'border-[var(--color-border)]'}"
 			oninput={(e) => searchQuery.set((e.target as HTMLInputElement).value)}
 		/>
 		<div class="flex gap-2">
 			<select
-				class="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 text-xs text-[var(--color-text)] focus:outline-none focus:border-[var(--color-accent)]"
+				class="flex-1 bg-[var(--color-bg)] border rounded-lg px-2 py-1.5 text-xs text-[var(--color-text)] focus:outline-none focus:border-[var(--color-accent)] {$filterCategory !== 'all' ? 'border-[var(--color-accent)]' : 'border-[var(--color-border)]'}"
 				onchange={(e) => filterCategory.set((e.target as HTMLSelectElement).value as ProjectCategory | 'all')}
 			>
 				{#each categories as c}
@@ -113,7 +136,7 @@
 				{/each}
 			</select>
 			<select
-				class="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 text-xs text-[var(--color-text)] focus:outline-none focus:border-[var(--color-accent)]"
+				class="flex-1 bg-[var(--color-bg)] border rounded-lg px-2 py-1.5 text-xs text-[var(--color-text)] focus:outline-none focus:border-[var(--color-accent)] {$filterStatus !== 'all' ? 'border-[var(--color-accent)]' : 'border-[var(--color-border)]'}"
 				onchange={(e) => filterStatus.set((e.target as HTMLSelectElement).value as ProjectStatus | 'all')}
 			>
 				{#each statuses as s}
@@ -122,7 +145,7 @@
 			</select>
 		</div>
 		<select
-			class="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 text-xs text-[var(--color-text)] focus:outline-none focus:border-[var(--color-accent)]"
+			class="w-full bg-[var(--color-bg)] border rounded-lg px-2 py-1.5 text-xs text-[var(--color-text)] focus:outline-none focus:border-[var(--color-accent)] {$filterFunding !== 'all' ? 'border-[var(--color-accent)]' : 'border-[var(--color-border)]'}"
 			onchange={(e) => filterFunding.set((e.target as HTMLSelectElement).value as FundingType | 'all')}
 		>
 			{#each fundingTypes as f}
@@ -130,17 +153,29 @@
 			{/each}
 		</select>
 		<select
-			class="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 text-xs text-[var(--color-text)] focus:outline-none focus:border-[var(--color-accent)]"
+			class="w-full bg-[var(--color-bg)] border rounded-lg px-2 py-1.5 text-xs text-[var(--color-text)] focus:outline-none focus:border-[var(--color-accent)] {$filterGovernmentLevel !== 'all' ? 'border-[var(--color-accent)]' : 'border-[var(--color-border)]'}"
 			onchange={(e) => filterGovernmentLevel.set((e.target as HTMLSelectElement).value as GovernmentLevel | 'all')}
 		>
 			{#each governmentLevels as g}
 				<option value={g.value}>{g.label}</option>
 			{/each}
 		</select>
+		{#if hasActiveFilters}
+			<button
+				class="w-full text-xs text-[var(--color-accent)] border border-[var(--color-accent)] rounded-lg py-1.5 hover:bg-[var(--color-accent)]/10 transition-colors cursor-pointer"
+				onclick={clearFilters}
+			>
+				Clear filters
+			</button>
+		{/if}
 	</div>
 
 	<!-- Project List -->
 	<div class="flex-1 overflow-y-auto">
+		<div class="px-3 py-1.5 text-[10px] text-[var(--color-text-muted)] border-b border-[var(--color-border)] flex justify-between">
+			<span>Showing {filtered().length} of {$projects.length}</span>
+			<span>{formatCurrency(totalSpent())} spent</span>
+		</div>
 		{#each filtered() as project (project.id)}
 			{@const cfg = STATUS_CONFIG[project.status]}
 			{@const catCfg = CATEGORY_CONFIG[project.category]}

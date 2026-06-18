@@ -21,9 +21,10 @@
 
 	<!-- Connections toggle -->
 	<button
+		aria-label="Toggle connections"
 		class="bg-[var(--color-surface)]/95 backdrop-blur border border-[var(--color-border)] rounded-lg px-3 py-2 text-xs cursor-pointer hover:bg-[var(--color-surface-hover)] transition-colors {$showConnections ? 'text-[var(--color-accent)] border-[var(--color-accent)]' : 'text-[var(--color-text)]'}"
 		onclick={() => showConnections.update(v => !v)}
 	>
-		🔗 Links
+		🔗 Connections
 	</button>
 </div>
