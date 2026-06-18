@@ -31,7 +31,7 @@
 	{@const flagged = isRedFlag(p)}
 	{@const funding = resolveFundingBreakdown(p)}
 
-	<div class="absolute top-14 right-4 w-96 max-h-[calc(100vh-8rem)] max-md:inset-x-2 max-md:top-2 max-md:w-auto max-md:max-h-[46dvh] overflow-y-auto bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl shadow-2xl z-[1000]">
+	<div class="absolute top-14 right-4 w-96 max-h-[calc(100vh-8rem)] max-md:inset-0 max-md:top-0 max-md:w-auto max-md:max-h-none max-md:rounded-none overflow-y-auto bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl shadow-2xl z-[1000]">
 		<!-- Header -->
 		<div class="p-4 border-b border-[var(--color-border)]">
 			<div class="flex items-start justify-between">

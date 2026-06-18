@@ -17,3 +17,5 @@ export const timelineRange = writable<[number, number]>([2008, 2036]);
 export const showHeatmap = writable(false);
 export const showConnections = writable(false);
 export const mapStyle = writable<'dark' | 'satellite'>('dark');
+// Mobile-only: which full-height view is showing (ignored at md+)
+export const mobileView = writable<'map' | 'list'>('map');

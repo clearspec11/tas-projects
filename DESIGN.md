@@ -301,6 +301,16 @@ is doing decoration rather than separating from the map, delete it.
   rest. Any new route joins this bar; do not introduce a second nav idiom.
 - Within the map route the sidebar remains the working nav surface (stats,
   filters, scrollable list); row selection drives the map, detail panel and URL.
+- **Mobile:** desktop shows sidebar + map side by side. Below md, a Map/List
+  segmented switch (accent underline on the active tab) gives each view the full
+  screen — never two cramped stacked halves. The detail panel becomes a
+  full-screen sheet that overlays whichever view; the legend and timeline are
+  desktop-only.
+
+### Map markers — interaction
+- Tapping/clicking a marker opens the detail panel only. There is **no Leaflet
+  popup**: a second white popup duplicated the panel and broke the dark theme,
+  worst on mobile. Hover tooltips (desktop) give the quick read.
 
 ### Contractor scorecard (signature component)
 - A sortable accountability table at `/contractors`: contractor, project count,

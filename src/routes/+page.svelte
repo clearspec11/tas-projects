@@ -4,7 +4,7 @@
 	import { replaceState } from '$app/navigation';
 	import {
 		projects, selectedProject, filterCategory, filterStatus, filterFunding,
-		filterGovernmentLevel, filterFlagged, filterContractor, searchQuery, sortKey, timelineRange
+		filterGovernmentLevel, filterFlagged, filterContractor, searchQuery, sortKey, timelineRange, mobileView
 	} from '$lib/stores';
 	import { SEED_PROJECTS } from '$lib/seed-data';
 	import { loadProjects } from '$lib/data';
@@ -124,18 +124,36 @@
 	<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 </svelte:head>
 
-<div class="flex h-full max-md:flex-col">
-	<Sidebar onFlyTo={handleFlyTo} />
-	<!-- On phones the map stacks on top at fixed height; the list fills the rest -->
-	<main class="flex-1 relative max-md:order-first max-md:flex-none max-md:h-[52dvh]">
-		<TasMap bind:this={mapComponent} />
-		<StoryBanner />
-		<MapControls />
-		<!-- Legend and timeline are desktop affordances; they'd bury a phone-sized map -->
-		<div class="contents max-md:hidden">
-			<MapLegend />
-			<TimelineSlider />
+<div class="flex flex-col h-full">
+	<!-- Mobile-only Map/List switch: each view gets the full screen instead of
+	     two cramped stacked halves. Hidden at md+ where both sit side by side. -->
+	<div class="md:hidden flex shrink-0 bg-[var(--color-surface)] border-b border-[var(--color-border)]">
+		{#each [['map', 'Map'], ['list', 'List']] as [v, label]}
+			<button
+				onclick={() => mobileView.set(v as 'map' | 'list')}
+				aria-pressed={$mobileView === v}
+				class="flex-1 py-2.5 text-sm font-medium transition-colors cursor-pointer border-b-2 {$mobileView === v ? 'text-[var(--color-accent)] border-[var(--color-accent)]' : 'text-[var(--color-text-muted)] border-transparent'}"
+			>{label}</button>
+		{/each}
+	</div>
+
+	<div class="flex flex-1 min-h-0 relative">
+		<!-- List/sidebar: always on desktop; on mobile only in list view -->
+		<div class="contents {$mobileView === 'map' ? 'max-md:hidden' : ''}">
+			<Sidebar onFlyTo={handleFlyTo} />
 		</div>
+		<!-- Map: always on desktop; on mobile only in map view -->
+		<main class="flex-1 relative {$mobileView === 'list' ? 'max-md:hidden' : ''}">
+			<TasMap bind:this={mapComponent} />
+			<StoryBanner />
+			<MapControls />
+			<!-- Legend and timeline are desktop affordances; they'd bury a phone map -->
+			<div class="contents max-md:hidden">
+				<MapLegend />
+				<TimelineSlider />
+			</div>
+		</main>
+		<!-- Detail panel overlays whichever view; full-screen sheet on mobile -->
 		<ProjectDetail />
-	</main>
+	</div>
 </div>

@@ -30,7 +30,7 @@
 <!-- One-line orientation for first-time visitors; retires once they engage -->
 {#if !dismissed && !$selectedProject && overList.length > 0}
 	<div
-		class="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] max-w-[calc(100%-7rem)] max-md:top-auto max-md:bottom-2 max-md:left-2 max-md:right-2 max-md:translate-x-0 max-md:max-w-none flex items-center gap-3 max-md:gap-2 px-4 py-2.5 max-md:px-3 max-md:py-2 rounded-xl bg-[var(--color-surface)]/95 backdrop-blur border border-[var(--color-border)] shadow-lg"
+		class="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] max-w-[calc(100%-7rem)] max-md:top-auto max-md:bottom-7 max-md:left-2 max-md:right-2 max-md:translate-x-0 max-md:max-w-none flex items-center gap-3 max-md:gap-2 px-4 py-2.5 max-md:px-3 max-md:py-2 rounded-xl bg-[var(--color-surface)]/95 backdrop-blur border border-[var(--color-border)] shadow-lg"
 	>
 		<p class="text-[0.8125rem] max-md:text-xs leading-snug">
 			<strong class="text-red-400 font-semibold">{overList.length} projects</strong>
