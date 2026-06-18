@@ -13,6 +13,7 @@ import {
 	contractorStats,
 	projectsToCsv,
 	budgetGrowth,
+	isVerified,
 	type FilterCriteria
 } from './metrics';
 
@@ -207,6 +208,13 @@ describe('contractorStats', () => {
 	});
 	it('ranks the worst overrun first', () => {
 		expect(contractorStats(list).ranked[0].name).toBe('Acme');
+	});
+});
+
+describe('isVerified', () => {
+	it('is true only when last_verified is set', () => {
+		expect(isVerified(makeProject({ last_verified: '2026-06-14' }))).toBe(true);
+		expect(isVerified(makeProject())).toBe(false);
 	});
 });
 

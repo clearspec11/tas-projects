@@ -93,6 +93,12 @@ export function resolveFundingBreakdown(p: Project): { breakdown: FundingBreakdo
 	};
 }
 
+// A project is "verified" once its figures have been checked against a cited
+// source (last_verified is set). The rest are illustrative seed data.
+export function isVerified(p: Project): boolean {
+	return Boolean(p.last_verified);
+}
+
 // Growth in announced total cost from the first recorded budget paper to the
 // latest. null when there's no usable history. This is the original-vs-revised
 // accountability signal, distinct from spend-vs-budget.

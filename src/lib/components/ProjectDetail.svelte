@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { selectedProject } from '$lib/stores';
 	import { STATUS_CONFIG, CATEGORY_CONFIG, FUNDING_CONFIG, GOVERNMENT_LEVEL_CONFIG, FUNDER_CONFIG, type FundingBreakdown } from '$lib/types';
-	import { formatCurrencyPrecise as formatCurrency, formatDate, budgetPercent, variance, variancePct, delayMonths, isRedFlag, resolveFundingBreakdown } from '$lib/metrics';
+	import { formatCurrencyPrecise as formatCurrency, formatDate, budgetPercent, variance, variancePct, delayMonths, isRedFlag, isVerified, resolveFundingBreakdown } from '$lib/metrics';
 	import BudgetHistory from './BudgetHistory.svelte';
 
 	const FUNDER_KEYS: (keyof FundingBreakdown)[] = ['federal', 'state', 'local', 'private'];
@@ -175,6 +175,18 @@
 					</div>
 				{/if}
 			</div>
+
+			<!-- Honest provenance: verified against a source, or illustrative -->
+			{#if isVerified(p)}
+				<div class="flex items-center gap-1.5 mt-2 text-[0.6875rem] text-[var(--color-success)]">
+					<span>✓</span>
+					<span>Figures verified against source{p.last_verified ? `, last checked ${formatDate(p.last_verified)}` : ''}.</span>
+				</div>
+			{:else}
+				<div class="mt-2 px-2.5 py-1.5 rounded-lg bg-[var(--color-warning)]/10 border border-[var(--color-warning)]/30 text-[0.6875rem] text-[var(--color-warning)] leading-snug">
+					Illustrative figures — not yet verified against an official source.
+				</div>
+			{/if}
 
 			{#if p.source_url}
 				<a

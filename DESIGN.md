@@ -337,6 +337,15 @@ is doing decoration rather than separating from the map, delete it.
   dismissed (per session) or as soon as a project is selected; once the
   visitor is engaged, its job is done. Plain sentence, red figures, no slogan.
 
+### Provenance indicator (Honest about uncertainty)
+- A project is "verified" once `last_verified` is set (figures checked against a
+  cited source). Verified rows read plainly; **unverified rows carry a quiet
+  muted "· illustrative" tag** after their location in the list, and the detail
+  panel shows an amber "Illustrative figures — not yet verified" callout. Verified
+  projects instead get a green "✓ Figures verified … last checked DATE" line by
+  the source link. The default is honest disclosure of the illustrative majority,
+  not a badge of pride on the few.
+
 ### Cost-over-time sparkline (signature component)
 - In the detail panel, when a project has a `budget_history` of 2+ snapshots: a
   small inline SVG sparkline of the announced Estimated Total Cost across budget

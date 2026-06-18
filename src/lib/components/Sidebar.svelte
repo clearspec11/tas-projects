@@ -4,7 +4,7 @@
 	import { timelineRange } from '$lib/stores';
 	import {
 		formatCurrency, budgetPercent, variance, variancePct, delayMonths, isRedFlag,
-		filterProjects, sortProjects, projectsToCsv, downloadFile, SORT_OPTIONS, type SortKey
+		isVerified, filterProjects, sortProjects, projectsToCsv, downloadFile, SORT_OPTIONS, type SortKey
 	} from '$lib/metrics';
 
 	let { onFlyTo }: { onFlyTo: (lat: number, lng: number) => void } = $props();
@@ -279,7 +279,7 @@
 							{#if flagged}<span title="Over budget or overdue">🚩</span> {/if}{catCfg.icon} {project.name}
 						</div>
 						<div class="text-xs text-[var(--color-text-muted)] mt-0.5">
-							{project.council ?? project.location_name}
+							{project.council ?? project.location_name}{#if !isVerified(project)}<span title="Illustrative figures — not yet verified against an official source"> · illustrative</span>{/if}
 						</div>
 					</div>
 					<div class="flex flex-col items-end gap-0.5">
