@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { STATUS_CONFIG, GOVERNMENT_LEVEL_CONFIG } from '$lib/types';
+	import { Flag, Minus } from '@lucide/svelte';
 
 	let expanded = $state(true);
 </script>
@@ -15,9 +16,10 @@
 			<div class="flex items-center justify-between mb-2">
 				<span class="text-xs font-semibold text-[var(--color-text)]">Legend</span>
 				<button
-					class="text-[var(--color-text-muted)] hover:text-[var(--color-text)] text-xs cursor-pointer"
+					aria-label="Collapse legend"
+					class="text-[var(--color-text-muted)] hover:text-[var(--color-text)] cursor-pointer"
 					onclick={() => expanded = false}
-				>_</button>
+				><Minus size={14} /></button>
 			</div>
 
 			<!-- Status colors -->
@@ -31,7 +33,7 @@
 				{/each}
 				<div class="flex items-center gap-2 py-0.5">
 					<span class="w-3 h-3 rounded-full inline-block border-2 border-dashed border-[var(--color-danger)]"></span>
-					<span class="text-[11px] text-[var(--color-text)]">🚩 Over budget or overdue</span>
+					<span class="inline-flex items-center gap-1 text-[11px] text-[var(--color-text)]"><Flag size={11} class="text-[var(--color-danger)]" /> Over budget or overdue</span>
 				</div>
 			</div>
 

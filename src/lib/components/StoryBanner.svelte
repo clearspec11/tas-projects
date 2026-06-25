@@ -5,6 +5,7 @@
 	import { fly } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
 	import { dur } from '$lib/motion';
+	import { X } from '@lucide/svelte';
 
 	let dismissed = $state(false);
 
@@ -50,6 +51,6 @@
 			onclick={dismiss}
 			aria-label="Dismiss this message"
 			class="text-[var(--color-text-muted)] hover:text-[var(--color-text)] leading-none cursor-pointer"
-		>✕</button>
+		><X size={16} /></button>
 	</div>
 {/if}

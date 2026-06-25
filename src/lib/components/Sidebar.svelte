@@ -6,6 +6,8 @@
 		formatCurrency, budgetPercent, variance, variancePct, delayMonths, isRedFlag,
 		isVerified, filterProjects, sortProjects, projectsToCsv, downloadFile, SORT_OPTIONS, type SortKey
 	} from '$lib/metrics';
+	import { CATEGORY_ICONS } from '$lib/icons';
+	import { Flag, X } from '@lucide/svelte';
 
 	let { onFlyTo }: { onFlyTo: (lat: number, lng: number) => void } = $props();
 
@@ -96,7 +98,7 @@
 
 	const categories: { value: ProjectCategory | 'all'; label: string }[] = [
 		{ value: 'all', label: 'All Categories' },
-		...Object.entries(CATEGORY_CONFIG).map(([k, v]) => ({ value: k as ProjectCategory, label: `${v.icon} ${v.label}` }))
+		...Object.entries(CATEGORY_CONFIG).map(([k, v]) => ({ value: k as ProjectCategory, label: v.label }))
 	];
 
 	const statuses: { value: ProjectStatus | 'all'; label: string }[] = [
@@ -158,7 +160,7 @@
 			title="Show only flagged projects (over budget or overdue)"
 			class="bg-[var(--color-bg)] rounded-lg p-2 text-center cursor-pointer border transition-colors {$filterFlagged ? 'border-[var(--color-warning)]' : 'border-transparent hover:border-[var(--color-border)]'}"
 		>
-			<div class="text-[1.375rem] leading-none font-bold text-[var(--color-warning)]">🚩{redFlagCount(list)}</div>
+			<div class="flex items-center justify-center gap-1 text-[1.375rem] leading-none font-bold text-[var(--color-warning)]"><Flag size={18} />{redFlagCount(list)}</div>
 			<div class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider mt-1">Flags</div>
 		</button>
 	</div>
@@ -206,8 +208,8 @@
 					<button
 						onclick={() => filterContractor.set(null)}
 						aria-label="Remove contractor filter"
-						class="hover:text-[var(--color-text)] leading-none cursor-pointer"
-					>✕</button>
+						class="inline-flex hover:text-[var(--color-text)] leading-none cursor-pointer"
+					><X size={13} /></button>
 				</span>
 			</div>
 		{/if}
@@ -263,7 +265,7 @@
 	<div class="flex-1 overflow-y-auto">
 		{#each list as project (project.id)}
 			{@const cfg = STATUS_CONFIG[project.status]}
-			{@const catCfg = CATEGORY_CONFIG[project.category]}
+			{@const CatIcon = CATEGORY_ICONS[project.category]}
 			{@const govCfg = GOVERNMENT_LEVEL_CONFIG[project.government_level]}
 			{@const pct = budgetPercent(project)}
 			{@const v = variance(project)}
@@ -275,8 +277,10 @@
 			>
 				<div class="flex items-start justify-between gap-2">
 					<div class="flex-1 min-w-0">
-						<div class="text-[0.9375rem] font-semibold truncate">
-							{#if flagged}<span title="Over budget or overdue">🚩</span> {/if}{catCfg.icon} {project.name}
+						<div class="flex items-center gap-1.5 text-[0.9375rem] font-semibold">
+							{#if flagged}<Flag size={14} class="shrink-0 text-[var(--color-warning)]" aria-label="Over budget or overdue" />{/if}
+							<CatIcon size={14} class="shrink-0 text-[var(--color-text-muted)]" />
+							<span class="truncate">{project.name}</span>
 						</div>
 						<div class="text-xs text-[var(--color-text-muted)] mt-0.5">
 							{project.council ?? project.location_name}{#if !isVerified(project)}<span title="Illustrative figures — not yet verified against an official source"> · illustrative</span>{/if}

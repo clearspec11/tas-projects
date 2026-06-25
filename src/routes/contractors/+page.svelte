@@ -5,6 +5,7 @@
 	import { SEED_PROJECTS } from '$lib/seed-data';
 	import { loadProjects } from '$lib/data';
 	import { contractorStats, formatCurrency, type ContractorStats } from '$lib/metrics';
+	import { Flag } from '@lucide/svelte';
 
 	onMount(() => {
 		// Direct-load support: the map page normally seeds the store
@@ -89,26 +90,31 @@
 			on-budget jobs.
 		</p>
 
-		<!-- Summary strip -->
-		<div class="grid grid-cols-3 max-md:grid-cols-1 gap-2 mt-4">
-			<div class="bg-[var(--color-surface)] rounded-lg p-3">
-				<div class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider">Contractors</div>
-				<div class="text-[1.375rem] leading-none font-bold tabular-nums mt-1">{stats.ranked.length}</div>
-			</div>
-			<div class="bg-[var(--color-surface)] rounded-lg p-3">
-				<div class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider">Combined budget</div>
-				<div class="text-[1.375rem] leading-none font-bold tabular-nums mt-1">{formatCurrency(combinedBudget)}</div>
-			</div>
-			<div class="bg-[var(--color-surface)] rounded-lg p-3">
+		<!-- Summary: the worst overrun is the headline; the two counts ride along
+		     in a quieter strip so the board reads as one finding, not three tiles. -->
+		<div class="flex max-md:flex-col items-stretch gap-3 mt-4">
+			<div class="flex-1 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-4">
 				<div class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider">Biggest overrun</div>
 				{#if worst && worst.overrunPct > 0}
-					<div class="text-[1.375rem] leading-none font-bold tabular-nums mt-1 text-red-400">
-						{pct(worst.overrunPct)}
-						<span class="text-[0.8125rem] font-medium text-[var(--color-text-muted)]">{worst.name}</span>
+					<div class="flex items-baseline gap-2 mt-1.5">
+						<span class="text-[2rem] leading-none font-bold tabular-nums text-red-400">{pct(worst.overrunPct)}</span>
+						<span class="text-sm font-semibold text-[var(--color-text)]">{worst.name}</span>
 					</div>
+					<p class="text-[0.6875rem] text-[var(--color-text-muted)] mt-2">Money-weighted across that contractor's projects.</p>
 				{:else}
-					<div class="text-[1.375rem] leading-none font-bold mt-1 text-[var(--color-success)]">None</div>
+					<div class="text-[2rem] leading-none font-bold mt-1.5 text-[var(--color-success)]">None</div>
+					<p class="text-[0.6875rem] text-[var(--color-text-muted)] mt-2">No contractor is spending over budget so far.</p>
 				{/if}
+			</div>
+			<div class="flex md:flex-col md:w-44 justify-around md:justify-center gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl px-4 py-3">
+				<div class="flex items-baseline gap-1.5">
+					<span class="text-lg font-bold tabular-nums">{stats.ranked.length}</span>
+					<span class="text-xs text-[var(--color-text-muted)]">contractors</span>
+				</div>
+				<div class="flex items-baseline gap-1.5">
+					<span class="text-lg font-bold tabular-nums">{formatCurrency(combinedBudget)}</span>
+					<span class="text-xs text-[var(--color-text-muted)]">combined budget</span>
+				</div>
 			</div>
 		</div>
 
@@ -160,7 +166,9 @@
 								{/if}
 							</td>
 							<td class="px-3 py-2.5 text-right tabular-nums {c.flagged > 0 ? 'text-[var(--color-warning)] font-semibold' : 'text-[var(--color-text-muted)]'}">
-								{c.flagged > 0 ? `🚩${c.flagged}` : '0'}
+								{#if c.flagged > 0}
+									<span class="inline-flex items-center justify-end gap-1"><Flag size={13} />{c.flagged}</span>
+								{:else}0{/if}
 							</td>
 							<td class="px-3 py-2.5 text-right font-mono tabular-nums">{Math.round(c.cleanPct * 100)}%</td>
 						</tr>

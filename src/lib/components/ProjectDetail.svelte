@@ -3,6 +3,8 @@
 	import { STATUS_CONFIG, CATEGORY_CONFIG, FUNDING_CONFIG, GOVERNMENT_LEVEL_CONFIG, FUNDER_CONFIG, type FundingBreakdown } from '$lib/types';
 	import { formatCurrencyPrecise as formatCurrency, formatDate, budgetPercent, variance, variancePct, delayMonths, isRedFlag, isVerified, resolveFundingBreakdown } from '$lib/metrics';
 	import BudgetHistory from './BudgetHistory.svelte';
+	import { CATEGORY_ICONS } from '$lib/icons';
+	import { Flag, Check, X, ArrowUpRight } from '@lucide/svelte';
 	import { fly } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
 	import { dur } from '$lib/motion';
@@ -26,6 +28,7 @@
 	{@const p = $selectedProject}
 	{@const cfg = STATUS_CONFIG[p.status]}
 	{@const catCfg = CATEGORY_CONFIG[p.category]}
+	{@const CatIcon = CATEGORY_ICONS[p.category]}
 	{@const fundCfg = FUNDING_CONFIG[p.funding_type]}
 	{@const govCfg = GOVERNMENT_LEVEL_CONFIG[p.government_level]}
 	{@const pct = budgetPercent(p)}
@@ -42,8 +45,8 @@
 		<div class="p-4 border-b border-[var(--color-border)]">
 			<div class="flex items-start justify-between">
 				<div>
-					<div class="text-xs text-[var(--color-text-muted)] uppercase tracking-wider mb-1">{catCfg.icon} {catCfg.label}</div>
-					<h2 class="text-xl font-bold leading-tight [text-wrap:balance]">{#if flagged}🚩 {/if}{p.name}</h2>
+					<div class="flex items-center gap-1.5 text-xs text-[var(--color-text-muted)] uppercase tracking-wider mb-1"><CatIcon size={13} /> {catCfg.label}</div>
+					<h2 class="flex items-start gap-1.5 text-xl font-bold leading-tight [text-wrap:balance]">{#if flagged}<Flag size={18} class="shrink-0 mt-1 text-[var(--color-danger)]" aria-label="Flagged" />{/if}<span>{p.name}</span></h2>
 					<div class="text-xs text-[var(--color-text-muted)] mt-1">
 					{p.council ? `${p.council} · ` : ''}{p.location_name}
 				</div>
@@ -52,7 +55,7 @@
 					onclick={close}
 					aria-label="Close project details"
 					class="shrink-0 -mr-1 -mt-1 w-8 h-8 flex items-center justify-center rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] transition-colors cursor-pointer"
-				>✕</button>
+				><X size={18} /></button>
 			</div>
 			<div class="flex flex-wrap gap-1.5 mt-2">
 				<span class="text-xs px-2 py-0.5 rounded-full font-medium {cfg.bgClass}">
@@ -186,7 +189,7 @@
 			<!-- Honest provenance: verified against a source, or illustrative -->
 			{#if isVerified(p)}
 				<div class="flex items-center gap-1.5 mt-2 text-[0.6875rem] text-[var(--color-success)]">
-					<span>✓</span>
+					<Check size={13} class="shrink-0" />
 					<span>Figures verified against source{p.last_verified ? `, last checked ${formatDate(p.last_verified)}` : ''}.</span>
 				</div>
 			{:else}
@@ -205,7 +208,7 @@
 					<span class="text-[var(--color-text-muted)] group-hover:text-[var(--color-text)]">
 						Source: <span class="font-medium">{hostname(p.source_url)}</span>
 					</span>
-					<span class="text-[var(--color-accent)]">↗</span>
+					<ArrowUpRight size={15} class="text-[var(--color-accent)]" />
 				</a>
 			{/if}
 		</div>

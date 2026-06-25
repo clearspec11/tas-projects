@@ -128,7 +128,7 @@
 	<!-- Mobile-only Map/List switch: each view gets the full screen instead of
 	     two cramped stacked halves. Hidden at md+ where both sit side by side.
 	     Also hidden while a project is open — that detail sheet is a drill-down,
-	     so its ✕ is the way back, not a dead tab behind the overlay. -->
+	     so its close button is the way back, not a dead tab behind the overlay. -->
 	<div class="md:hidden flex shrink-0 bg-[var(--color-surface)] border-b border-[var(--color-border)] {$selectedProject ? 'hidden' : ''}">
 		{#each [['map', 'Map'], ['list', 'List']] as [v, label]}
 			<button

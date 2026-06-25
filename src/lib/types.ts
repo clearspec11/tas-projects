@@ -63,15 +63,15 @@ export const STATUS_CONFIG: Record<ProjectStatus, { label: string; color: string
 	cancelled: { label: 'Cancelled', color: '#6b7280', bgClass: 'bg-gray-500/20 text-gray-400' }
 };
 
-export const CATEGORY_CONFIG: Record<ProjectCategory, { label: string; icon: string }> = {
-	transport: { label: 'Transport', icon: '🛣️' },
-	health: { label: 'Health', icon: '🏥' },
-	education: { label: 'Education', icon: '🎓' },
-	utilities: { label: 'Utilities', icon: '⚡' },
-	housing: { label: 'Housing', icon: '🏘️' },
-	environment: { label: 'Environment', icon: '🌿' },
-	community: { label: 'Community', icon: '🏛️' },
-	other: { label: 'Other', icon: '📋' }
+export const CATEGORY_CONFIG: Record<ProjectCategory, { label: string }> = {
+	transport: { label: 'Transport' },
+	health: { label: 'Health' },
+	education: { label: 'Education' },
+	utilities: { label: 'Utilities' },
+	housing: { label: 'Housing' },
+	environment: { label: 'Environment' },
+	community: { label: 'Community' },
+	other: { label: 'Other' }
 };
 
 export const GOVERNMENT_LEVEL_CONFIG: Record<GovernmentLevel, { label: string; shortLabel: string; color: string; description: string }> = {

@@ -8,6 +8,7 @@
 	import { STATUS_CONFIG, CATEGORY_CONFIG, FUNDING_CONFIG, GOVERNMENT_LEVEL_CONFIG, type Project } from '$lib/types';
 	import { TASMANIA_CENTER, TASMANIA_ZOOM } from '$lib/tasmania-geo';
 	import { formatCurrency, budgetPercent, filterProjects, isRedFlag, delayMonths } from '$lib/metrics';
+	import { FLAG_SVG_DANGER } from '$lib/icons';
 	import tasmaniaGeoJson from '$lib/tasmania-boundary.json';
 
 	let mapContainer: HTMLDivElement;
@@ -62,7 +63,7 @@
 		// Hover tooltip
 		marker.bindTooltip(`
 			<div style="font-family: 'IBM Plex Sans', system-ui; font-size: 12px; line-height: 1.4;">
-				<strong>${isRedFlag(p) ? '🚩 ' : ''}${p.name}</strong><br/>
+				<strong>${isRedFlag(p) ? FLAG_SVG_DANGER : ''}${p.name}</strong><br/>
 				<span style="color: ${cfg.color};">${cfg.label}</span> · ${govCfg.shortLabel} · ${fundCfg.shortLabel}<br/>
 				${formatCurrency(p.spent)} / ${formatCurrency(p.budget)} (${budgetPercent(p)}%)${late ? ` · <span style="color:#f59e0b;">${late}mo late</span>` : ''}
 			</div>
