@@ -46,8 +46,8 @@
 	<svg viewBox="0 0 {W} {H}" class="w-full" style="height: {H}px" role="img"
 		aria-label="Estimated total cost from {formatCurrency(first.estimated_total_cost)} in {first.fiscal_year} to {formatCurrency(last.estimated_total_cost)} in {last.fiscal_year}">
 		<polygon points={area} fill={stroke} fill-opacity="0.08" />
-		<polyline points={line} fill="none" stroke={stroke} stroke-width="2"
-			stroke-linejoin="round" stroke-linecap="round" />
+		<polyline points={line} pathLength="1" class="tas-spark-line" fill="none" stroke={stroke}
+			stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
 		{#each pts as p}
 			<circle cx={p.x} cy={p.y} r="2.5" fill="var(--color-surface)" stroke={stroke} stroke-width="1.5">
 				<title>{p.fiscal_year}: {formatCurrency(p.estimated_total_cost)}</title>
@@ -66,3 +66,24 @@
 		</p>
 	{/if}
 </div>
+
+<style>
+	/* Draw the trend line in when the panel opens. pathLength="1" normalises
+	   the dash maths regardless of the line's real length. */
+	.tas-spark-line {
+		stroke-dasharray: 1;
+		stroke-dashoffset: 1;
+		animation: tas-spark-draw 0.6s var(--ease, cubic-bezier(0.22, 1, 0.36, 1)) forwards;
+	}
+	@keyframes tas-spark-draw {
+		to {
+			stroke-dashoffset: 0;
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.tas-spark-line {
+			animation: none;
+			stroke-dashoffset: 0;
+		}
+	}
+</style>

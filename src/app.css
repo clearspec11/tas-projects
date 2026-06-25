@@ -41,6 +41,26 @@ body {
 	outline-offset: 2px;
 }
 
+/* Quiet, themed scrollbars instead of the bright OS default on dark surfaces */
+* {
+	scrollbar-width: thin;
+	scrollbar-color: var(--color-border) transparent;
+}
+*::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+*::-webkit-scrollbar-track {
+	background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+	background: var(--color-border);
+	border-radius: 9999px;
+}
+*::-webkit-scrollbar-thumb:hover {
+	background: var(--color-surface-hover);
+}
+
 .leaflet-container {
 	background: var(--color-bg) !important;
 }

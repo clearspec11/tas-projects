@@ -3,6 +3,9 @@
 	import { STATUS_CONFIG, CATEGORY_CONFIG, FUNDING_CONFIG, GOVERNMENT_LEVEL_CONFIG, FUNDER_CONFIG, type FundingBreakdown } from '$lib/types';
 	import { formatCurrencyPrecise as formatCurrency, formatDate, budgetPercent, variance, variancePct, delayMonths, isRedFlag, isVerified, resolveFundingBreakdown } from '$lib/metrics';
 	import BudgetHistory from './BudgetHistory.svelte';
+	import { fly } from 'svelte/transition';
+	import { cubicOut } from 'svelte/easing';
+	import { dur } from '$lib/motion';
 
 	const FUNDER_KEYS: (keyof FundingBreakdown)[] = ['federal', 'state', 'local', 'private'];
 
@@ -31,7 +34,10 @@
 	{@const flagged = isRedFlag(p)}
 	{@const funding = resolveFundingBreakdown(p)}
 
-	<div class="absolute top-14 right-4 w-96 max-h-[calc(100vh-8rem)] max-md:inset-0 max-md:top-0 max-md:w-auto max-md:max-h-none max-md:rounded-none overflow-y-auto bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl shadow-2xl z-[1000]">
+	<div
+		transition:fly={{ y: 12, duration: dur(200), easing: cubicOut }}
+		class="absolute top-14 right-4 w-96 max-h-[calc(100vh-8rem)] max-md:inset-0 max-md:top-0 max-md:w-auto max-md:max-h-none max-md:rounded-none overflow-y-auto bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl shadow-2xl z-[1000]"
+	>
 		<!-- Header -->
 		<div class="p-4 border-b border-[var(--color-border)]">
 			<div class="flex items-start justify-between">
@@ -44,7 +50,8 @@
 				</div>
 				<button
 					onclick={close}
-					class="text-[var(--color-text-muted)] hover:text-[var(--color-text)] text-lg leading-none cursor-pointer"
+					aria-label="Close project details"
+					class="shrink-0 -mr-1 -mt-1 w-8 h-8 flex items-center justify-center rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] transition-colors cursor-pointer"
 				>✕</button>
 			</div>
 			<div class="flex flex-wrap gap-1.5 mt-2">
