@@ -306,6 +306,10 @@ is doing decoration rather than separating from the map, delete it.
   screen — never two cramped stacked halves. The detail panel becomes a
   full-screen sheet that overlays whichever view; the legend and timeline are
   desktop-only.
+- **Mobile drill-down rule:** opening a project is one level deeper, so the
+  Map/List switch hides while the detail sheet is open — its ✕ is the way back.
+  Never leave the tab switch visible behind a full-screen overlay where it reads
+  as a dead control.
 
 ### Map markers — interaction
 - Tapping/clicking a marker opens the detail panel only. There is **no Leaflet
