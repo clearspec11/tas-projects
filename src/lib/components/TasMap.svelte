@@ -3,7 +3,7 @@
 	import {
 		projects, selectedProject, filterCategory, filterStatus,
 		filterFunding, filterGovernmentLevel, filterFlagged, filterContractor, searchQuery, timelineRange, showHeatmap,
-		showConnections, mapStyle, mapZoom
+		showConnections, mapStyle, mapZoom, seaOverlayPos
 	} from '$lib/stores';
 	import { STATUS_CONFIG, CATEGORY_CONFIG, FUNDING_CONFIG, GOVERNMENT_LEVEL_CONFIG, type Project } from '$lib/types';
 	import { TASMANIA_CENTER, TASMANIA_ZOOM } from '$lib/tasmania-geo';
@@ -197,6 +197,18 @@
 		// Mirror zoom so the sea overlay can fade past the whole-island view.
 		mapZoom.set(map.getZoom());
 		map.on('zoomend', () => mapZoom.set(map.getZoom()));
+
+		// Anchor the sea readout to a fixed open-water coordinate in Bass Strait
+		// (NW of Tasmania) so it pans and zooms with the map instead of floating
+		// over the screen. Recompute its container-pixel position on every move.
+		const SEA_POINT: [number, number] = [-39.55, 144.4];
+		const updateSeaPos = () => {
+			if (!map) return;
+			const pt = map.latLngToContainerPoint(SEA_POINT);
+			seaOverlayPos.set({ x: pt.x, y: pt.y });
+		};
+		map.on('move zoom viewreset resize', updateSeaPos);
+		updateSeaPos();
 
 		darkTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
 			attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
