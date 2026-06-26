@@ -45,7 +45,7 @@
 
 <div class="h-full overflow-y-auto bg-[var(--color-bg)]">
 	<div class="max-w-5xl mx-auto p-4 md:p-6">
-		<h1 class="text-xl font-bold tracking-tight">Insights</h1>
+		<h1 class="text-2xl font-bold tracking-tight">Insights</h1>
 		<p class="text-[0.8125rem] text-[var(--color-text-muted)] mt-1 max-w-[65ch]">
 			The whole book at a glance: where the money sits, which projects are running over, and
 			when the pipeline delivers. Figures aggregate every project currently on the tracker.
@@ -53,7 +53,7 @@
 
 		<!-- Headline projection -->
 		<div class="mt-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-4 md:p-5">
-			<div class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider">Projected overrun, live projects</div>
+			<div class="text-[0.6875rem] text-[var(--color-text-muted)]">Projected overrun, live projects</div>
 			{#if projectedOverrun > 0}
 				<div class="flex flex-wrap items-baseline gap-x-3 gap-y-1 mt-1.5">
 					<span class="text-[2.25rem] leading-none font-bold tabular-nums text-[var(--color-danger)]">{formatCurrency(projectedOverrun)}</span>

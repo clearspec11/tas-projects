@@ -5,19 +5,20 @@
 	--font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
-/* The Island at Night: neutrals tinted toward the Tasman sea (hue ~200),
-   not generic blue-slate. Encodings (status/tier/funder hues) are unchanged. */
+/* Tasmanian wilderness after dark: peat-and-myrtle neutrals (green hue ~150,
+   warm, not the generic blue-slate of every tool), a warm huon-pine / sandstone
+   accent instead of SaaS sky-cyan, and ember for the things that are on fire. */
 :root {
-	--color-bg: #0a181d;
-	--color-surface: #102329;
-	--color-surface-hover: #173138;
-	--color-border: #22424c;
-	--color-text: #eef6f6;
-	--color-text-muted: #9bb8bc;
-	--color-accent: #38bdf8;
-	--color-success: #22c55e;
-	--color-warning: #f59e0b;
-	--color-danger: #ef4444;
+	--color-bg: #0c1410;
+	--color-surface: #14201a;
+	--color-surface-hover: #1f2d24;
+	--color-border: #2c3f34;
+	--color-text: #edf3ea;
+	--color-text-muted: #9fb1a1;
+	--color-accent: #d7a25c;
+	--color-success: #5aa84f;
+	--color-warning: #e0933a;
+	--color-danger: #df5a39;
 }
 
 body {
@@ -66,8 +67,8 @@ body {
 }
 
 .leaflet-tile-pane {
-	/* Desaturate, darken, and cast the basemap toward the sea-teal neutrals */
-	filter: saturate(0.35) brightness(0.4) sepia(0.22) hue-rotate(135deg);
+	/* Desaturate, darken, and cast the basemap toward the peat-and-myrtle neutrals */
+	filter: saturate(0.4) brightness(0.42) sepia(0.4) hue-rotate(55deg);
 }
 
 .leaflet-control-zoom a {
@@ -77,7 +78,7 @@ body {
 }
 
 .leaflet-control-attribution {
-	background: rgba(10, 24, 29, 0.8) !important;
+	background: rgba(12, 20, 16, 0.8) !important;
 	color: var(--color-text-muted) !important;
 }
 

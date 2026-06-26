@@ -27,18 +27,18 @@
 		style="transform: translate3d({pos.x}px, {pos.y}px, 0); opacity: {fade}; will-change: transform;"
 		aria-hidden={fade < 0.5}
 	>
-		<div class="text-[0.625rem] uppercase tracking-[0.18em] text-[var(--color-text-muted)] [text-shadow:0_1px_6px_rgba(10,24,29,0.95)]">
+		<div class="text-[0.6875rem] text-[var(--color-text-muted)] [text-shadow:0_1px_6px_rgba(12,20,16,0.95)]">
 			If current trends hold
 		</div>
-		<div class="mt-1 text-[1.875rem] leading-none font-bold tabular-nums text-[var(--color-danger)] [text-shadow:0_1px_8px_rgba(10,24,29,0.95)]">
+		<div class="mt-1 text-[1.875rem] leading-none font-bold tabular-nums text-[var(--color-danger)] [text-shadow:0_1px_8px_rgba(12,20,16,0.95)]">
 			{formatCurrency(projectedOverrun)}
 		</div>
-		<div class="mt-1 text-[0.75rem] leading-snug text-[var(--color-text)] [text-shadow:0_1px_6px_rgba(10,24,29,0.98)]">
+		<div class="mt-1 text-[0.75rem] leading-snug text-[var(--color-text)] [text-shadow:0_1px_6px_rgba(12,20,16,0.98)]">
 			projected overrun across {trackingOver.length} live projects
 		</div>
 		<a
 			href="/insights"
-			class="pointer-events-auto inline-block mt-1.5 text-[0.6875rem] font-medium text-[var(--color-accent)] hover:underline [text-shadow:0_1px_6px_rgba(10,24,29,0.95)]"
+			class="pointer-events-auto inline-block mt-1.5 text-[0.6875rem] font-medium text-[var(--color-accent)] hover:underline [text-shadow:0_1px_6px_rgba(12,20,16,0.95)]"
 		>See the full forecast →</a>
 	</div>
 {/if}

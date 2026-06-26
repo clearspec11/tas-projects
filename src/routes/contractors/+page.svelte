@@ -85,7 +85,7 @@
 
 <div class="h-full overflow-y-auto bg-[var(--color-bg)]">
 	<div class="max-w-4xl mx-auto p-4 md:p-6">
-		<h1 class="text-xl font-bold tracking-tight">Contractor scorecards</h1>
+		<h1 class="text-2xl font-bold tracking-tight">Contractor scorecards</h1>
 		<p class="text-[0.8125rem] text-[var(--color-text-muted)] mt-1 max-w-[65ch]">
 			Who delivers on budget and who doesn't, across every named contractor on the board.
 			Overrun is money-weighted, so one large blowout counts for more than several small
@@ -96,10 +96,10 @@
 		     in a quieter strip so the board reads as one finding, not three tiles. -->
 		<div class="flex max-md:flex-col items-stretch gap-3 mt-4">
 			<div class="flex-1 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-4">
-				<div class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider">Biggest overrun</div>
+				<div class="text-[0.6875rem] text-[var(--color-text-muted)]">Biggest overrun</div>
 				{#if worst && worst.overrunPct > 0}
 					<div class="flex items-baseline gap-2 mt-1.5">
-						<span class="text-[2rem] leading-none font-bold tabular-nums text-red-400">{pct(worst.overrunPct)}</span>
+						<span class="text-[2rem] leading-none font-bold tabular-nums text-[var(--color-danger)]">{pct(worst.overrunPct)}</span>
 						<span class="text-sm font-semibold text-[var(--color-text)]">{worst.name}</span>
 					</div>
 					<p class="text-[0.6875rem] text-[var(--color-text-muted)] mt-2">Money-weighted across that contractor's projects.</p>
@@ -131,7 +131,7 @@
 									onclick={() => setSort(col.key)}
 									title={col.key === 'overrun' ? undefined : col.title}
 									aria-sort={sortCol === col.key ? (sortDesc ? 'descending' : 'ascending') : undefined}
-									class="text-[0.6875rem] uppercase tracking-wider font-semibold cursor-pointer transition-colors {sortCol === col.key ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'}"
+									class="text-[0.6875rem] font-semibold cursor-pointer transition-colors {sortCol === col.key ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'}"
 								>
 									{col.label}{sortCol === col.key ? (sortDesc ? ' ↓' : ' ↑') : ''}
 								</button>{#if col.key === 'overrun'}<span class="ml-1"><InfoTip text={GLOSSARY.overrun} iconSize={11} /></span>{/if}
@@ -161,7 +161,7 @@
 												style="width: {Math.round((c.overrunPct / barMax) * 100)}%;"
 											></span>
 										</span>
-										<span class="font-mono font-medium w-12 text-red-400">{pct(c.overrunPct)}</span>
+										<span class="font-mono font-medium w-12 text-[var(--color-danger)]">{pct(c.overrunPct)}</span>
 									</span>
 								{:else}
 									<span class="text-[var(--color-text-muted)]" title="Spending is at or below budget so far">none</span>

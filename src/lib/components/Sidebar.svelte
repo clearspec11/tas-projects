@@ -120,7 +120,7 @@
 <aside class="w-96 h-full max-md:w-full max-md:h-auto max-md:flex-1 max-md:min-h-0 flex flex-col bg-[var(--color-surface)] border-r max-md:border-r-0 max-md:border-t border-[var(--color-border)] overflow-hidden">
 	<!-- Header row: brand lives in the top nav; this keeps the export actions -->
 	<div class="px-3 pt-3 flex items-center justify-between">
-		<span class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider">Projects</span>
+		<span class="text-[0.6875rem] text-[var(--color-text-muted)]">Projects</span>
 		<div class="flex gap-1">
 			<button
 				onclick={exportCsv}
@@ -139,11 +139,11 @@
 	<div class="grid grid-cols-4 gap-1.5 p-3 border-b border-[var(--color-border)]">
 		<div class="bg-[var(--color-bg)] rounded-lg p-2 text-center">
 			<div class="text-[1.375rem] leading-none font-bold tabular-nums text-[var(--color-accent)]">{list.length}</div>
-			<div class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider mt-1">Projects</div>
+			<div class="text-[0.6875rem] text-[var(--color-text-muted)] mt-1">Projects</div>
 		</div>
 		<div class="bg-[var(--color-bg)] rounded-lg p-2 text-center">
 			<div class="text-[1.375rem] leading-none font-bold tabular-nums text-[var(--color-text)]">{formatCurrency(totalBudget(list))}</div>
-			<div class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider mt-1">Budget</div>
+			<div class="text-[0.6875rem] text-[var(--color-text-muted)] mt-1">Budget</div>
 		</div>
 		<button
 			onclick={toggleOver}
@@ -152,7 +152,7 @@
 			class="bg-[var(--color-bg)] rounded-lg p-2 text-center cursor-pointer border transition-colors {$filterStatus === 'over_budget' ? 'border-[var(--color-danger)]' : 'border-transparent hover:border-[var(--color-border)]'}"
 		>
 			<div class="text-[1.375rem] leading-none font-bold tabular-nums text-[var(--color-danger)]">{overBudgetCount(list)}</div>
-			<div class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider mt-1">Over</div>
+			<div class="text-[0.6875rem] text-[var(--color-text-muted)] mt-1">Over</div>
 		</button>
 		<button
 			onclick={toggleFlagged}
@@ -161,7 +161,7 @@
 			class="bg-[var(--color-bg)] rounded-lg p-2 text-center cursor-pointer border transition-colors {$filterFlagged ? 'border-[var(--color-warning)]' : 'border-transparent hover:border-[var(--color-border)]'}"
 		>
 			<div class="flex items-center justify-center gap-1 text-[1.375rem] leading-none font-bold text-[var(--color-warning)]"><Flag size={18} />{redFlagCount(list)}</div>
-			<div class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider mt-1">Flags</div>
+			<div class="text-[0.6875rem] text-[var(--color-text-muted)] mt-1">Flags</div>
 		</button>
 	</div>
 
@@ -308,7 +308,7 @@
 				{#if v > 0 || late}
 					<div class="mt-1 flex items-center gap-2 text-[0.6875rem]">
 						{#if v > 0}
-							<span class="text-red-400 font-medium">+{formatCurrency(v)} ({Math.round(variancePct(project) * 100)}%)</span>
+							<span class="text-[var(--color-danger)] font-medium">+{formatCurrency(v)} ({Math.round(variancePct(project) * 100)}%)</span>
 						{/if}
 						{#if late}
 							<span class="text-[var(--color-warning)] font-medium">{late}mo late</span>

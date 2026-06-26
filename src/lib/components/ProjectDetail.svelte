@@ -47,7 +47,7 @@
 		<div class="p-4 border-b border-[var(--color-border)]">
 			<div class="flex items-start justify-between">
 				<div>
-					<div class="flex items-center gap-1.5 text-xs text-[var(--color-text-muted)] uppercase tracking-wider mb-1"><CatIcon size={13} /> {catCfg.label}</div>
+					<div class="flex items-center gap-1.5 text-xs text-[var(--color-text-muted)] mb-1"><CatIcon size={13} /> {catCfg.label}</div>
 					<h2 class="flex items-start gap-1.5 text-xl font-bold leading-tight [text-wrap:balance]">{#if flagged}<Flag size={18} class="shrink-0 mt-1 text-[var(--color-danger)]" aria-label="Flagged" />{/if}<span>{p.name}</span></h2>
 					<div class="text-xs text-[var(--color-text-muted)] mt-1">
 					{p.council ? `${p.council} · ` : ''}{p.location_name}
@@ -66,7 +66,7 @@
 				<span title={govCfg.description} class="text-xs px-2 py-0.5 rounded-full font-medium" style="background: {govCfg.color}20; color: {govCfg.color};">
 					{govCfg.shortLabel}
 				</span>
-				<span title={fundCfg.description} class="text-xs px-2 py-0.5 rounded-full font-medium bg-slate-500/20 text-slate-400">
+				<span title={fundCfg.description} class="text-xs px-2 py-0.5 rounded-full font-medium bg-[var(--color-surface-hover)] text-[var(--color-text-muted)]">
 					{fundCfg.label}
 				</span>
 			</div>
@@ -92,11 +92,11 @@
 
 			<div class="grid grid-cols-2 gap-3">
 				<div class="bg-[var(--color-bg)] rounded-lg p-3">
-					<div class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider">Budget</div>
+					<div class="text-[0.6875rem] text-[var(--color-text-muted)]">Budget</div>
 					<div class="text-xl font-bold tabular-nums mt-0.5">{formatCurrency(p.budget)}</div>
 				</div>
 				<div class="bg-[var(--color-bg)] rounded-lg p-3">
-					<div class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider">Spent</div>
+					<div class="text-[0.6875rem] text-[var(--color-text-muted)]">Spent</div>
 					<div class="text-xl font-bold tabular-nums mt-0.5" style="color: {cfg.color}">{formatCurrency(p.spent)}</div>
 				</div>
 			</div>
@@ -104,18 +104,18 @@
 			<div class="grid {late ? 'grid-cols-2' : 'grid-cols-1'} gap-3">
 				{#if v !== 0}
 					<div class="bg-[var(--color-bg)] rounded-lg p-3 text-center">
-						<div class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider">Variance <InfoTip text={GLOSSARY.variance} /></div>
+						<div class="text-[0.6875rem] text-[var(--color-text-muted)]">Variance <InfoTip text={GLOSSARY.variance} /></div>
 						<div class="text-xl font-bold tabular-nums mt-0.5" style="color: {v > 0 ? 'var(--color-danger)' : 'var(--color-success)'}">
 							{v > 0 ? '+' : ''}{formatCurrency(Math.abs(v))}
 						</div>
-						<div class="text-[0.6875rem] font-mono mt-0.5" style="color: {v > 0 ? '#f87171' : 'var(--color-success)'}">
+						<div class="text-[0.6875rem] font-mono mt-0.5" style="color: {v > 0 ? 'var(--color-danger)' : 'var(--color-success)'}">
 							{v > 0 ? '+' : ''}{Math.round(variancePct(p) * 100)}%
 						</div>
 					</div>
 				{/if}
 				{#if late}
 					<div class="bg-[var(--color-bg)] rounded-lg p-3 text-center">
-						<div class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider">Schedule</div>
+						<div class="text-[0.6875rem] text-[var(--color-text-muted)]">Schedule</div>
 						<div class="text-xl font-bold mt-0.5 text-[var(--color-warning)]">{late}mo late</div>
 						<div class="text-[0.6875rem] mt-0.5 text-[var(--color-warning)]">past due date</div>
 					</div>
@@ -132,7 +132,7 @@
 			<!-- Funding split: who pays -->
 			<div>
 				<div class="flex justify-between items-baseline mb-1.5">
-					<span class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider">
+					<span class="text-[0.6875rem] text-[var(--color-text-muted)]">
 						Who pays {funding.estimated ? '· est.' : ''}
 					</span>
 				</div>
