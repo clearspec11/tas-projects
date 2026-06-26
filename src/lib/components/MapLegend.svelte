@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { STATUS_CONFIG, GOVERNMENT_LEVEL_CONFIG } from '$lib/types';
 	import { Flag, Minus } from '@lucide/svelte';
+	import InfoTip from './InfoTip.svelte';
+	import { GLOSSARY, MAP_ORIENTATION } from '$lib/glossary';
 
 	let expanded = $state(true);
 </script>
@@ -14,7 +16,7 @@
 	{#if expanded}
 		<div class="bg-[var(--color-surface)]/95 backdrop-blur border border-[var(--color-border)] rounded-xl p-3 shadow-lg min-w-[180px]">
 			<div class="flex items-center justify-between mb-2">
-				<span class="text-xs font-semibold text-[var(--color-text)]">Legend</span>
+				<span class="flex items-center gap-1 text-xs font-semibold text-[var(--color-text)]">Legend <InfoTip text={MAP_ORIENTATION} iconSize={12} /></span>
 				<button
 					aria-label="Collapse legend"
 					class="text-[var(--color-text-muted)] hover:text-[var(--color-text)] cursor-pointer"
@@ -39,7 +41,7 @@
 
 			<!-- Governing tier (marker border colour) -->
 			<div class="mb-2">
-				<div class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Border = Tier</div>
+				<div class="flex items-center gap-1 text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Border = Tier <InfoTip text={GLOSSARY.tier} iconSize={11} /></div>
 				{#each Object.entries(GOVERNMENT_LEVEL_CONFIG) as [, cfg]}
 					<div class="flex items-center gap-2 py-0.5">
 						<span class="w-3 h-3 rounded-full inline-block border-2" style="border-color: {cfg.color};"></span>

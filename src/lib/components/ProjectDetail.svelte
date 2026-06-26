@@ -3,6 +3,8 @@
 	import { STATUS_CONFIG, CATEGORY_CONFIG, FUNDING_CONFIG, GOVERNMENT_LEVEL_CONFIG, FUNDER_CONFIG, type FundingBreakdown } from '$lib/types';
 	import { formatCurrencyPrecise as formatCurrency, formatDate, budgetPercent, variance, variancePct, delayMonths, isRedFlag, isVerified, resolveFundingBreakdown } from '$lib/metrics';
 	import BudgetHistory from './BudgetHistory.svelte';
+	import InfoTip from './InfoTip.svelte';
+	import { GLOSSARY } from '$lib/glossary';
 	import { CATEGORY_ICONS } from '$lib/icons';
 	import { Flag, Check, X, ArrowUpRight } from '@lucide/svelte';
 	import { fly } from 'svelte/transition';
@@ -77,7 +79,7 @@
 		<div class="p-4 space-y-3">
 			<div>
 				<div class="flex justify-between text-xs mb-1">
-					<span class="text-[var(--color-text-muted)]">Budget Usage</span>
+					<span class="text-[var(--color-text-muted)]">Budget Usage <InfoTip text={GLOSSARY.budget_usage} /></span>
 					<span class="font-mono font-bold" style="color: {cfg.color}">{pct}%</span>
 				</div>
 				<div class="bg-[var(--color-bg)] rounded-full h-3">
@@ -102,7 +104,7 @@
 			<div class="grid {late ? 'grid-cols-2' : 'grid-cols-1'} gap-3">
 				{#if v !== 0}
 					<div class="bg-[var(--color-bg)] rounded-lg p-3 text-center">
-						<div title="How far spending is above or below the budget" class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider">Variance</div>
+						<div class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider">Variance <InfoTip text={GLOSSARY.variance} /></div>
 						<div class="text-xl font-bold tabular-nums mt-0.5" style="color: {v > 0 ? 'var(--color-danger)' : 'var(--color-success)'}">
 							{v > 0 ? '+' : ''}{formatCurrency(Math.abs(v))}
 						</div>
