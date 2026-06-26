@@ -1,12 +1,11 @@
 <script lang="ts">
-	import { projects, mapZoom, seaOverlayPos } from '$lib/stores';
-	import { TASMANIA_ZOOM } from '$lib/tasmania-geo';
+	import { projects } from '$lib/stores';
 	import { formatCurrency, projectFinalCost } from '$lib/metrics';
 
-	// Forward-looking readout pinned to a fixed open-water coordinate (TasMap
-	// publishes its container-pixel position), so it rides the sea as the user
-	// pans and zooms. Fades out past the whole-island view; it speaks to the
-	// island as a whole, not to any street.
+	// Forward-looking readout. Mounted by TasMap into a Leaflet marker anchored
+	// in open water, so Leaflet keeps it locked to that sea coordinate through
+	// pan and zoom — exactly like the coastline. It naturally leaves view when the
+	// user zooms in past Bass Strait, so it needs no separate fade.
 	const live = $derived($projects.filter((p) => p.status !== 'completed' && p.status !== 'cancelled'));
 	const trackingOver = $derived(
 		live
@@ -14,19 +13,10 @@
 			.filter((x): x is NonNullable<typeof x> => x !== null && x.overBy > 0)
 	);
 	const projectedOverrun = $derived(trackingOver.reduce((s, p) => s + p.overBy, 0));
-
-	// 1 at the whole-island zoom, fading to 0 two levels in.
-	const fade = $derived(Math.max(0, Math.min(1, 1 - ($mapZoom - TASMANIA_ZOOM) / 2)));
-	const pos = $derived($seaOverlayPos);
 </script>
 
-{#if projectedOverrun > 0 && pos}
-	<div
-		class="absolute top-0 left-0 z-[600] w-[15rem] select-none transition-opacity duration-200"
-		class:pointer-events-none={fade < 0.5}
-		style="transform: translate3d({pos.x}px, {pos.y}px, 0); opacity: {fade}; will-change: transform;"
-		aria-hidden={fade < 0.5}
-	>
+{#if projectedOverrun > 0}
+	<div class="max-md:hidden w-[15rem] select-none pointer-events-none">
 		<div class="text-[0.6875rem] text-[var(--color-text-muted)] [text-shadow:0_1px_6px_rgba(12,20,16,0.95)]">
 			If current trends hold
 		</div>
