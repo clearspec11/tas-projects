@@ -17,5 +17,8 @@ export const timelineRange = writable<[number, number]>([2008, 2036]);
 export const showHeatmap = writable(false);
 export const showConnections = writable(false);
 export const mapStyle = writable<'dark' | 'satellite'>('dark');
+// Current Leaflet zoom level, mirrored so overlays can react (e.g. the sea
+// readout fades as the user zooms past the whole-island view).
+export const mapZoom = writable<number>(7);
 // Mobile-only: which full-height view is showing (ignored at md+)
 export const mobileView = writable<'map' | 'list'>('map');

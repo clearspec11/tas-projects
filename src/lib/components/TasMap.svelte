@@ -3,7 +3,7 @@
 	import {
 		projects, selectedProject, filterCategory, filterStatus,
 		filterFunding, filterGovernmentLevel, filterFlagged, filterContractor, searchQuery, timelineRange, showHeatmap,
-		showConnections, mapStyle
+		showConnections, mapStyle, mapZoom
 	} from '$lib/stores';
 	import { STATUS_CONFIG, CATEGORY_CONFIG, FUNDING_CONFIG, GOVERNMENT_LEVEL_CONFIG, type Project } from '$lib/types';
 	import { TASMANIA_CENTER, TASMANIA_ZOOM } from '$lib/tasmania-geo';
@@ -193,6 +193,10 @@
 			minZoom: 6,
 			maxZoom: 14
 		});
+
+		// Mirror zoom so the sea overlay can fade past the whole-island view.
+		mapZoom.set(map.getZoom());
+		map.on('zoomend', () => mapZoom.set(map.getZoom()));
 
 		darkTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
 			attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
