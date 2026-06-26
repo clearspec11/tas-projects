@@ -31,11 +31,14 @@
 	}
 </script>
 
-<!-- One-line orientation for first-time visitors; retires once they engage -->
+<!-- Mobile-only headline: phones have no sidebar stats or sea readout in map
+     view, so this is their over-budget entry point. On desktop the sidebar
+     "Over" tile and the sea projection already carry it, so the banner would
+     just be a second competing red headline — hidden there. -->
 {#if !dismissed && !$selectedProject && overList.length > 0}
 	<div
 		transition:fly={{ y: -10, duration: dur(220), easing: cubicOut }}
-		class="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] max-w-[calc(100%-7rem)] max-md:top-auto max-md:bottom-7 max-md:left-2 max-md:right-2 max-md:translate-x-0 max-md:max-w-none flex items-center gap-3 max-md:gap-2 px-4 py-2.5 max-md:px-3 max-md:py-2 rounded-xl bg-[var(--color-surface)]/95 backdrop-blur border border-[var(--color-border)] shadow-lg"
+		class="md:hidden absolute top-4 left-1/2 -translate-x-1/2 z-[1000] max-w-[calc(100%-7rem)] max-md:top-auto max-md:bottom-7 max-md:left-2 max-md:right-2 max-md:translate-x-0 max-md:max-w-none flex items-center gap-3 max-md:gap-2 px-4 py-2.5 max-md:px-3 max-md:py-2 rounded-xl bg-[var(--color-surface)]/95 backdrop-blur border border-[var(--color-border)] shadow-lg"
 	>
 		<p class="text-[0.8125rem] max-md:text-xs leading-snug">
 			<strong class="text-red-400 font-semibold">{overList.length} projects</strong>
