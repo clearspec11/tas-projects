@@ -4,7 +4,8 @@
 	import { replaceState } from '$app/navigation';
 	import {
 		projects, selectedProject, filterCategory, filterStatus, filterFunding,
-		filterGovernmentLevel, filterFlagged, filterContractor, searchQuery, sortKey, timelineRange, mobileView
+		filterGovernmentLevel, filterFlagged, filterContractor, searchQuery, sortKey, timelineRange, mobileView,
+		sidebarOpen
 	} from '$lib/stores';
 	import { SEED_PROJECTS } from '$lib/seed-data';
 	import { loadProjects } from '$lib/data';
@@ -19,7 +20,6 @@
 	import { ChevronRight, ChevronLeft } from '@lucide/svelte';
 
 	let mapComponent: TasMap;
-	let sidebarOpen = $state(false);
 
 	const activeFilterCount = $derived(
 		($filterCategory !== 'all' ? 1 : 0) +
@@ -161,7 +161,7 @@
 		     z-[800] clears Leaflet's highest internal pane (z-index 700). -->
 		<div
 			class="hidden md:block absolute inset-y-0 left-0 w-96"
-			style="z-index:800; transform: translateX({sidebarOpen ? '0%' : '-100%'}); transition: transform 280ms cubic-bezier(0.4,0,0.2,1); will-change: transform; box-shadow: 4px 0 28px rgba(0,0,0,0.45);"
+			style="z-index:800; transform: translateX({$sidebarOpen ? '0%' : '-100%'}); transition: transform 280ms cubic-bezier(0.4,0,0.2,1); will-change: transform; box-shadow: 4px 0 28px rgba(0,0,0,0.45);"
 		>
 			<Sidebar onFlyTo={handleFlyTo} />
 		</div>
@@ -169,16 +169,16 @@
 		<!-- Desktop tab: rides the sidebar's right edge, acts as toggle in both states -->
 		<button
 			class="hidden md:flex flex-col items-center justify-center gap-1.5 absolute left-0 top-1/2 cursor-pointer select-none"
-			style="z-index:810; transform: translate({sidebarOpen ? '24rem' : '0'}, -50%); transition: transform 280ms cubic-bezier(0.4,0,0.2,1); will-change: transform;"
-			onclick={() => (sidebarOpen = !sidebarOpen)}
-			aria-label={sidebarOpen ? 'Collapse projects panel' : 'Show projects panel'}
-			aria-expanded={sidebarOpen}
+			style="z-index:810; transform: translate({$sidebarOpen ? '24rem' : '0'}, -50%); transition: transform 280ms cubic-bezier(0.4,0,0.2,1); will-change: transform;"
+			onclick={() => sidebarOpen.update(v => !v)}
+			aria-label={$sidebarOpen ? 'Collapse projects panel' : 'Show projects panel'}
+			aria-expanded={$sidebarOpen}
 		>
 			<div
 				class="flex flex-col items-center justify-center gap-2 py-3 px-1.5 rounded-r-lg transition-colors hover:bg-[var(--color-surface-hover)]"
 				style="min-height:5.5rem; background:var(--color-surface); border:1px solid var(--color-border); border-left:2px solid var(--color-accent); border-radius:0 8px 8px 0;"
 			>
-				{#if sidebarOpen}
+				{#if $sidebarOpen}
 					<ChevronLeft size={12} class="text-[var(--color-text-muted)]" />
 				{:else}
 					<ChevronRight size={12} class="text-[var(--color-accent)]" />
@@ -191,7 +191,7 @@
 		</button>
 
 		<!-- Map: always full-width on desktop (sidebar overlays); on mobile only in map view -->
-		<main class="flex-1 relative {$mobileView === 'list' ? 'max-md:hidden' : ''}">
+		<main class="flex-1 relative {$mobileView === 'list' ? 'max-md:hidden' : ''}" class:sidebar-open={$sidebarOpen}>
 			<TasMap bind:this={mapComponent} />
 			<StoryBanner />
 			<MapControls />

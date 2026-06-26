@@ -22,3 +22,5 @@ export const mapStyle = writable<'dark' | 'satellite'>('dark');
 export const mapZoom = writable<number>(7);
 // Mobile-only: which full-height view is showing (ignored at md+)
 export const mobileView = writable<'map' | 'list'>('map');
+// Desktop sidebar slide state — shared so map controls can offset themselves
+export const sidebarOpen = writable(false);

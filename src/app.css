@@ -77,6 +77,15 @@ body {
 	border-color: var(--color-border) !important;
 }
 
+/* Shift Leaflet top-left controls (zoom +/−) out from behind the slide panel */
+.sidebar-open .leaflet-top.leaflet-left {
+	left: 24rem;
+	transition: left 280ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.leaflet-top.leaflet-left {
+	transition: left 280ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .leaflet-control-attribution {
 	background: rgba(12, 20, 16, 0.8) !important;
 	color: var(--color-text-muted) !important;

@@ -3,11 +3,15 @@
 	import { Flag, Minus } from '@lucide/svelte';
 	import InfoTip from './InfoTip.svelte';
 	import { GLOSSARY, MAP_ORIENTATION } from '$lib/glossary';
+	import { sidebarOpen } from '$lib/stores';
 
 	let expanded = $state(true);
 </script>
 
-<div class="absolute bottom-6 left-4 z-[1000]">
+<div
+	class="absolute bottom-6 left-4 z-[1000]"
+	style="transform: translateX({$sidebarOpen ? '24rem' : '0'}); transition: transform 280ms cubic-bezier(0.4,0,0.2,1);"
+>
 	<button
 		class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg px-3 py-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] cursor-pointer mb-1 {expanded ? 'hidden' : ''}"
 		onclick={() => expanded = true}
