@@ -14,6 +14,10 @@ import {
 	projectsToCsv,
 	budgetGrowth,
 	isVerified,
+	projectFinalCost,
+	spendByCategory,
+	overBudgetLeaderboard,
+	completionsByYear,
 	type FilterCriteria
 } from './metrics';
 
@@ -258,5 +262,105 @@ describe('projectsToCsv', () => {
 	it('quotes fields that contain commas', () => {
 		const csv = projectsToCsv([makeProject({ name: 'Road, Stage 2' })]);
 		expect(csv).toContain('"Road, Stage 2"');
+	});
+});
+
+describe('projectFinalCost', () => {
+	it('returns null for completed or cancelled projects', () => {
+		expect(projectFinalCost(makeProject({ status: 'completed' }), NOW)).toBeNull();
+		expect(projectFinalCost(makeProject({ status: 'cancelled' }), NOW)).toBeNull();
+	});
+
+	it('projects above budget by burn rate when spend outpaces the schedule', () => {
+		// 50% of schedule elapsed (2023→2029, now 2026), but 80% spent → ~160% final.
+		const p = makeProject({
+			status: 'over_budget',
+			budget: 100_000_000,
+			spent: 80_000_000,
+			start_date: '2023-01-01',
+			expected_end_date: '2029-01-01'
+		});
+		const proj = projectFinalCost(p, NOW)!;
+		expect(proj.method).toBe('burn-rate');
+		expect(proj.estimate).toBeGreaterThan(100_000_000);
+		expect(proj.overBy).toBeGreaterThan(0);
+	});
+
+	it('uses the latest revised estimate when it is the strongest signal', () => {
+		const p = makeProject({
+			status: 'on_budget',
+			budget: 100_000_000,
+			spent: 1_000_000,
+			start_date: '2025-01-01',
+			expected_end_date: '2035-01-01',
+			budget_history: [
+				{ fiscal_year: '2024-25', estimated_total_cost: 100_000_000 },
+				{ fiscal_year: '2025-26', estimated_total_cost: 130_000_000 }
+			]
+		});
+		const proj = projectFinalCost(p, NOW)!;
+		expect(proj.method).toBe('revised-estimate');
+		expect(proj.estimate).toBe(130_000_000);
+	});
+
+	it('reports on-budget when no signal exceeds the budget', () => {
+		const p = makeProject({
+			status: 'on_budget',
+			budget: 100_000_000,
+			spent: 1_000_000,
+			start_date: '2025-01-01',
+			expected_end_date: '2035-01-01'
+		});
+		const proj = projectFinalCost(p, NOW)!;
+		expect(proj.method).toBe('on-budget');
+		expect(proj.overBy).toBe(0);
+	});
+
+	it('ignores burn rate before 15% of the schedule has elapsed', () => {
+		// Started a month before NOW on a 10-year job → barely any time elapsed.
+		const p = makeProject({
+			status: 'on_budget',
+			budget: 100_000_000,
+			spent: 5_000_000,
+			start_date: '2026-05-01',
+			expected_end_date: '2036-05-01'
+		});
+		const proj = projectFinalCost(p, NOW)!;
+		expect(proj.method).toBe('on-budget');
+	});
+});
+
+describe('aggregate helpers', () => {
+	it('spendByCategory sums budgets per category, largest first', () => {
+		const out = spendByCategory([
+			makeProject({ category: 'transport', budget: 300 }),
+			makeProject({ category: 'health', budget: 600 }),
+			makeProject({ category: 'transport', budget: 200 })
+		]);
+		expect(out[0]).toEqual({ category: 'health', total: 600 });
+		expect(out[1]).toEqual({ category: 'transport', total: 500 });
+	});
+
+	it('overBudgetLeaderboard ranks only over-budget projects by overrun', () => {
+		const out = overBudgetLeaderboard([
+			makeProject({ id: 'a', budget: 100, spent: 150 }),
+			makeProject({ id: 'b', budget: 100, spent: 90 }),
+			makeProject({ id: 'c', budget: 100, spent: 130 })
+		]);
+		expect(out.map((r) => r.project.id)).toEqual(['a', 'c']);
+		expect(out[0].over).toBe(50);
+	});
+
+	it('completionsByYear counts by end year, oldest first', () => {
+		const out = completionsByYear([
+			makeProject({ expected_end_date: '2027-06-01' }),
+			makeProject({ expected_end_date: '2025-03-01' }),
+			makeProject({ expected_end_date: '2027-11-01' }),
+			makeProject({ expected_end_date: null })
+		]);
+		expect(out).toEqual([
+			{ year: 2025, count: 1 },
+			{ year: 2027, count: 2 }
+		]);
 	});
 });
