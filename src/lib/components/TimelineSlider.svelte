@@ -24,23 +24,41 @@
 		timelineRange.set([startYear, endYear]);
 	}
 
-	// Clicking/tapping anywhere on the track jumps the nearer thumb to that
-	// year. Without this only the 24px thumbs are interactive (the inputs are
-	// pointer-events:none so the track itself swallows nothing), which made the
-	// slider feel dead — especially at the extremes where the thumbs sit clipped
-	// at the container edge.
+	// Pressing the track grabs the nearer thumb and drags it for the whole
+	// gesture — click anywhere to jump, or press-and-drag to scrub. The native
+	// inputs stay for keyboard + ARIA; we bail out when the press lands on one
+	// (a direct thumb grab) so native dragging isn't fought.
 	let trackEl: HTMLDivElement;
-	function jumpToClick(e: PointerEvent) {
+	let dragging: 'start' | 'end' | null = null;
+
+	function yearAt(clientX: number): number {
 		const rect = trackEl.getBoundingClientRect();
-		const ratio = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
-		const year = Math.round(MIN_YEAR + ratio * (MAX_YEAR - MIN_YEAR));
-		// Move whichever thumb is closer; ties go to whichever side the click fell on.
-		if (Math.abs(year - startYear) <= Math.abs(year - endYear)) {
-			startYear = year;
-		} else {
-			endYear = year;
-		}
-		updateRange();
+		const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+		return Math.round(MIN_YEAR + ratio * (MAX_YEAR - MIN_YEAR));
+	}
+
+	function applyDrag(year: number) {
+		// Clamp at the other thumb so the two never cross.
+		if (dragging === 'start') startYear = Math.min(year, endYear);
+		else if (dragging === 'end') endYear = Math.max(year, startYear);
+		timelineRange.set([startYear, endYear]);
+	}
+
+	function onTrackPointerDown(e: PointerEvent) {
+		if ((e.target as HTMLElement).tagName === 'INPUT') return; // native thumb grab
+		const year = yearAt(e.clientX);
+		dragging = Math.abs(year - startYear) <= Math.abs(year - endYear) ? 'start' : 'end';
+		applyDrag(year);
+		trackEl.setPointerCapture(e.pointerId);
+	}
+
+	function onTrackPointerMove(e: PointerEvent) {
+		if (dragging) applyDrag(yearAt(e.clientX));
+	}
+
+	function onTrackPointerUp(e: PointerEvent) {
+		dragging = null;
+		try { trackEl.releasePointerCapture(e.pointerId); } catch { /* already released */ }
 	}
 
 	// When start thumb is in the upper half, bring it to front so it can be
@@ -59,9 +77,11 @@
 		<span class="text-[0.6875rem] text-[var(--color-text-muted)]">Timeline</span>
 		<span class="text-xs font-mono font-bold text-[var(--color-accent)]">{startYear}</span>
 		<div
-			class="relative w-48 h-6 flex items-center cursor-pointer"
+			class="relative w-48 h-6 flex items-center cursor-pointer touch-none"
 			bind:this={trackEl}
-			onpointerdown={jumpToClick}
+			onpointerdown={onTrackPointerDown}
+			onpointermove={onTrackPointerMove}
+			onpointerup={onTrackPointerUp}
 		>
 			<input
 				type="range"
