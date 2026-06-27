@@ -1,11 +1,7 @@
 <script lang="ts">
-	import { projects } from '$lib/stores';
+	import { projects, mapZoom } from '$lib/stores';
 	import { formatCurrency, projectFinalCost } from '$lib/metrics';
 
-	// Forward-looking readout. Mounted by TasMap into a Leaflet marker anchored
-	// in open water, so Leaflet keeps it locked to that sea coordinate through
-	// pan and zoom — exactly like the coastline. It naturally leaves view when the
-	// user zooms in past Bass Strait, so it needs no separate fade.
 	const live = $derived($projects.filter((p) => p.status !== 'completed' && p.status !== 'cancelled'));
 	const trackingOver = $derived(
 		live
@@ -13,10 +9,22 @@
 			.filter((x): x is NonNullable<typeof x> => x !== null && x.overBy > 0)
 	);
 	const projectedOverrun = $derived(trackingOver.reduce((s, p) => s + p.overBy, 0));
+
+	// Fade out as the user zooms in past the whole-island view — at zoom 9+ Bass
+	// Strait is off-screen and the readout has no context.
+	const opacity = $derived(
+		$mapZoom <= 7.5 ? 1 :
+		$mapZoom >= 9   ? 0 :
+		1 - ($mapZoom - 7.5) / 1.5
+	);
 </script>
 
-{#if projectedOverrun > 0}
-	<div class="max-md:hidden w-[15rem] select-none pointer-events-none">
+{#if projectedOverrun > 0 && opacity > 0}
+	<div
+		class="max-md:hidden absolute select-none pointer-events-none"
+		style="top: 38%; left: 20%; opacity: {opacity}; transition: opacity 400ms ease; z-index: 750;"
+		aria-hidden="true"
+	>
 		<div class="text-[0.6875rem] text-[var(--color-text-muted)] [text-shadow:0_1px_6px_rgba(12,20,16,0.95)]">
 			If current trends hold
 		</div>

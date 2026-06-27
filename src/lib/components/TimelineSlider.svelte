@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { timelineRange } from '$lib/stores';
+	import { timelineRange, sidebarOpen } from '$lib/stores';
 
 	const MIN_YEAR = 2008;
 	const MAX_YEAR = 2036;
@@ -23,9 +23,19 @@
 		}
 		timelineRange.set([startYear, endYear]);
 	}
+
+	// When start thumb is in the upper half, bring it to front so it can be
+	// dragged even when endYear thumb is nearby.
+	const startZ = $derived(startYear > (MIN_YEAR + MAX_YEAR) / 2 ? 30 : 10);
+	const endZ = $derived(startYear > (MIN_YEAR + MAX_YEAR) / 2 ? 10 : 30);
 </script>
 
-<div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-[1000] bg-[var(--color-surface)]/95 backdrop-blur border border-[var(--color-border)] rounded-xl px-4 py-3 shadow-lg">
+<!-- Shifts right by half the sidebar width when panel is open, keeping it
+     centred in the unobstructed portion of the map and clear of the legend. -->
+<div
+	class="absolute bottom-6 z-[1000] bg-[var(--color-surface)]/95 backdrop-blur border border-[var(--color-border)] rounded-xl px-4 py-3 shadow-lg"
+	style="left: 50%; transform: translateX(calc(-50% + {$sidebarOpen ? '12rem' : '0rem'})); transition: transform 280ms cubic-bezier(0.4,0,0.2,1);"
+>
 	<div class="flex items-center gap-3">
 		<span class="text-[0.6875rem] text-[var(--color-text-muted)]">Timeline</span>
 		<span class="text-xs font-mono font-bold text-[var(--color-accent)]">{startYear}</span>
@@ -36,7 +46,8 @@
 				max={MAX_YEAR}
 				bind:value={startYear}
 				oninput={updateRange}
-				class="absolute w-full appearance-none bg-transparent cursor-pointer z-10 timeline-range"
+				class="absolute w-full appearance-none bg-transparent cursor-pointer timeline-range"
+				style="z-index: {startZ};"
 			/>
 			<input
 				type="range"
@@ -44,7 +55,8 @@
 				max={MAX_YEAR}
 				bind:value={endYear}
 				oninput={updateRange}
-				class="absolute w-full appearance-none bg-transparent cursor-pointer z-20 timeline-range"
+				class="absolute w-full appearance-none bg-transparent cursor-pointer timeline-range"
+				style="z-index: {endZ};"
 			/>
 			<div class="absolute w-full h-1 bg-[var(--color-border)] rounded-full">
 				<div
@@ -74,7 +86,6 @@
 		cursor: pointer;
 		pointer-events: all;
 		position: relative;
-		z-index: 30;
 	}
 	.timeline-range::-moz-range-thumb {
 		width: 24px;

@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { onMount, mount, unmount } from 'svelte';
-	import SeaOverlay from './SeaOverlay.svelte';
+	import { onMount } from 'svelte';
 	import {
 		projects, selectedProject, filterCategory, filterStatus,
 		filterFunding, filterGovernmentLevel, filterFlagged, filterContractor, searchQuery, timelineRange, showHeatmap,
@@ -22,8 +21,6 @@
 	let darkTiles: any;
 	let satTiles: any;
 	let L: any;
-	let seaOverlayApp: any;
-
 	// Accent ring marking the currently selected project on the map
 	function drawSelection(p: Project | null) {
 		if (!selectionLayer || !L) return;
@@ -200,16 +197,6 @@
 		mapZoom.set(map.getZoom());
 		map.on('zoomend', () => mapZoom.set(map.getZoom()));
 
-		// Anchor the sea readout to a fixed open-water coordinate in Bass Strait
-		// (NW of Tasmania) as a real Leaflet marker, so Leaflet locks it to the
-		// geography through pan AND the zoom animation — the same pane transform
-		// that moves the coastline — rather than a screen overlay that drifts.
-		const SEA_POINT: [number, number] = [-39.55, 144.4];
-		const seaIcon = L.divIcon({ className: 'tas-sea-overlay', html: '', iconSize: [240, 116], iconAnchor: [0, 0] });
-		const seaMarker = L.marker(SEA_POINT, { icon: seaIcon, interactive: false, keyboard: false }).addTo(map);
-		const seaTarget = seaMarker.getElement();
-		if (seaTarget) seaOverlayApp = mount(SeaOverlay, { target: seaTarget });
-
 		darkTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
 			attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
 			subdomains: 'abcd'
@@ -298,7 +285,6 @@
 		return () => {
 			unsubs.forEach((u) => u());
 			resizeObserver.disconnect();
-			if (seaOverlayApp) unmount(seaOverlayApp);
 			map.remove();
 		};
 	});
@@ -335,15 +321,6 @@
 		.tas-aurora {
 			animation: none;
 		}
-	}
-	/* The sea readout rides in the marker pane; strip Leaflet's default divIcon
-	   chrome and let the content overflow the 0-anchored box. The link re-enables
-	   its own pointer events. */
-	:global(.tas-sea-overlay) {
-		background: transparent;
-		border: none;
-		overflow: visible;
-		pointer-events: none;
 	}
 	:global(.tas-tooltip) {
 		background: rgba(12, 20, 16, 0.95) !important;

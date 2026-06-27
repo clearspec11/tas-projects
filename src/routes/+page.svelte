@@ -17,6 +17,7 @@
 	import MapControls from '$lib/components/MapControls.svelte';
 	import TimelineSlider from '$lib/components/TimelineSlider.svelte';
 	import StoryBanner from '$lib/components/StoryBanner.svelte';
+	import SeaOverlay from '$lib/components/SeaOverlay.svelte';
 	import { ChevronRight, ChevronLeft } from '@lucide/svelte';
 
 	let mapComponent: TasMap;
@@ -195,9 +196,8 @@
 			<TasMap bind:this={mapComponent} />
 			<StoryBanner />
 			<MapControls />
-			<!-- Legend and timeline are desktop affordances; they'd bury a phone map.
-			     The sea readout is mounted inside the map itself (TasMap), anchored
-			     to a coordinate, so it lives with the markers, not as an overlay. -->
+			<SeaOverlay />
+			<!-- Legend and timeline are desktop affordances; they'd bury a phone map. -->
 			<div class="contents max-md:hidden">
 				<MapLegend />
 				<TimelineSlider />
