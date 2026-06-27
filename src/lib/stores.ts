@@ -24,12 +24,3 @@ export const mapZoom = writable<number>(7);
 export const mobileView = writable<'map' | 'list'>('map');
 // Desktop sidebar slide state — shared so map controls can offset themselves
 export const sidebarOpen = writable(false);
-// Screen position (px, relative to the map container) of the Bass Strait sea
-// anchor, projected by Leaflet each move/zoom so the overrun readout stays
-// pinned to open water instead of floating over the island. `shown` is false
-// during the zoom animation and when zoomed in past the whole-island view.
-export const seaAnchor = writable<{ x: number; y: number; shown: boolean }>({
-	x: 0,
-	y: 0,
-	shown: false
-});
