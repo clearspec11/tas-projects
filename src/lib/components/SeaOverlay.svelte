@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { projects, mapZoom } from '$lib/stores';
+	import { projects, seaAnchor } from '$lib/stores';
 	import { formatCurrency, projectFinalCost } from '$lib/metrics';
 
 	const live = $derived($projects.filter((p) => p.status !== 'completed' && p.status !== 'cancelled'));
@@ -9,20 +9,12 @@
 			.filter((x): x is NonNullable<typeof x> => x !== null && x.overBy > 0)
 	);
 	const projectedOverrun = $derived(trackingOver.reduce((s, p) => s + p.overBy, 0));
-
-	// Fade out as the user zooms in past the whole-island view — at zoom 9+ Bass
-	// Strait is off-screen and the readout has no context.
-	const opacity = $derived(
-		$mapZoom <= 7.5 ? 1 :
-		$mapZoom >= 9   ? 0 :
-		1 - ($mapZoom - 7.5) / 1.5
-	);
 </script>
 
-{#if projectedOverrun > 0 && opacity > 0}
+{#if projectedOverrun > 0}
 	<div
-		class="max-md:hidden absolute select-none pointer-events-none"
-		style="top: 38%; left: 20%; opacity: {opacity}; transition: opacity 400ms ease; z-index: 750;"
+		class="max-md:hidden absolute select-none pointer-events-none w-[15rem]"
+		style="left: {$seaAnchor.x}px; top: {$seaAnchor.y}px; opacity: {$seaAnchor.shown ? 1 : 0}; transition: opacity 220ms ease; z-index: 750;"
 		aria-hidden="true"
 	>
 		<div class="text-[0.6875rem] text-[var(--color-text-muted)] [text-shadow:0_1px_6px_rgba(12,20,16,0.95)]">

@@ -3,7 +3,7 @@
 	import {
 		projects, selectedProject, filterCategory, filterStatus,
 		filterFunding, filterGovernmentLevel, filterFlagged, filterContractor, searchQuery, timelineRange, showHeatmap,
-		showConnections, mapStyle, mapZoom
+		showConnections, mapStyle, mapZoom, seaAnchor
 	} from '$lib/stores';
 	import { STATUS_CONFIG, CATEGORY_CONFIG, FUNDING_CONFIG, GOVERNMENT_LEVEL_CONFIG, type Project } from '$lib/types';
 	import { TASMANIA_CENTER, TASMANIA_ZOOM } from '$lib/tasmania-geo';
@@ -196,6 +196,21 @@
 		// Mirror zoom so the sea overlay can fade past the whole-island view.
 		mapZoom.set(map.getZoom());
 		map.on('zoomend', () => mapZoom.set(map.getZoom()));
+
+		// Pin the overrun readout to a fixed open-water point in Bass Strait by
+		// projecting that lat/lng to container pixels on every pan/zoom. Because the
+		// readout is a plain DOM element (not a Leaflet pane child), it never picks
+		// up the zoom-animation scale transform. Hidden during the zoom animation
+		// (it can't follow the smooth tween) and once zoomed in past the island.
+		const SEA_POINT: [number, number] = [-39.55, 144.4];
+		function updateSeaAnchor(shown = true) {
+			const p = map.latLngToContainerPoint(SEA_POINT);
+			seaAnchor.set({ x: p.x, y: p.y, shown: shown && map.getZoom() <= 8 });
+		}
+		map.on('move', () => updateSeaAnchor());
+		map.on('zoomstart', () => seaAnchor.update((a) => ({ ...a, shown: false })));
+		map.on('zoomend', () => updateSeaAnchor());
+		updateSeaAnchor();
 
 		darkTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
 			attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
