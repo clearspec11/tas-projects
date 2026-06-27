@@ -24,45 +24,9 @@
 		timelineRange.set([startYear, endYear]);
 	}
 
-	// Pressing the track grabs the nearer thumb and drags it for the whole
-	// gesture — click anywhere to jump, or press-and-drag to scrub. The native
-	// inputs stay for keyboard + ARIA; we bail out when the press lands on one
-	// (a direct thumb grab) so native dragging isn't fought.
-	let trackEl: HTMLDivElement;
-	let dragging: 'start' | 'end' | null = null;
-
-	function yearAt(clientX: number): number {
-		const rect = trackEl.getBoundingClientRect();
-		const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
-		return Math.round(MIN_YEAR + ratio * (MAX_YEAR - MIN_YEAR));
-	}
-
-	function applyDrag(year: number) {
-		// Clamp at the other thumb so the two never cross.
-		if (dragging === 'start') startYear = Math.min(year, endYear);
-		else if (dragging === 'end') endYear = Math.max(year, startYear);
-		timelineRange.set([startYear, endYear]);
-	}
-
-	function onTrackPointerDown(e: PointerEvent) {
-		if ((e.target as HTMLElement).tagName === 'INPUT') return; // native thumb grab
-		const year = yearAt(e.clientX);
-		dragging = Math.abs(year - startYear) <= Math.abs(year - endYear) ? 'start' : 'end';
-		applyDrag(year);
-		trackEl.setPointerCapture(e.pointerId);
-	}
-
-	function onTrackPointerMove(e: PointerEvent) {
-		if (dragging) applyDrag(yearAt(e.clientX));
-	}
-
-	function onTrackPointerUp(e: PointerEvent) {
-		dragging = null;
-		try { trackEl.releasePointerCapture(e.pointerId); } catch { /* already released */ }
-	}
-
-	// When start thumb is in the upper half, bring it to front so it can be
-	// dragged even when endYear thumb is nearby.
+	// Dragging happens on the handles themselves (native range thumbs). When the
+	// start thumb is in the upper half of the range, bring it to the front so it
+	// stays grabbable even when the two thumbs sit close together.
 	const startZ = $derived(startYear > (MIN_YEAR + MAX_YEAR) / 2 ? 30 : 10);
 	const endZ = $derived(startYear > (MIN_YEAR + MAX_YEAR) / 2 ? 10 : 30);
 </script>
@@ -76,13 +40,7 @@
 	<div class="flex items-center gap-3">
 		<span class="text-[0.6875rem] text-[var(--color-text-muted)]">Timeline</span>
 		<span class="text-xs font-mono font-bold text-[var(--color-accent)]">{startYear}</span>
-		<div
-			class="relative w-48 h-6 flex items-center cursor-pointer touch-none"
-			bind:this={trackEl}
-			onpointerdown={onTrackPointerDown}
-			onpointermove={onTrackPointerMove}
-			onpointerup={onTrackPointerUp}
-		>
+		<div class="relative w-48 h-6 flex items-center">
 			<input
 				type="range"
 				min={MIN_YEAR}
