@@ -19,10 +19,11 @@
 		timelineRange.set([startYear, endYear]);
 	}
 
-	// Custom thumbs (two divs) instead of overlapping native range inputs: the
-	// native dual-range pattern relies on pointer-events trickery that left the
-	// handles unreliable to grab. Here each thumb owns its own drag via pointer
-	// capture, so the gesture follows the pointer anywhere once started.
+	// Custom thumbs (two divs) instead of overlapping native range inputs, which
+	// relied on pointer-events trickery that left the handles unreliable to grab.
+	// The drag tracks on `window` for its whole lifetime, so the gesture follows
+	// the pointer anywhere on screen and only ends when the button is released —
+	// it never stalls because the pointer wandered off the small handle.
 	let trackEl: HTMLDivElement;
 	let dragging: 'start' | 'end' | null = null;
 
@@ -32,11 +33,6 @@
 		return Math.round(MIN_YEAR + ratio * (MAX_YEAR - MIN_YEAR));
 	}
 
-	function grab(which: 'start' | 'end', e: PointerEvent) {
-		dragging = which;
-		(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-		e.preventDefault();
-	}
 	function move(e: PointerEvent) {
 		if (!dragging) return;
 		const year = yearAt(e.clientX);
@@ -45,15 +41,21 @@
 		else endYear = Math.max(year, startYear);
 		commit();
 	}
-	function release(e: PointerEvent) {
+	function release() {
 		if (!dragging) return;
 		dragging = null;
-		try {
-			(e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
-		} catch {
-			/* already released */
-		}
+		window.removeEventListener('pointermove', move);
+		window.removeEventListener('pointerup', release);
 	}
+	function grab(which: 'start' | 'end', e: PointerEvent) {
+		dragging = which;
+		e.preventDefault();
+		window.addEventListener('pointermove', move);
+		window.addEventListener('pointerup', release);
+	}
+
+	// Safety net: drop listeners if the component is torn down mid-drag.
+	$effect(() => () => release());
 
 	function key(which: 'start' | 'end', e: KeyboardEvent) {
 		const step = e.key === 'ArrowLeft' || e.key === 'ArrowDown' ? -1
@@ -94,8 +96,6 @@
 				class="timeline-thumb"
 				style="left: {pct(startYear)}%; z-index: {dragging === 'start' ? 31 : 30};"
 				onpointerdown={(e) => grab('start', e)}
-				onpointermove={move}
-				onpointerup={release}
 				onkeydown={(e) => key('start', e)}
 			></div>
 			<!-- End handle -->
@@ -109,8 +109,6 @@
 				class="timeline-thumb"
 				style="left: {pct(endYear)}%; z-index: {dragging === 'end' ? 31 : 30};"
 				onpointerdown={(e) => grab('end', e)}
-				onpointermove={move}
-				onpointerup={release}
 				onkeydown={(e) => key('end', e)}
 			></div>
 		</div>
