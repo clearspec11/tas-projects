@@ -1,0 +1,1 @@
+export const env={PUBLIC_SUPABASE_ANON_KEY:"sb_publishable_ktuEO0PB0cMebv3EZO8vPQ_kGhn3aI9",PUBLIC_SUPABASE_URL:"https://likrvvjrfzxsghbeehfw.supabase.co"}
