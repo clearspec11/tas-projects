@@ -25,7 +25,7 @@
 	// the pointer anywhere on screen and only ends when the button is released —
 	// it never stalls because the pointer wandered off the small handle.
 	let trackEl: HTMLDivElement;
-	let dragging: 'start' | 'end' | null = null;
+	let dragging = $state<'start' | 'end' | null>(null);
 
 	function yearAt(clientX: number): number {
 		const rect = trackEl.getBoundingClientRect();
