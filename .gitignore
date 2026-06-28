@@ -22,3 +22,4 @@ Thumbs.db
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .bp-tmp
+scripts/budget-history.json

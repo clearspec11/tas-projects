@@ -3,6 +3,7 @@
 
 	const links = [
 		{ href: '/', label: 'Map' },
+		{ href: '/insights', label: 'Insights' },
 		{ href: '/contractors', label: 'Contractors' }
 	];
 

@@ -111,6 +111,99 @@ export function budgetGrowth(p: Project): { first: number; last: number; pct: nu
 	return { first, last, pct: (last - first) / first };
 }
 
+// ---- Projection ----
+// A deliberately simple, honest forecast of a live project's final cost. Not a
+// promise: it takes the strongest available "where this lands" signal and labels
+// which one it used so the UI can show its working.
+//   - revised-estimate: the latest figure from successive budget papers
+//   - burn-rate: spend-to-date extrapolated over the full schedule
+//   - on-budget: no signal points above the current budget
+// Returns null for finished/cancelled projects and where there's nothing to model.
+export interface Projection {
+	estimate: number; // projected final cost
+	overBy: number; // estimate - budget (negative = tracking under)
+	pct: number; // overBy / budget
+	method: 'revised-estimate' | 'burn-rate' | 'on-budget';
+	elapsedPct: number; // share of the schedule elapsed, 0..1
+}
+
+export function projectFinalCost(p: Project, now: Date = new Date()): Projection | null {
+	if (p.status === 'completed' || p.status === 'cancelled') return null;
+	if (!p.budget) return null;
+
+	// How far through the planned schedule are we?
+	let elapsed = NaN;
+	if (p.start_date && p.expected_end_date) {
+		const s = new Date(p.start_date).getTime();
+		const e = new Date(p.expected_end_date).getTime();
+		const n = now.getTime();
+		if (e > s) elapsed = Math.min(1, Math.max(0, (n - s) / (e - s)));
+	}
+
+	let estimate = p.budget;
+	let method: Projection['method'] = 'on-budget';
+
+	// Latest revised total cost from the budget-paper trail, if any.
+	const revised = p.budget_history?.length
+		? p.budget_history[p.budget_history.length - 1].estimated_total_cost
+		: null;
+	if (revised && revised > estimate) {
+		estimate = revised;
+		method = 'revised-estimate';
+	}
+
+	// Burn-rate extrapolation, but only once enough schedule has passed that the
+	// rate means something (avoids wild forecasts from a single early invoice).
+	const burn = Number.isFinite(elapsed) && elapsed >= 0.15 && p.spent > 0 ? p.spent / elapsed : null;
+	if (burn && burn > estimate) {
+		estimate = burn;
+		method = 'burn-rate';
+	}
+
+	estimate = Math.round(estimate);
+	return {
+		estimate,
+		overBy: estimate - p.budget,
+		pct: (estimate - p.budget) / p.budget,
+		method,
+		elapsedPct: Number.isFinite(elapsed) ? elapsed : 0
+	};
+}
+
+// Aggregate budget grouped by category, largest first — feeds the spend chart.
+export function spendByCategory(list: Project[]): { category: ProjectCategory; total: number }[] {
+	const totals = new Map<ProjectCategory, number>();
+	for (const p of list) totals.set(p.category, (totals.get(p.category) ?? 0) + p.budget);
+	return [...totals.entries()]
+		.map(([category, total]) => ({ category, total }))
+		.sort((a, b) => b.total - a.total);
+}
+
+// Projects ranked by how far spend has run over budget, biggest first.
+// Only those actually over (variance > 0); caller decides how many to show.
+export function overBudgetLeaderboard(list: Project[]): { project: Project; over: number }[] {
+	return list
+		.map((project) => ({ project, over: variance(project) }))
+		.filter((r) => r.over > 0)
+		.sort((a, b) => b.over - a.over);
+}
+
+// Count of projects due to finish in each year, oldest first — the delivery
+// pipeline. Uses actual end where known, else the expected date.
+export function completionsByYear(list: Project[]): { year: number; count: number }[] {
+	const counts = new Map<number, number>();
+	for (const p of list) {
+		const d = p.actual_end_date ?? p.expected_end_date;
+		if (!d) continue;
+		const year = new Date(d).getFullYear();
+		if (!Number.isFinite(year)) continue;
+		counts.set(year, (counts.get(year) ?? 0) + 1);
+	}
+	return [...counts.entries()]
+		.map(([year, count]) => ({ year, count }))
+		.sort((a, b) => a.year - b.year);
+}
+
 // ---- Filtering (shared by sidebar + map so they never diverge) ----
 export interface FilterCriteria {
 	category: ProjectCategory | 'all';

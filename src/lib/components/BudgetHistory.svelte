@@ -33,7 +33,7 @@
 
 <div>
 	<div class="flex items-baseline justify-between mb-1.5">
-		<span class="text-[0.6875rem] text-[var(--color-text-muted)] uppercase tracking-wider">
+		<span class="text-[0.6875rem] text-[var(--color-text-muted)]">
 			Estimated cost over time
 		</span>
 		{#if growth}
