@@ -24,6 +24,7 @@
 		class="max-md:hidden absolute top-20 left-4 w-[14rem] select-none pointer-events-none rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/80 backdrop-blur-sm px-3.5 py-3"
 		style="z-index: 750; opacity: {shown ? 1 : 0}; transform: translateX({$sidebarOpen ? '24rem' : '0'}); transition: opacity 220ms ease, transform 280ms cubic-bezier(0.4,0,0.2,1);"
 		aria-hidden={!shown}
+		inert={!shown}
 	>
 		<div class="text-[0.6875rem] text-[var(--color-text-muted)]">If current trends hold</div>
 		<div class="mt-1 text-[1.75rem] leading-none font-bold tabular-nums text-[var(--color-danger)]">

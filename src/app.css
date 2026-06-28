@@ -62,6 +62,21 @@ body {
 	background: var(--color-surface-hover);
 }
 
+/* Honour reduced-motion across the panel/control choreography (sidebar slide,
+   tab, legend, timeline, sea readout, and the Leaflet control shift). These move
+   via inline transitions, so neutralize animation/transition globally under the
+   preference; the result is an instant state change instead of a slide/fade. */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}
+
 .leaflet-container {
 	background: var(--color-bg) !important;
 }
