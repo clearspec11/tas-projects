@@ -3,7 +3,7 @@
 	import {
 		projects, selectedProject, filterCategory, filterStatus,
 		filterFunding, filterGovernmentLevel, filterFlagged, filterContractor, searchQuery, timelineRange, showHeatmap,
-		showConnections, mapStyle
+		showConnections, mapStyle, mapZoom
 	} from '$lib/stores';
 	import { STATUS_CONFIG, CATEGORY_CONFIG, FUNDING_CONFIG, GOVERNMENT_LEVEL_CONFIG, type Project } from '$lib/types';
 	import { TASMANIA_CENTER, TASMANIA_ZOOM } from '$lib/tasmania-geo';
@@ -21,7 +21,6 @@
 	let darkTiles: any;
 	let satTiles: any;
 	let L: any;
-
 	// Accent ring marking the currently selected project on the map
 	function drawSelection(p: Project | null) {
 		if (!selectionLayer || !L) return;
@@ -30,7 +29,7 @@
 		L.circleMarker([p.lat, p.lng], {
 			radius: markerRadius(p) + 8,
 			fill: false,
-			color: '#38bdf8',
+			color: '#d7a25c',
 			weight: 3,
 			opacity: 0.95,
 			className: 'tas-selected-ring'
@@ -65,7 +64,7 @@
 			<div style="font-family: 'IBM Plex Sans', system-ui; font-size: 12px; line-height: 1.4;">
 				<strong>${isRedFlag(p) ? FLAG_SVG_DANGER : ''}${p.name}</strong><br/>
 				<span style="color: ${cfg.color};">${cfg.label}</span> · ${govCfg.shortLabel} · ${fundCfg.shortLabel}<br/>
-				${formatCurrency(p.spent)} / ${formatCurrency(p.budget)} (${budgetPercent(p)}%)${late ? ` · <span style="color:#f59e0b;">${late}mo late</span>` : ''}
+				${formatCurrency(p.spent)} / ${formatCurrency(p.budget)} (${budgetPercent(p)}%)${late ? ` · <span style="color:#e0933a;">${late}mo late</span>` : ''}
 			</div>
 		`, {
 			direction: 'top',
@@ -120,7 +119,7 @@
 					radius: 35,
 					blur: 25,
 					maxZoom: 12,
-					gradient: { 0.2: '#38bdf8', 0.4: '#22c55e', 0.6: '#f59e0b', 0.8: '#ef4444', 1.0: '#dc2626' }
+					gradient: { 0.2: '#3fa39e', 0.4: '#5aa84f', 0.6: '#e0933a', 0.8: '#df5a39', 1.0: '#c0432a' }
 				}).addTo(map);
 			} catch {
 				// leaflet.heat not loaded
@@ -133,7 +132,7 @@
 				L.circleMarker([p.lat, p.lng], {
 					radius: markerRadius(p) + 5,
 					fill: false,
-					color: '#ef4444',
+					color: '#df5a39',
 					weight: 2,
 					opacity: 0.75,
 					dashArray: '2 3'
@@ -155,7 +154,7 @@
 					if (!related) return;
 					if (!filtered.some((f) => f.id === rid)) return;
 					L.polyline([[p.lat, p.lng], [related.lat, related.lng]], {
-						color: '#f59e0b',
+						color: '#d7a25c',
 						weight: 1.5,
 						opacity: 0.5,
 						dashArray: '6 6'
@@ -194,6 +193,10 @@
 			maxZoom: 14
 		});
 
+		// Mirror zoom so the sea overlay can fade past the whole-island view.
+		mapZoom.set(map.getZoom());
+		map.on('zoomend', () => mapZoom.set(map.getZoom()));
+
 		darkTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
 			attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
 			subdomains: 'abcd'
@@ -207,16 +210,16 @@
 		// so the island reads as a lit shoreline rather than a CAD outline.
 		L.geoJSON(tasmaniaGeoJson, {
 			style: {
-				color: '#2dd4bf',
+				color: '#34b893',
 				weight: 7,
 				opacity: 0.14,
-				fillColor: '#2dd4bf',
+				fillColor: '#34b893',
 				fillOpacity: 0.05
 			}
 		}).addTo(map);
 		L.geoJSON(tasmaniaGeoJson, {
 			style: {
-				color: '#7ee8da',
+				color: '#86e3c0',
 				weight: 1.25,
 				opacity: 0.85,
 				fill: false
@@ -239,8 +242,8 @@
 						html: `<div style="
 							display:flex;align-items:center;justify-content:center;
 							width:${size}px;height:${size}px;border-radius:50%;
-							background:rgba(56,189,248,0.25);border:2px solid #38bdf8;
-							color:#f1f5f9;font-weight:700;font-size:13px;font-family:'IBM Plex Sans',system-ui;
+							background:rgba(215,162,92,0.22);border:2px solid #d7a25c;
+							color:#edf3ea;font-weight:700;font-size:13px;font-family:'IBM Plex Sans',system-ui;
 						">${count}</div>`,
 						className: '',
 						iconSize: [size, size]
@@ -305,9 +308,9 @@
 		pointer-events: none;
 		z-index: 1;
 		background:
-			radial-gradient(120% 90% at 35% 115%, rgba(45, 212, 191, 0.10), transparent 55%),
-			radial-gradient(90% 80% at 70% 120%, rgba(74, 222, 128, 0.07), transparent 50%),
-			radial-gradient(70% 60% at 55% 125%, rgba(167, 139, 250, 0.05), transparent 55%);
+			radial-gradient(120% 90% at 35% 115%, rgba(52, 184, 147, 0.10), transparent 55%),
+			radial-gradient(90% 80% at 70% 120%, rgba(90, 168, 79, 0.08), transparent 50%),
+			radial-gradient(70% 60% at 55% 125%, rgba(215, 162, 92, 0.06), transparent 55%);
 		animation: tas-aurora-breathe 26s ease-in-out infinite;
 	}
 	@keyframes tas-aurora-breathe {
@@ -320,15 +323,15 @@
 		}
 	}
 	:global(.tas-tooltip) {
-		background: rgba(10, 24, 29, 0.95) !important;
-		color: #eef6f6 !important;
-		border: 1px solid #22424c !important;
+		background: rgba(12, 20, 16, 0.95) !important;
+		color: #edf3ea !important;
+		border: 1px solid #2c3f34 !important;
 		border-radius: 8px !important;
 		padding: 8px 12px !important;
 		box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
 	}
 	:global(.tas-tooltip::before) {
-		border-top-color: rgba(10, 24, 29, 0.95) !important;
+		border-top-color: rgba(12, 20, 16, 0.95) !important;
 	}
 	:global(.leaflet-popup-content-wrapper) {
 		border-radius: 12px !important;

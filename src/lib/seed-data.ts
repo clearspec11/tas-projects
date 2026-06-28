@@ -20,23 +20,25 @@ const RAW_PROJECTS: Project[] = [
 		contractor: 'McConnell Dowell',
 		related_project_ids: ['10'],
 		// Verified from Tasmanian Budget Papers BP1 Ch6 (Estimated Total Cost),
-		// 2019-20 through 2023-24. Held at $576M, revised to $786M in 2022-23.
+		// 2019-20 through 2023-24 (HTML) and the 2024-25 Budget Paper No 1 (PDF).
+		// Held at $576M, revised to $786M in 2022-23 and held since.
 		source_url: 'https://www.treasury.tas.gov.au/BudgetPapersHTML/Budget2023/BP1/2023-24-BP1-6-Infrastructure-Investment.htm',
 		budget_history: [
 			{ fiscal_year: '2019-20', estimated_total_cost: 576_000_000 },
 			{ fiscal_year: '2020-21', estimated_total_cost: 576_000_000 },
 			{ fiscal_year: '2021-22', estimated_total_cost: 576_000_000 },
 			{ fiscal_year: '2022-23', estimated_total_cost: 786_000_000 },
-			{ fiscal_year: '2023-24', estimated_total_cost: 786_000_000 }
+			{ fiscal_year: '2023-24', estimated_total_cost: 786_000_000 },
+			{ fiscal_year: '2024-25', estimated_total_cost: 786_000_000 }
 		],
-		last_verified: '2026-06-14',
+		last_verified: '2026-06-28',
 		created_at: '2024-01-01T00:00:00Z',
 		updated_at: '2024-06-01T00:00:00Z'
 	},
 	{
 		id: '2',
 		name: 'Royal Hobart Hospital Redevelopment',
-		description: 'Major redevelopment of the Royal Hobart Hospital including new clinical services building, expanded emergency department, and upgraded patient facilities.',
+		description: 'Major redevelopment of the Royal Hobart Hospital including new clinical services building, expanded emergency department, and upgraded patient facilities. The Tasmanian Auditor-General reviewed the project (Report No. 5 of 2019-20), examining its governance, financial oversight and management amid sustained cost and schedule pressure. Note: the Budget Papers record a $469.2M state-funded redevelopment line; the figures shown here reflect the broader project cost and remain indicative pending a single reconciled source.',
 		category: 'health',
 		status: 'over_budget',
 		funding_type: 'public',
@@ -50,26 +52,40 @@ const RAW_PROJECTS: Project[] = [
 		expected_end_date: '2027-12-31',
 		contractor: 'John Holland',
 		related_project_ids: [],
+		// Auditor-General context; figures remain indicative (no single source
+		// reconciles the broader project cost), so this stays unverified.
+		source_url: 'https://www.audit.tas.gov.au/publication/royal-hobart-hospital-redevelopment-project/',
 		created_at: '2024-01-01T00:00:00Z',
 		updated_at: '2024-06-01T00:00:00Z'
 	},
 	{
 		id: '3',
-		name: 'Launceston General Hospital Masterplan',
-		description: 'Stage 1 of the Launceston General Hospital redevelopment including new acute mental health unit, upgraded emergency department, and car parking.',
+		name: 'Launceston General Hospital Redevelopment - Stage 2',
+		description: 'Stage 2 of the Launceston General Hospital redevelopment, including a new mental health precinct, expanded emergency department, and additional inpatient capacity.',
 		category: 'health',
 		status: 'on_budget',
 		funding_type: 'public',
 		government_level: 'state',
 		budget: 580_000_000,
 		spent: 340_000_000,
+		original_budget: 580_000_000,
 		lat: -41.4373,
 		lng: 147.1352,
 		location_name: 'Launceston',
 		start_date: '2023-07-01',
-		expected_end_date: '2029-06-30',
+		expected_end_date: '2032-06-30',
 		contractor: 'Vos Construction',
 		related_project_ids: [],
+		// Verified from Budget Papers BP1 Ch6 (Estimated Total Cost). The "LGH
+		// Redevelopment - Stage 2 (including Mental Health Precinct)" line held at
+		// $580M across 2022-23 and 2023-24, completion 2032. (Stage 1, a separate
+		// $87.3M line, is not this project.)
+		source_url: 'https://www.treasury.tas.gov.au/BudgetPapersHTML/Budget2023/BP1/2023-24-BP1-6-Infrastructure-Investment.htm',
+		budget_history: [
+			{ fiscal_year: '2022-23', estimated_total_cost: 580_000_000 },
+			{ fiscal_year: '2023-24', estimated_total_cost: 580_000_000 }
+		],
+		last_verified: '2026-06-28',
 		created_at: '2024-01-01T00:00:00Z',
 		updated_at: '2024-06-01T00:00:00Z'
 	},

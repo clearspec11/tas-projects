@@ -49,18 +49,18 @@ export interface Project {
 }
 
 export const FUNDER_CONFIG: Record<keyof FundingBreakdown, { label: string; color: string }> = {
-	federal: { label: 'Federal', color: '#6366f1' },
-	state: { label: 'State', color: '#38bdf8' },
-	local: { label: 'Local', color: '#34d399' },
-	private: { label: 'Private', color: '#f59e0b' }
+	federal: { label: 'Federal', color: '#9a8ad6' },
+	state: { label: 'State', color: '#3fa39e' },
+	local: { label: 'Local', color: '#5aa84f' },
+	private: { label: 'Private', color: '#e0933a' }
 };
 
 export const STATUS_CONFIG: Record<ProjectStatus, { label: string; color: string; bgClass: string }> = {
-	on_budget: { label: 'On Budget', color: '#22c55e', bgClass: 'bg-green-500/20 text-green-400' },
-	over_budget: { label: 'Over Budget', color: '#ef4444', bgClass: 'bg-red-500/20 text-red-400' },
-	under_budget: { label: 'Under Budget', color: '#38bdf8', bgClass: 'bg-sky-500/20 text-sky-400' },
-	completed: { label: 'Completed', color: '#a78bfa', bgClass: 'bg-violet-500/20 text-violet-400' },
-	cancelled: { label: 'Cancelled', color: '#6b7280', bgClass: 'bg-gray-500/20 text-gray-400' }
+	on_budget: { label: 'On Budget', color: '#5aa84f', bgClass: 'bg-[#5aa84f]/15 text-[#7cc070]' },
+	over_budget: { label: 'Over Budget', color: '#df5a39', bgClass: 'bg-[#df5a39]/15 text-[#ec8366]' },
+	under_budget: { label: 'Under Budget', color: '#3fa39e', bgClass: 'bg-[#3fa39e]/15 text-[#63c0bb]' },
+	completed: { label: 'Completed', color: '#ab8ad6', bgClass: 'bg-[#ab8ad6]/15 text-[#c2a8e3]' },
+	cancelled: { label: 'Cancelled', color: '#889085', bgClass: 'bg-[#889085]/15 text-[#a8b0a4]' }
 };
 
 export const CATEGORY_CONFIG: Record<ProjectCategory, { label: string }> = {
@@ -75,9 +75,9 @@ export const CATEGORY_CONFIG: Record<ProjectCategory, { label: string }> = {
 };
 
 export const GOVERNMENT_LEVEL_CONFIG: Record<GovernmentLevel, { label: string; shortLabel: string; color: string; description: string }> = {
-	federal: { label: 'Federal Government', shortLabel: 'Federal', color: '#818cf8', description: 'Led and mainly funded by the Australian Government' },
-	state: { label: 'State Government', shortLabel: 'State', color: '#38bdf8', description: 'Led by the Tasmanian state government' },
-	local: { label: 'Local Council', shortLabel: 'Council', color: '#34d399', description: 'Led by a local council' }
+	federal: { label: 'Federal Government', shortLabel: 'Federal', color: '#9a8ad6', description: 'Led and mainly funded by the Australian Government' },
+	state: { label: 'State Government', shortLabel: 'State', color: '#3fa39e', description: 'Led by the Tasmanian state government' },
+	local: { label: 'Local Council', shortLabel: 'Council', color: '#5aa84f', description: 'Led by a local council' }
 };
 
 export const FUNDING_CONFIG: Record<FundingType, { label: string; shortLabel: string; dashArray: string; borderStyle: string; description: string }> = {
