@@ -213,6 +213,13 @@
 					<ArrowUpRight size={15} class="text-[var(--color-accent)]" />
 				</a>
 			{/if}
+
+			{#if p.source_url?.includes('treasury.tas.gov.au')}
+				<p class="mt-1.5 text-[0.625rem] text-[var(--color-text-muted)] leading-snug">
+					Budget figures from the Tasmanian Budget Papers, © State of Tasmania, used under
+					<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer" class="underline hover:text-[var(--color-text)]">CC BY 4.0</a>.
+				</p>
+			{/if}
 		</div>
 	</div>
 {/if}
