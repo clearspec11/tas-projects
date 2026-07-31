@@ -8,7 +8,9 @@
 		format = (n: number) => String(n),
 		labelWidth = '7rem'
 	}: {
-		data: { label: string; value: number }[];
+		// A per-row `color` wins over the shared one, so a chart whose categories
+		// already have semantic colours (funders, statuses) can carry them through.
+		data: { label: string; value: number; color?: string }[];
 		color?: string;
 		format?: (n: number) => string;
 		labelWidth?: string;
@@ -27,10 +29,10 @@
 			<div class="h-5 rounded bg-[var(--color-bg)] overflow-hidden">
 				<div
 					class="h-full rounded tas-bar"
-					style="width: {(d.value / max) * 100}%; background: {color};"
+					style="width: {(d.value / max) * 100}%; background: {d.color ?? color};"
 				></div>
 			</div>
-			<span class="tabular-nums font-medium w-16 text-right" style="color: {color}">{format(d.value)}</span>
+			<span class="tabular-nums font-medium w-16 text-right" style="color: {d.color ?? color}">{format(d.value)}</span>
 		</div>
 	{/each}
 </div>

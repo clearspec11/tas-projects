@@ -179,6 +179,86 @@ export function spendByCategory(list: Project[]): { category: ProjectCategory; t
 		.sort((a, b) => b.total - a.total);
 }
 
+// Aggregate budget by who pays, largest first. Uses each project's explicit
+// funding_breakdown where present and the derived split otherwise, so the totals
+// answer "whose money is this" across the whole book rather than per project.
+export function spendByFunder(list: Project[]): { funder: keyof FundingBreakdown; total: number }[] {
+	const totals: FundingBreakdown = { federal: 0, state: 0, local: 0, private: 0 };
+	for (const p of list) {
+		const { breakdown } = resolveFundingBreakdown(p);
+		totals.federal += breakdown.federal;
+		totals.state += breakdown.state;
+		totals.local += breakdown.local;
+		totals.private += breakdown.private;
+	}
+	return (Object.keys(totals) as (keyof FundingBreakdown)[])
+		.map((funder) => ({ funder, total: Math.round(totals[funder]) }))
+		.filter((r) => r.total > 0)
+		.sort((a, b) => b.total - a.total);
+}
+
+// Tasmania's three standard regional groupings, derived from each project's
+// coordinates (no region column exists). The split follows the Cradle Coast /
+// North / South LGA groupings: everything below the Midlands reads as South, and
+// the north is divided at the Tamar. Projects marked "Statewide" aren't regional.
+export type Region = 'Statewide' | 'South' | 'North' | 'North West';
+
+export function regionOf(p: Project): Region {
+	if (/statewide/i.test(p.location_name)) return 'Statewide';
+	if (p.lat <= -42.3) return 'South';
+	return p.lng >= 146.7 ? 'North' : 'North West';
+}
+
+// Aggregate budget grouped by region, largest first.
+export function spendByRegion(list: Project[]): { region: Region; total: number }[] {
+	const totals = new Map<Region, number>();
+	for (const p of list) totals.set(regionOf(p), (totals.get(regionOf(p)) ?? 0) + p.budget);
+	return [...totals.entries()]
+		.map(([region, total]) => ({ region, total }))
+		.sort((a, b) => b.total - a.total);
+}
+
+// Headline figures across the book.
+//
+// `overrunPct` is deliberately measured only across projects that have actually
+// run over, money-weighted (their overspend / their budget). Averaging spend
+// against budget over every project instead would mostly measure how much work
+// is still unfinished — a book of half-built projects would report a large
+// "under budget" number, which reads as good news and is not.
+//
+// `spentPct` reports that progress figure separately and neutrally.
+export function portfolioAverages(list: Project[]): {
+	count: number;
+	totalBudget: number;
+	avgBudget: number;
+	spentPct: number;
+	overrunPct: number;
+	overCount: number;
+	flaggedPct: number;
+} {
+	const count = list.length;
+	const totalBudget = list.reduce((s, p) => s + p.budget, 0);
+	const totalSpent = list.reduce((s, p) => s + p.spent, 0);
+
+	const over = list.filter((p) => variance(p) > 0);
+	const overBudgetTotal = over.reduce((s, p) => s + p.budget, 0);
+	const overspend = over.reduce((s, p) => s + variance(p), 0);
+
+	return {
+		count,
+		totalBudget,
+		avgBudget: count ? Math.round(totalBudget / count) : 0,
+		spentPct: totalBudget ? totalSpent / totalBudget : 0,
+		overrunPct: overBudgetTotal ? overspend / overBudgetTotal : 0,
+		overCount: over.length,
+		flaggedPct: count ? flagged(list) / count : 0
+	};
+}
+
+function flagged(list: Project[]): number {
+	return list.filter((p) => isRedFlag(p)).length;
+}
+
 // Projects ranked by how far spend has run over budget, biggest first.
 // Only those actually over (variance > 0); caller decides how many to show.
 export function overBudgetLeaderboard(list: Project[]): { project: Project; over: number }[] {
