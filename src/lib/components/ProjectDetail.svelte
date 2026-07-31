@@ -196,7 +196,7 @@
 				</div>
 			{:else}
 				<div class="mt-2 px-2.5 py-1.5 rounded-lg bg-[var(--color-warning)]/10 border border-[var(--color-warning)]/30 text-[0.6875rem] text-[var(--color-warning)] leading-snug">
-					Illustrative figures — not yet verified against an official source.
+					Illustrative figures: not yet verified against an official source.
 				</div>
 			{/if}
 
