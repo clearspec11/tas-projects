@@ -3,11 +3,12 @@
 	import { projects } from '$lib/stores';
 	import { SEED_PROJECTS } from '$lib/seed-data';
 	import { loadProjects } from '$lib/data';
-	import { CATEGORY_CONFIG } from '$lib/types';
+	import { CATEGORY_CONFIG, FUNDER_CONFIG } from '$lib/types';
 	import BarList from '$lib/components/BarList.svelte';
 	import {
 		formatCurrency, spendByCategory, overBudgetLeaderboard,
-		completionsByYear, projectFinalCost
+		completionsByYear, projectFinalCost, spendByFunder, spendByRegion,
+		portfolioAverages
 	} from '$lib/metrics';
 
 	onMount(() => {
@@ -37,10 +38,21 @@
 	const completionsData = $derived(
 		completionsByYear($projects).map((r) => ({ label: String(r.year), value: r.count }))
 	);
+	const funderData = $derived(
+		spendByFunder($projects).map((r) => ({
+			label: FUNDER_CONFIG[r.funder].label,
+			value: r.total,
+			color: FUNDER_CONFIG[r.funder].color
+		}))
+	);
+	const regionData = $derived(
+		spendByRegion($projects).map((r) => ({ label: r.region, value: r.total }))
+	);
+	const averages = $derived(portfolioAverages($projects));
 </script>
 
 <svelte:head>
-	<title>Insights — TAS Project Tracker</title>
+	<title>Insights: TAS Project Tracker</title>
 </svelte:head>
 
 <div class="h-full overflow-y-auto bg-[var(--color-bg)]">
@@ -71,6 +83,30 @@
 			{/if}
 		</div>
 
+		<!-- Portfolio averages: the shape of a typical project on the book -->
+		<div class="mt-4 grid grid-cols-4 max-md:grid-cols-2 gap-2">
+			<div class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-3">
+				<div class="text-[1.375rem] leading-none font-mono font-bold tabular-nums text-[var(--color-text)]">{formatCurrency(averages.totalBudget)}</div>
+				<div class="text-[0.6875rem] text-[var(--color-text-muted)] mt-1.5">Total budget</div>
+			</div>
+			<div class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-3">
+				<div class="text-[1.375rem] leading-none font-mono font-bold tabular-nums text-[var(--color-accent)]">{formatCurrency(averages.avgBudget)}</div>
+				<div class="text-[0.6875rem] text-[var(--color-text-muted)] mt-1.5">Average project</div>
+			</div>
+			<div class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-3">
+				<div class="text-[1.375rem] leading-none font-mono font-bold tabular-nums text-[var(--color-danger)]">
+					+{Math.round(averages.overrunPct * 100)}%
+				</div>
+				<div class="text-[0.6875rem] text-[var(--color-text-muted)] mt-1.5">
+					Overrun on the {averages.overCount} over budget
+				</div>
+			</div>
+			<div class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-3">
+				<div class="text-[1.375rem] leading-none font-mono font-bold tabular-nums text-[var(--color-warning)]">{Math.round(averages.flaggedPct * 100)}%</div>
+				<div class="text-[0.6875rem] text-[var(--color-text-muted)] mt-1.5">Over budget or late</div>
+			</div>
+		</div>
+
 		<!-- Charts -->
 		<div class="mt-4 grid grid-cols-2 max-md:grid-cols-1 gap-4">
 			<section class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-4">
@@ -87,6 +123,23 @@
 				{:else}
 					<div class="py-10 text-center text-sm text-[var(--color-text-muted)]">No projects are over budget.</div>
 				{/if}
+			</section>
+
+			<section class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-4">
+				<h2 class="text-sm font-semibold">Who pays</h2>
+				<p class="text-[0.6875rem] text-[var(--color-text-muted)] mt-0.5 mb-3">
+					Budget by funding source. Estimated from governing tier and delivery model where a project
+					publishes no split.
+				</p>
+				<BarList data={funderData} format={formatCurrency} labelWidth="4.5rem" />
+			</section>
+
+			<section class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-4">
+				<h2 class="text-sm font-semibold">Budget by region</h2>
+				<p class="text-[0.6875rem] text-[var(--color-text-muted)] mt-0.5 mb-3">
+					Committed budget across Tasmania's three regions, grouped from each project's location.
+				</p>
+				<BarList data={regionData} color="var(--color-accent)" format={formatCurrency} labelWidth="5.5rem" />
 			</section>
 
 			<section class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-4 col-span-2 max-md:col-span-1">

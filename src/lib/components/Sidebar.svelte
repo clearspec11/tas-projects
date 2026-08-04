@@ -283,7 +283,7 @@
 							<span class="truncate">{project.name}</span>
 						</div>
 						<div class="text-xs text-[var(--color-text-muted)] mt-0.5">
-							{project.council ?? project.location_name}{#if !isVerified(project)}<span title="Illustrative figures — not yet verified against an official source"> · illustrative</span>{/if}
+							{project.council ?? project.location_name}{#if !isVerified(project)}<span title="Illustrative figures: not yet verified against an official source"> · illustrative</span>{/if}
 						</div>
 					</div>
 					<div class="flex flex-col items-end gap-0.5">

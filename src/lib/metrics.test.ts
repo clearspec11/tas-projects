@@ -18,6 +18,10 @@ import {
 	spendByCategory,
 	overBudgetLeaderboard,
 	completionsByYear,
+	spendByFunder,
+	spendByRegion,
+	regionOf,
+	portfolioAverages,
 	type FilterCriteria
 } from './metrics';
 
@@ -362,5 +366,81 @@ describe('aggregate helpers', () => {
 			{ year: 2025, count: 1 },
 			{ year: 2027, count: 2 }
 		]);
+	});
+
+	it('spendByFunder sums each funder across the book, largest first', () => {
+		const out = spendByFunder([
+			makeProject({ budget: 100, funding_type: 'public', government_level: 'state' }),
+			makeProject({ budget: 100, funding_type: 'public', government_level: 'state' })
+		]);
+		// state-led + fully public: 80/20 state/federal, no private or local
+		expect(out).toEqual([
+			{ funder: 'state', total: 160 },
+			{ funder: 'federal', total: 40 }
+		]);
+		expect(out.map((r) => r.total).reduce((a, b) => a + b, 0)).toBe(200);
+	});
+
+	it('spendByFunder honours an explicit breakdown over the derived split', () => {
+		const out = spendByFunder([
+			makeProject({ budget: 100, funding_breakdown: { federal: 100, state: 0, local: 0, private: 0 } })
+		]);
+		expect(out).toEqual([{ funder: 'federal', total: 100 }]);
+	});
+
+	it('regionOf splits Tasmania south / north / north west', () => {
+		expect(regionOf(makeProject({ lat: -42.88, lng: 147.33 }))).toBe('South'); // Hobart
+		expect(regionOf(makeProject({ lat: -41.44, lng: 147.14 }))).toBe('North'); // Launceston
+		expect(regionOf(makeProject({ lat: -41.18, lng: 146.35 }))).toBe('North West'); // Devonport
+		expect(regionOf(makeProject({ lat: -42.08, lng: 145.55 }))).toBe('North West'); // Queenstown
+		expect(regionOf(makeProject({ location_name: 'Statewide' }))).toBe('Statewide');
+	});
+
+	it('spendByRegion aggregates budget per region, largest first', () => {
+		const out = spendByRegion([
+			makeProject({ budget: 10, lat: -42.88, lng: 147.33 }),
+			makeProject({ budget: 50, lat: -41.44, lng: 147.14 }),
+			makeProject({ budget: 5, lat: -41.44, lng: 147.14 })
+		]);
+		expect(out).toEqual([
+			{ region: 'North', total: 55 },
+			{ region: 'South', total: 10 }
+		]);
+	});
+
+	it('portfolioAverages reports totals, spend progress and flagged share', () => {
+		const out = portfolioAverages([
+			makeProject({ budget: 100, spent: 150, expected_end_date: '2030-01-01' }), // over -> flagged
+			makeProject({ budget: 300, spent: 300, expected_end_date: '2030-01-01' })
+		]);
+		expect(out.count).toBe(2);
+		expect(out.totalBudget).toBe(400);
+		expect(out.avgBudget).toBe(200);
+		expect(out.spentPct).toBeCloseTo(450 / 400);
+		expect(out.flaggedPct).toBe(0.5);
+	});
+
+	it('portfolioAverages measures overrun only across projects actually over', () => {
+		const out = portfolioAverages([
+			makeProject({ budget: 100, spent: 150 }), // 50% over
+			// Barely-started project: spend well under budget because the work is
+			// unfinished. It must not dilute the overrun figure into "under budget".
+			makeProject({ budget: 900, spent: 10 })
+		]);
+		expect(out.overCount).toBe(1);
+		expect(out.overrunPct).toBeCloseTo(0.5);
+		expect(out.spentPct).toBeCloseTo(160 / 1000);
+	});
+
+	it('portfolioAverages is safe on an empty book', () => {
+		expect(portfolioAverages([])).toEqual({
+			count: 0,
+			totalBudget: 0,
+			avgBudget: 0,
+			spentPct: 0,
+			overrunPct: 0,
+			overCount: 0,
+			flaggedPct: 0
+		});
 	});
 });

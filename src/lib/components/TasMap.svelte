@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import {
 		projects, selectedProject, filterCategory, filterStatus,
 		filterFunding, filterGovernmentLevel, filterFlagged, filterContractor, searchQuery, timelineRange, showHeatmap,
@@ -21,6 +21,17 @@
 	let darkTiles: any;
 	let satTiles: any;
 	let L: any;
+
+	// Leaflet setup is async (dynamic imports), and Svelte never awaits an async
+	// onMount's return value — a cleanup returned from there would never run. So
+	// the teardown is parked here and invoked from a synchronous onDestroy.
+	let cleanup: (() => void) | undefined;
+	let destroyed = false;
+	onDestroy(() => {
+		destroyed = true;
+		cleanup?.();
+	});
+
 	// Accent ring marking the currently selected project on the map
 	function drawSelection(p: Project | null) {
 		if (!selectionLayer || !L) return;
@@ -282,11 +293,13 @@
 			selectedProject.subscribe((p) => drawSelection(p))
 		];
 
-		return () => {
+		cleanup = () => {
 			unsubs.forEach((u) => u());
 			resizeObserver.disconnect();
 			map.remove();
 		};
+		// Unmounted while the dynamic imports were still in flight: tear down now.
+		if (destroyed) cleanup();
 	});
 
 	export function flyTo(lat: number, lng: number) {
