@@ -30,6 +30,6 @@
 		class="{btn} {$showConnections ? 'text-[var(--color-accent)] border-[var(--color-accent)]' : 'text-[var(--color-text)]'}"
 		onclick={() => showConnections.update(v => !v)}
 	>
-		<Link2 size={14} /> Links
+		<Link2 size={14} /> Connections
 	</button>
 </div>
