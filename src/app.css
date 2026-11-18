@@ -86,6 +86,12 @@ body {
 	filter: saturate(0.4) brightness(0.42) sepia(0.4) hue-rotate(55deg);
 }
 
+/* The dark canvas is already near-black, so the pane filter above would bury its
+   roads and place names. Lift just these layers; satellite keeps the full dim. */
+.leaflet-layer.tiles-dark {
+	filter: brightness(1.9) contrast(1.1);
+}
+
 .leaflet-control-zoom a {
 	background: var(--color-surface) !important;
 	color: var(--color-text) !important;

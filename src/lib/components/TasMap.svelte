@@ -208,10 +208,24 @@
 		mapZoom.set(map.getZoom());
 		map.on('zoomend', () => mapZoom.set(map.getZoom()));
 
-		darkTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-			attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
-			subdomains: 'abcd'
-		}).addTo(map);
+		// Esri's Dark Gray Canvas: a keyless dark basemap from the same service as
+		// the satellite layer. (CARTO's dark tiles now come back watermarked
+		// "API KEY REQUIRED" without a paid key.) Place names are a separate
+		// overlay, grouped with the base so the style toggle swaps both.
+		const ESRI = 'https://server.arcgisonline.com/ArcGIS/rest/services';
+		const esriAttribution =
+			'Tiles &copy; <a href="https://www.esri.com/">Esri</a>, HERE, Garmin, &copy; OpenStreetMap contributors';
+		darkTiles = L.layerGroup([
+			L.tileLayer(`${ESRI}/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}`, {
+				attribution: esriAttribution,
+				maxNativeZoom: 16,
+				className: 'tiles-dark'
+			}),
+			L.tileLayer(`${ESRI}/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}`, {
+				maxNativeZoom: 16,
+				className: 'tiles-dark'
+			})
+		]).addTo(map);
 
 		satTiles = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
 			attribution: '&copy; Esri'
