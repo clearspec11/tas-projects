@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { onMount, tick } from 'svelte';
+	import { MediaQuery } from 'svelte/reactivity';
 	import { selectedProject } from '$lib/stores';
 	import { STATUS_CONFIG, CATEGORY_CONFIG, FUNDING_CONFIG, GOVERNMENT_LEVEL_CONFIG, FUNDER_CONFIG, type FundingBreakdown } from '$lib/types';
 	import { formatCurrencyPrecise as formatCurrency, formatDate, budgetPercent, variance, variancePct, delayMonths, isRedFlag, isVerified, resolveFundingBreakdown } from '$lib/metrics';
@@ -24,6 +26,46 @@
 	function close() {
 		selectedProject.set(null);
 	}
+
+	// Full-screen sheet below md (a dialog over the map or list), a side panel
+	// beside the map from md up.
+	const phone = new MediaQuery('not all and (min-width: 48rem)', false);
+
+	let panel: HTMLDivElement | undefined = $state();
+	let heading: HTMLHeadingElement | undefined = $state();
+
+	// Opening moves focus to the project name, so keyboard and screen reader
+	// users land in the panel and hear what opened. Closing hands focus back to
+	// the marker or list row that opened it.
+	onMount(() => {
+		let openId: string | null = null;
+		// Map markers are SVG paths, list rows are buttons; both can take focus.
+		let opener: HTMLElement | SVGElement | null = null;
+		return selectedProject.subscribe((p) => {
+			const id = p?.id ?? null;
+			if (id === openId) return;
+			const wasOpen = openId !== null;
+			openId = id;
+			// Read the focused element now, before the page under a phone sheet
+			// turns inert and drops it.
+			const el = document.activeElement;
+			const active = el instanceof HTMLElement || el instanceof SVGElement ? el : null;
+			if (id !== null) {
+				const outside = active !== null && active !== document.body && !panel?.contains(active);
+				if (!wasOpen || outside) opener = outside ? active : null;
+				tick().then(() => {
+					if (panel) panel.scrollTop = 0;
+					heading?.focus({ preventScroll: true });
+				});
+			} else {
+				const back = opener;
+				opener = null;
+				tick().then(() => {
+					if (back?.isConnected) back.focus({ preventScroll: true });
+				});
+			}
+		});
+	});
 </script>
 
 {#if $selectedProject}
@@ -40,6 +82,9 @@
 	{@const funding = resolveFundingBreakdown(p)}
 
 	<div
+		bind:this={panel}
+		role={phone.current ? 'dialog' : 'region'}
+		aria-labelledby="project-detail-title"
 		transition:fly={{ y: 12, duration: dur(200), easing: cubicOut }}
 		class="absolute top-14 right-4 w-96 max-h-[calc(100vh-8rem)] max-md:inset-0 max-md:top-0 max-md:w-auto max-md:max-h-none max-md:rounded-none overflow-y-auto bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl shadow-2xl z-[1000]"
 	>
@@ -48,7 +93,7 @@
 			<div class="flex items-start justify-between">
 				<div>
 					<div class="flex items-center gap-1.5 text-xs text-[var(--color-text-muted)] mb-1"><CatIcon size={13} /> {catCfg.label}</div>
-					<h2 class="flex items-start gap-1.5 text-xl font-bold leading-tight [text-wrap:balance]">{#if flagged}<Flag size={18} class="shrink-0 mt-1 text-[var(--color-danger)]" aria-label="Flagged" />{/if}<span>{p.name}</span></h2>
+					<h2 bind:this={heading} id="project-detail-title" tabindex="-1" class="flex items-start gap-1.5 text-xl font-bold leading-tight [text-wrap:balance]">{#if flagged}<Flag size={18} class="shrink-0 mt-1 text-[var(--color-danger)]" aria-label="Flagged" />{/if}<span>{p.name}</span></h2>
 					<div class="text-xs text-[var(--color-text-muted)] mt-1">
 					{p.council ? `${p.council} · ` : ''}{p.location_name}
 				</div>

@@ -20,6 +20,7 @@
 	<!-- Heatmap toggle -->
 	<button
 		class="{btn} {$showHeatmap ? 'text-[var(--color-accent)] border-[var(--color-accent)]' : 'text-[var(--color-text)]'}"
+		aria-pressed={$showHeatmap}
 		onclick={() => showHeatmap.update(v => !v)}
 	>
 		<Flame size={14} /> Heatmap
@@ -28,6 +29,7 @@
 	<!-- Connections toggle -->
 	<button
 		class="{btn} {$showConnections ? 'text-[var(--color-accent)] border-[var(--color-accent)]' : 'text-[var(--color-text)]'}"
+		aria-pressed={$showConnections}
 		onclick={() => showConnections.update(v => !v)}
 	>
 		<Link2 size={14} /> Connections
