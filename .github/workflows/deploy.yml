@@ -27,6 +27,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Nothing is published unless the checks pass.
+      - name: Type-check
+        run: npm run check
+
+      - name: Test
+        run: npm test
+
       - name: Build
         run: npm run build
         env:
