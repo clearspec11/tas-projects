@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { STATUS_CONFIG, GOVERNMENT_LEVEL_CONFIG } from '$lib/types';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { Flag, Minus, Info } from '@lucide/svelte';
 	import InfoTip from './InfoTip.svelte';
 	import { GLOSSARY, MAP_ORIENTATION } from '$lib/glossary';
@@ -10,6 +10,8 @@
 	// choice is remembered for returning visitors.
 	const KEY = 'tas-legend-open';
 	let expanded = $state(false);
+	let openButton: HTMLButtonElement | undefined = $state();
+	let closeButton: HTMLButtonElement | undefined = $state();
 
 	onMount(() => {
 		try {
@@ -19,13 +21,17 @@
 		}
 	});
 
-	function setExpanded(open: boolean) {
+	async function setExpanded(open: boolean) {
 		expanded = open;
 		try {
 			localStorage.setItem(KEY, open ? '1' : '0');
 		} catch {
 			// storage unavailable; the choice just won't persist
 		}
+		// The button that was pressed is swapped out for its counterpart, so
+		// carry focus across instead of letting it fall back to the page.
+		await tick();
+		(open ? closeButton : openButton)?.focus();
 	}
 </script>
 
@@ -38,6 +44,7 @@
 	{#if !expanded}
 	<button
 		class="inline-flex items-center gap-1.5 bg-[var(--color-surface)]/95 backdrop-blur border border-[var(--color-border)] rounded-lg px-3 py-2 text-xs text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] cursor-pointer"
+		bind:this={openButton}
 		aria-expanded="false"
 		onclick={() => setExpanded(true)}
 	><Info size={14} class="text-[var(--color-accent)]" /> Legend</button>
@@ -46,7 +53,9 @@
 			<div class="flex items-center justify-between mb-2">
 				<span class="text-xs font-semibold text-[var(--color-text)]">Legend</span>
 				<button
+					bind:this={closeButton}
 					aria-label="Collapse legend"
+					aria-expanded="true"
 					class="text-[var(--color-text-muted)] hover:text-[var(--color-text)] cursor-pointer"
 					onclick={() => setExpanded(false)}
 				><Minus size={14} /></button>

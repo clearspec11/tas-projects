@@ -263,7 +263,7 @@
 				iconCreateFunction: (cluster: any) => {
 					const count = cluster.getChildCount();
 					const size = count > 10 ? 44 : count > 5 ? 36 : 30;
-					return L.divIcon({
+					const icon = L.divIcon({
 						html: `<div style="
 							display:flex;align-items:center;justify-content:center;
 							width:${size}px;height:${size}px;border-radius:50%;
@@ -273,6 +273,15 @@
 						className: '',
 						iconSize: [size, size]
 					});
+					// Leaflet makes the cluster a focusable button but gives it no name,
+					// so a screen reader would only hear the bare count.
+					const createIcon = icon.createIcon.bind(icon);
+					icon.createIcon = (oldIcon?: HTMLElement) => {
+						const el = createIcon(oldIcon);
+						el.setAttribute('aria-label', `${count} projects, zoom in`);
+						return el;
+					};
+					return icon;
 				}
 			}).addTo(map);
 		} catch {

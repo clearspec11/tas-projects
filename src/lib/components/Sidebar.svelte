@@ -181,6 +181,7 @@
 		/>
 		<div class="flex gap-2">
 			<select
+				aria-label="Status"
 				class="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 text-xs text-[var(--color-text)] focus:border-[var(--color-accent)]"
 				value={$filterStatus}
 				onchange={(e) => filterStatus.set((e.target as HTMLSelectElement).value as ProjectStatus | 'all')}
@@ -222,6 +223,7 @@
 			<div class="space-y-2 pt-1">
 				<div class="flex gap-2">
 					<select
+						aria-label="Category"
 						class="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 text-xs text-[var(--color-text)] focus:border-[var(--color-accent)]"
 						value={$filterCategory}
 						onchange={(e) => filterCategory.set((e.target as HTMLSelectElement).value as ProjectCategory | 'all')}
@@ -244,6 +246,7 @@
 				</div>
 				<div class="flex gap-2">
 					<select
+						aria-label="Government level"
 						class="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 text-xs text-[var(--color-text)] focus:border-[var(--color-accent)]"
 						value={$filterGovernmentLevel}
 						onchange={(e) => filterGovernmentLevel.set((e.target as HTMLSelectElement).value as GovernmentLevel | 'all')}
@@ -253,6 +256,7 @@
 						{/each}
 					</select>
 					<select
+						aria-label="Sort projects"
 						title="Sort projects"
 						class="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 text-xs text-[var(--color-text)] focus:border-[var(--color-accent)]"
 						value={$sortKey}

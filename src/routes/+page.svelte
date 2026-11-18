@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
+	import { MediaQuery } from 'svelte/reactivity';
 	import { get } from 'svelte/store';
 	import { replaceState } from '$app/navigation';
 	import {
@@ -21,6 +22,11 @@
 	import { ChevronRight, ChevronLeft } from '@lucide/svelte';
 
 	let mapComponent: TasMap;
+
+	// Below md the detail panel is a full-screen sheet, so whatever sits
+	// underneath it must leave the tab order and the accessibility tree.
+	const phone = new MediaQuery('not all and (min-width: 48rem)', false);
+	const sheetOpen = $derived(phone.current && $selectedProject !== null);
 
 	const activeFilterCount = $derived(
 		($filterCategory !== 'all' ? 1 : 0) +
@@ -102,7 +108,7 @@
 	}
 
 	// "/" focuses search, Escape closes the detail panel
-	function handleKeydown(e: KeyboardEvent) {
+	async function handleKeydown(e: KeyboardEvent) {
 		const target = e.target as HTMLElement;
 		const typing = ['INPUT', 'SELECT', 'TEXTAREA'].includes(target?.tagName);
 		if (e.key === '/' && !typing) {
@@ -111,6 +117,8 @@
 			// pick the search box that is actually on screen, opening the desktop
 			// panel first if it is tucked away.
 			sidebarOpen.set(true);
+			// The closed panel is inert; wait for that to lift before focusing.
+			await tick();
 			const boxes = document.querySelectorAll<HTMLInputElement>('[data-project-search]');
 			[...boxes].find((el) => el.offsetParent !== null)?.focus();
 		} else if (e.key === 'Escape' && !typing) {
@@ -123,9 +131,6 @@
 
 <svelte:head>
 	<title>TAS Project Tracker: Tasmanian Public Infrastructure</title>
-	<link rel="preconnect" href="https://fonts.googleapis.com" />
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
-	<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 </svelte:head>
 
 <div class="flex flex-col h-full">
@@ -145,13 +150,15 @@
 
 	<div class="flex flex-1 min-h-0 relative">
 		<!-- Mobile: full-screen sidebar in list view -->
-		<div class="md:hidden flex flex-col flex-1 min-h-0 {$mobileView === 'map' ? 'hidden' : ''}">
+		<div class="md:hidden flex flex-col flex-1 min-w-0 min-h-0 {$mobileView === 'map' ? 'hidden' : ''}" inert={sheetOpen}>
 			<Sidebar onFlyTo={handleFlyTo} />
 		</div>
 
 		<!-- Desktop: sidebar slides in from left as an overlay (doesn't squeeze the map).
-		     z-[800] clears Leaflet's highest internal pane (z-index 700). -->
+		     z-[800] clears Leaflet's highest internal pane (z-index 700).
+		     Inert while tucked away, so its controls can't take focus off screen. -->
 		<div
+			inert={!$sidebarOpen}
 			class="hidden md:block absolute inset-y-0 left-0 w-96"
 			style="z-index:800; transform: translateX({$sidebarOpen ? '0%' : '-100%'}); transition: transform 280ms cubic-bezier(0.4,0,0.2,1); will-change: transform; box-shadow: 4px 0 28px rgba(0,0,0,0.45);"
 		>
@@ -183,7 +190,7 @@
 		</button>
 
 		<!-- Map: always full-width on desktop (sidebar overlays); on mobile only in map view -->
-		<main class="flex-1 relative {$mobileView === 'list' ? 'max-md:hidden' : ''}" class:sidebar-open={$sidebarOpen}>
+		<main class="flex-1 relative {$mobileView === 'list' ? 'max-md:hidden' : ''}" class:sidebar-open={$sidebarOpen} inert={sheetOpen}>
 			<TasMap bind:this={mapComponent} />
 			<StoryBanner />
 			<MapControls />
