@@ -56,101 +56,106 @@
 </svelte:head>
 
 <div class="h-full overflow-y-auto bg-[var(--color-bg)]">
-	<div class="max-w-5xl mx-auto p-4 md:p-6">
-		<h1 class="text-2xl font-bold tracking-tight">Insights</h1>
+	<main class="max-w-5xl mx-auto p-4 md:p-6">
+		<h1 class="text-xl font-bold tracking-tight">Insights</h1>
 		<p class="text-[0.8125rem] text-[var(--color-text-muted)] mt-1 max-w-[65ch]">
 			The whole book at a glance: where the money sits, which projects are running over, and
 			when the pipeline delivers. Figures aggregate every project currently on the tracker.
 		</p>
 
-		<!-- Headline projection -->
-		<div class="mt-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-4 md:p-5">
-			<div class="text-[0.6875rem] text-[var(--color-text-muted)]">Projected overrun, live projects</div>
-			{#if projectedOverrun > 0}
-				<div class="flex flex-wrap items-baseline gap-x-3 gap-y-1 mt-1.5">
-					<span class="text-[2.25rem] leading-none font-bold tabular-nums text-[var(--color-danger)]">{formatCurrency(projectedOverrun)}</span>
-					<span class="text-sm text-[var(--color-text)]">
-						across <strong class="tabular-nums">{trackingOver.length}</strong> of {projections.length} live projects
-					</span>
-				</div>
-				<p class="text-[0.6875rem] text-[var(--color-text-muted)] mt-2 max-w-[60ch]">
-					Estimated, not promised: each project is forecast from its latest revised budget paper or its
-					spend-to-date burn rate, whichever runs higher. Finished and cancelled projects are excluded.
-				</p>
-			{:else}
-				<div class="text-[2.25rem] leading-none font-bold mt-1.5 text-[var(--color-success)]">On track</div>
-				<p class="text-[0.6875rem] text-[var(--color-text-muted)] mt-2">No live project is currently forecast to exceed its budget.</p>
-			{/if}
-		</div>
+		<!-- The size of the book, stated once in a line rather than boxed up -->
+		<dl class="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-[0.8125rem]">
+			<div class="flex items-baseline gap-2">
+				<dt class="text-[var(--color-text-muted)]">Total budget</dt>
+				<dd class="font-mono font-semibold">{formatCurrency(averages.totalBudget)}</dd>
+			</div>
+			<div class="flex items-baseline gap-2">
+				<dt class="text-[var(--color-text-muted)]">Average project</dt>
+				<dd class="font-mono font-semibold">{formatCurrency(averages.avgBudget)}</dd>
+			</div>
+		</dl>
 
-		<!-- Portfolio averages: the shape of a typical project on the book -->
-		<div class="mt-4 grid grid-cols-4 max-md:grid-cols-2 gap-2">
-			<div class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-3">
-				<div class="text-[1.375rem] leading-none font-mono font-bold tabular-nums text-[var(--color-text)]">{formatCurrency(averages.totalBudget)}</div>
-				<div class="text-[0.6875rem] text-[var(--color-text-muted)] mt-1.5">Total budget</div>
-			</div>
-			<div class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-3">
-				<div class="text-[1.375rem] leading-none font-mono font-bold tabular-nums text-[var(--color-accent)]">{formatCurrency(averages.avgBudget)}</div>
-				<div class="text-[0.6875rem] text-[var(--color-text-muted)] mt-1.5">Average project</div>
-			</div>
-			<div class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-3">
-				<div class="text-[1.375rem] leading-none font-mono font-bold tabular-nums text-[var(--color-danger)]">
-					+{Math.round(averages.overrunPct * 100)}%
-				</div>
-				<div class="text-[0.6875rem] text-[var(--color-text-muted)] mt-1.5">
-					Overrun on the {averages.overCount} over budget
-				</div>
-			</div>
-			<div class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-3">
-				<div class="text-[1.375rem] leading-none font-mono font-bold tabular-nums text-[var(--color-warning)]">{Math.round(averages.flaggedPct * 100)}%</div>
-				<div class="text-[0.6875rem] text-[var(--color-text-muted)] mt-1.5">Over budget or late</div>
-			</div>
-		</div>
+		<!-- Lead: the page's one finding. Where the live book is heading on the
+		     left, the projects taking it there on the right; one panel, one rule
+		     between them. -->
+		<div class="mt-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)]">
+			<section class="p-4 md:p-5">
+				<h2 class="text-sm font-semibold">Projected overrun, live projects</h2>
+				{#if projectedOverrun > 0}
+					<div class="mt-3 text-[1.375rem] leading-none font-mono font-bold text-[var(--color-danger)]">{formatCurrency(projectedOverrun)}</div>
+					<p class="mt-2 text-[0.8125rem] text-[var(--color-text)]">
+						across <strong class="font-mono font-semibold">{trackingOver.length}</strong> of
+						<span class="font-mono">{projections.length}</span> live projects
+					</p>
+					<p class="text-[0.6875rem] leading-relaxed text-[var(--color-text-muted)] mt-2 max-w-[60ch]">
+						Estimated, not promised: each project is forecast from its latest revised budget paper or its
+						spend-to-date burn rate, whichever runs higher. Finished and cancelled projects are excluded.
+					</p>
+				{:else}
+					<div class="mt-3 text-[1.375rem] leading-none font-bold text-[var(--color-success)]">On track</div>
+					<p class="text-[0.6875rem] text-[var(--color-text-muted)] mt-2">No live project is currently forecast to exceed its budget.</p>
+				{/if}
 
-		<!-- Charts -->
-		<div class="mt-4 grid grid-cols-2 max-md:grid-cols-1 gap-4">
-			<section class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-4">
-				<h2 class="text-sm font-semibold">Budget by category</h2>
-				<p class="text-[0.6875rem] text-[var(--color-text-muted)] mt-0.5 mb-3">Total committed budget per sector.</p>
-				<BarList data={categoryData} color="var(--color-accent)" format={formatCurrency} />
+				<dl class="mt-4 pt-4 border-t border-[var(--color-border)] grid grid-cols-2 gap-4">
+					<div class="flex flex-col-reverse gap-1">
+						<dt class="text-[0.6875rem] text-[var(--color-text-muted)]">Overrun on the {averages.overCount} over budget</dt>
+						<dd class="text-[0.9375rem] leading-none font-mono font-semibold text-[var(--color-danger)]">+{Math.round(averages.overrunPct * 100)}%</dd>
+					</div>
+					<div class="flex flex-col-reverse gap-1">
+						<dt class="text-[0.6875rem] text-[var(--color-text-muted)]">Over budget or late</dt>
+						<dd class="text-[0.9375rem] leading-none font-mono font-semibold">{Math.round(averages.flaggedPct * 100)}%</dd>
+					</div>
+				</dl>
 			</section>
 
-			<section class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-4">
+			<section class="p-4 md:p-5 border-t md:border-t-0 md:border-l border-[var(--color-border)]">
 				<h2 class="text-sm font-semibold">Biggest overruns</h2>
 				<p class="text-[0.6875rem] text-[var(--color-text-muted)] mt-0.5 mb-3">Spend above budget, top projects.</p>
 				{#if leaderboardData.length}
-					<BarList data={leaderboardData} color="var(--color-danger)" format={formatCurrency} labelWidth="8.5rem" />
+					<BarList data={leaderboardData} color="var(--color-danger)" valueColor="var(--color-danger)" format={formatCurrency} labelWidth="8.5rem" />
 				{:else}
 					<div class="py-10 text-center text-sm text-[var(--color-text-muted)]">No projects are over budget.</div>
 				{/if}
 			</section>
-
-			<section class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-4">
-				<h2 class="text-sm font-semibold">Who pays</h2>
-				<p class="text-[0.6875rem] text-[var(--color-text-muted)] mt-0.5 mb-3">
-					Budget by funding source. Estimated from governing tier and delivery model where a project
-					publishes no split.
-				</p>
-				<BarList data={funderData} format={formatCurrency} labelWidth="4.5rem" />
-			</section>
-
-			<section class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-4">
-				<h2 class="text-sm font-semibold">Budget by region</h2>
-				<p class="text-[0.6875rem] text-[var(--color-text-muted)] mt-0.5 mb-3">
-					Committed budget across Tasmania's three regions, grouped from each project's location.
-				</p>
-				<BarList data={regionData} color="var(--color-accent)" format={formatCurrency} labelWidth="5.5rem" />
-			</section>
-
-			<section class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-4 col-span-2 max-md:col-span-1">
-				<h2 class="text-sm font-semibold">Delivery pipeline</h2>
-				<p class="text-[0.6875rem] text-[var(--color-text-muted)] mt-0.5 mb-3">Projects due to finish each year.</p>
-				<BarList data={completionsData} color="#a78bfa" format={(n) => `${n}`} labelWidth="3.5rem" />
-			</section>
 		</div>
+
+		<!-- Where the money sits: by sector on the left, by place and by payer on
+		     the right. Bars are neutral; only the funders carry their own colours. -->
+		<div class="mt-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl grid md:grid-cols-2">
+			<section class="p-4 md:p-5">
+				<h2 class="text-sm font-semibold">Budget by category</h2>
+				<p class="text-[0.6875rem] text-[var(--color-text-muted)] mt-0.5 mb-3">Total committed budget per sector.</p>
+				<BarList data={categoryData} format={formatCurrency} />
+			</section>
+
+			<div class="border-t md:border-t-0 md:border-l border-[var(--color-border)]">
+				<section class="p-4 md:p-5">
+					<h2 class="text-sm font-semibold">Budget by region</h2>
+					<p class="text-[0.6875rem] text-[var(--color-text-muted)] mt-0.5 mb-3">
+						Committed budget across Tasmania's three regions, grouped from each project's location.
+					</p>
+					<BarList data={regionData} format={formatCurrency} labelWidth="5.5rem" />
+				</section>
+
+				<section class="p-4 md:p-5 border-t border-[var(--color-border)]">
+					<h2 class="text-sm font-semibold">Who pays</h2>
+					<p class="text-[0.6875rem] text-[var(--color-text-muted)] mt-0.5 mb-3">
+						Budget by funding source. Estimated from governing tier and delivery model where a project
+						publishes no split.
+					</p>
+					<BarList data={funderData} format={formatCurrency} labelWidth="5.5rem" />
+				</section>
+			</div>
+		</div>
+
+		<section class="mt-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-4 md:p-5">
+			<h2 class="text-sm font-semibold">Delivery pipeline</h2>
+			<p class="text-[0.6875rem] text-[var(--color-text-muted)] mt-0.5 mb-3">Projects due to finish each year.</p>
+			<BarList data={completionsData} format={(n) => `${n}`} labelWidth="3.5rem" />
+		</section>
 
 		<p class="mt-3 text-[0.6875rem] text-[var(--color-text-muted)] italic">
 			Figures come from the source cited on each project. Funder totals include estimated splits for older projects whose funding split is not published.
 		</p>
-	</div>
+	</main>
 </div>

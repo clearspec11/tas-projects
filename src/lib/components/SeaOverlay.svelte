@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { projects, mapZoom, sidebarOpen } from '$lib/stores';
+	import { projects, mapZoom, sidebarShown, mapStripRem } from '$lib/stores';
 	import { formatCurrency, projectFinalCost } from '$lib/metrics';
 
 	const live = $derived($projects.filter((p) => p.status !== 'completed' && p.status !== 'cancelled'));
@@ -12,7 +12,9 @@
 
 	// This is a whole-island summary, so it only makes sense at the overview
 	// zooms. Fade it out as the user zooms in to inspect individual projects.
-	const shown = $derived($mapZoom <= 8);
+	// It also steps out when the side panels leave too little open map for it
+	// to sit beside the map controls.
+	const shown = $derived($mapZoom <= 8 && $mapStripRem >= 30);
 </script>
 
 {#if projectedOverrun > 0}
@@ -22,16 +24,16 @@
 	     zoom control and slides clear of the sidebar when the panel opens. -->
 	<div
 		class="max-md:hidden absolute top-20 left-4 w-[14rem] select-none pointer-events-none rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/80 backdrop-blur-sm px-3.5 py-3"
-		style="z-index: 750; opacity: {shown ? 1 : 0}; transform: translateX({$sidebarOpen ? '24rem' : '0'}); transition: opacity 220ms ease, transform 280ms cubic-bezier(0.4,0,0.2,1);"
+		style="z-index: 750; opacity: {shown ? 1 : 0}; transform: translateX({$sidebarShown ? '24rem' : '0'}); transition: opacity 220ms ease, transform 280ms cubic-bezier(0.4,0,0.2,1);"
 		aria-hidden={!shown}
 		inert={!shown}
 	>
 		<div class="text-[0.6875rem] text-[var(--color-text-muted)]">If current trends hold</div>
-		<div class="mt-1 text-[1.75rem] leading-none font-bold tabular-nums text-[var(--color-danger)]">
+		<div class="mt-1.5 text-[1.375rem] leading-none font-mono font-bold text-[var(--color-danger)]">
 			{formatCurrency(projectedOverrun)}
 		</div>
 		<div class="mt-1.5 text-[0.75rem] leading-snug text-[var(--color-text)]">
-			projected overrun across {trackingOver.length} live projects
+			projected overrun across <span class="font-mono">{trackingOver.length}</span> live projects
 		</div>
 		<a
 			href="/insights"

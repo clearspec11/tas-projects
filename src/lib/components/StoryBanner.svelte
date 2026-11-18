@@ -41,19 +41,19 @@
 		class="md:hidden absolute top-4 left-1/2 -translate-x-1/2 z-[1000] max-w-[calc(100%-7rem)] max-md:top-auto max-md:bottom-7 max-md:left-2 max-md:right-2 max-md:translate-x-0 max-md:max-w-none flex items-center gap-3 max-md:gap-2 px-4 py-2.5 max-md:px-3 max-md:py-2 rounded-xl bg-[var(--color-surface)]/95 backdrop-blur border border-[var(--color-border)] shadow-lg"
 	>
 		<p class="text-[0.8125rem] max-md:text-xs leading-snug">
-			<strong class="text-[var(--color-danger)] font-semibold">{overList.length} projects</strong>
+			<strong class="text-[var(--color-danger)] font-semibold"><span class="font-mono">{overList.length}</span> projects</strong>
 			are a combined
-			<strong class="text-[var(--color-danger)] font-semibold tabular-nums">{formatCurrency(totalOver)}</strong>
+			<strong class="text-[var(--color-danger)] font-mono font-semibold">{formatCurrency(totalOver)}</strong>
 			over budget.
 		</p>
 		<button
 			onclick={seeThem}
-			class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-[var(--color-accent)] text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 transition-colors cursor-pointer whitespace-nowrap"
+			class="text-xs font-semibold px-3 py-1.5 max-md:min-h-11 rounded-lg border border-[var(--color-accent)] text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 transition-colors cursor-pointer whitespace-nowrap"
 		>See them</button>
 		<button
 			onclick={dismiss}
 			aria-label="Dismiss this message"
-			class="text-[var(--color-text-muted)] hover:text-[var(--color-text)] leading-none cursor-pointer"
+			class="hit-area shrink-0 text-[var(--color-text-muted)] hover:text-[var(--color-text)] leading-none cursor-pointer"
 		><X size={16} /></button>
 	</div>
 {/if}

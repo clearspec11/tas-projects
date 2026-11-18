@@ -55,14 +55,14 @@
 		{/each}
 	</svg>
 
-	<div class="flex justify-between mt-1 text-[0.625rem] text-[var(--color-text-muted)]">
+	<div class="flex justify-between mt-1 text-[0.6875rem] text-[var(--color-text-muted)]">
 		<span>{first.fiscal_year} · <span class="font-mono">{formatCurrency(first.estimated_total_cost)}</span></span>
 		<span>{last.fiscal_year} · <span class="font-mono" style="color: {stroke}">{formatCurrency(last.estimated_total_cost)}</span></span>
 	</div>
 
 	{#if original && original !== first.estimated_total_cost}
-		<p class="text-[0.625rem] text-[var(--color-text-muted)] mt-1">
-			Originally announced at {formatCurrency(original)}.
+		<p class="text-[0.6875rem] text-[var(--color-text-muted)] mt-1">
+			Originally announced at <span class="font-mono">{formatCurrency(original)}</span>.
 		</p>
 	{/if}
 </div>

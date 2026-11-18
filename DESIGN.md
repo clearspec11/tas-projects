@@ -21,6 +21,8 @@ colors:
   tier-state: "#3fa39e"
   tier-local: "#5aa84f"
   fund-private: "#e0933a"
+  coast-glow: "#34b893"
+  coast-line: "#86e3c0"
 typography:
   stat:
     fontFamily: "'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace"
@@ -145,7 +147,7 @@ A dark green wilderness palette: peat-and-myrtle neutrals carrying the surface, 
 
 ### Secondary (semantic status)
 - **Myrtle Green / On Budget** (`#5aa84f`): healthy budget state; doubles as the Local-council tier colour.
-- **Ember / Over Budget** (`#df5a39`): the system's alarm. Over-budget markers and figures, red-flag halos and dashed rings, variance overruns. Always paired with a label or flag icon, never colour alone.
+- **Ember / Over Budget** (`#df5a39`): the system's alarm. Over-budget markers and figures, red-flag halos and dashed rings, variance overruns, and the flag icon wherever it appears (list rows, stat tile, contractor table, map tooltip, legend). Always paired with a label or flag icon, never colour alone.
 - **Tarn Teal / Under Budget** (`#3fa39e`): under-budget state; doubles as the State-government tier colour.
 - **Dusk Mauve / Completed** (`#ab8ad6`): finished projects, on the map and in chips.
 - **Lichen Grey / Cancelled** (`#889085`): cancelled or inactive projects; a desaturated green-grey that reads as "switched off".
@@ -153,7 +155,7 @@ A dark green wilderness palette: peat-and-myrtle neutrals carrying the surface, 
 ### Tertiary (tier + funder)
 - **Federal Iris** (`#9a8ad6`): federal-government tier (marker border) and the federal slice of funding breakdowns.
 - **Tarn Teal** (`#3fa39e`) / **Myrtle Green** (`#5aa84f`): state and local tiers respectively (shared with the status hues above by design, so tier and budget state stay within one family).
-- **Ochre / Private** (`#e0933a`): the private-funding slice; shared with the `warning` role.
+- **Ochre / Private** (`#e0933a`): the private-funding slice; shared with the `warning` role, which sets the "months late" text. The flag icon itself is ember, not ochre.
 
 ### Neutral
 - **Peat** (`#0c1410`): app background, the deepest layer; also the Leaflet canvas behind the basemap.
@@ -161,7 +163,10 @@ A dark green wilderness palette: peat-and-myrtle neutrals carrying the surface, 
 - **Surface Hover** (`#1f2d24`): hovered rows, raised hover state of surface elements.
 - **Moss Border** (`#2c3f34`): borders, dividers, input strokes.
 - **Snowgum** (`#edf3ea`): primary text/ink, near-white with a faint green cast.
-- **Muted Sage** (`#9fb1a1`): secondary text, labels, captions; holds at least 4.5:1 on `surface`.
+- **Muted Sage** (`#9fb1a1`): secondary text, labels, captions; holds at least 4.5:1 on `surface`. Mixed 55% into `bg`, it is also the neutral fill for bar charts that show plain magnitude (budget by category, by region, the delivery pipeline); colour is kept for bars whose subject has one (funder tiers, ember for overruns).
+
+### Atmosphere (map only)
+- **Shoreline Glow** (`#34b893`) / **Shoreline Line** (`#86e3c0`): the lit Tasmanian coastline and the aurora wash low on the map. Scenery, never data: no marker, chip, chart or figure uses them, and they appear nowhere off the map.
 
 ### Named Rules
 **The Ember Rule.** `#df5a39` means one thing: over budget or overdue. It is never used decoratively, never for a hover, never for a generic "primary". If something is ember, it is on fire.
@@ -227,7 +232,7 @@ The single exception is the set of panels that genuinely float over the Leaflet 
 - **Style:** `bg` (the deep peat, one step below the surrounding `surface`), 1px `border`, 8px corners (`rounded-lg`), 6px by 12px padding, `ink` text.
 - **Placeholder:** Muted Sage, meeting the same 4.5:1 contrast as body text (no faint grey placeholders).
 - **Focus:** border shifts to `accent` (plus the global focus-visible ring). No glow.
-- **Select / range:** same treatment; the timeline uses custom huon-pine thumbs (20px, white ring) on a `border` rail with an `accent` selected span.
+- **Select / range:** same treatment; the timeline uses custom huon-pine thumbs (20px, `ink` ring) on a `border` rail with an `accent` selected span.
 
 ### Navigation
 - **Top bar:** 48px tall, `surface` fill, 1px bottom `border`. Brand wordmark left (Tasmania silhouette in `accent` plus "TAS" in `accent`), nav links right.
@@ -238,10 +243,10 @@ The single exception is the set of panels that genuinely float over the Leaflet 
 - **Project marker:** Leaflet `circleMarker`, radius scaled by budget (8 to 20px). **Fill = status** colour at 0.8 opacity; **border = governing tier** colour at 2.5px. Two codes on one mark, decoded by the legend.
 - **Red-flag halo:** a dashed ember (`#df5a39`) ring behind any over-budget/overdue marker, on its own layer.
 - **Selection ring:** a pulsing 3px huon-pine ring (`tas-selected-ring`), honouring `prefers-reduced-motion` by holding still.
-- **Cluster:** circular `accent` at 22% fill with a 2px `accent` border and the count in `ink`.
+- **Cluster:** circular `accent` at 22% fill with a 2px `accent` border and the count in `ink`, set in mono.
 
 ### Sidebar Slide Tab (signature component)
-- The desktop projects panel is hidden by default and slides in from the left over the map; a vertical tab handle rides its right edge as the toggle, carrying a rotated "Projects" label and an active-filter count badge. The tab and panel animate together (280ms, `cubic-bezier(0.4,0,0.2,1)`); the legend and timeline shift right in lockstep so nothing hides behind the panel.
+- The desktop projects panel is hidden by default and slides in from the left over the map; a vertical tab handle rides its right edge as the toggle, carrying a rotated "Projects" label and an active-filter count badge. The tab and panel animate together (280ms, `cubic-bezier(0.4,0,0.2,1)`); the legend and timeline shift right in lockstep so nothing hides behind the panel. The detail panel owns a 25rem lane on the right: when a project is open the map controls and the timeline step left of it on the same curve. All of them read one shared measure of the open map between the side panels, so below 75rem an open project takes the projects panel's place (the panel returns when the project closes), and a panel that no longer fits the strip steps out rather than overlapping.
 
 ## 6. Do's and Don'ts
 

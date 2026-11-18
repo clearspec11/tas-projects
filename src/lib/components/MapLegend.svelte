@@ -4,7 +4,7 @@
 	import { Flag, Minus, Info } from '@lucide/svelte';
 	import InfoTip from './InfoTip.svelte';
 	import { GLOSSARY, MAP_ORIENTATION } from '$lib/glossary';
-	import { sidebarOpen } from '$lib/stores';
+	import { sidebarShown, mapStripRem, timelineFits, viewportRem, TIMELINE_REM, MD_REM } from '$lib/stores';
 
 	// Collapsed by default so the first view of the map isn't crowded; the
 	// choice is remembered for returning visitors.
@@ -21,6 +21,22 @@
 		}
 	});
 
+	// The timeline is centred in the open map and the legend sits at its left
+	// edge. Where the strip is too narrow for the two side by side, the legend
+	// rides above the timeline instead of under it.
+	const LIFT_REM = 4;
+	// Left edge to right edge, in rem: the closed button, and the open panel
+	// with the indent that keeps it off the projects tab.
+	const CLOSED_REACH = 1 + 6;
+	const OPEN_REACH = 1 + 1.5 + 15;
+	const raised = $derived(
+		$timelineFits &&
+			($mapStripRem - TIMELINE_REM) / 2 < (expanded ? OPEN_REACH : CLOSED_REACH) + 0.75
+	);
+	// On desktop the open panel stops short of the forecast readout docked
+	// above it; phones have no readout, only the nav, tabs and zoom control.
+	const ceilingRem = $derived($viewportRem < MD_REM ? 14 : raised ? 19 + LIFT_REM : 19);
+
 	async function setExpanded(open: boolean) {
 		expanded = open;
 		try {
@@ -35,28 +51,32 @@
 	}
 </script>
 
-<!-- Desktop: bottom-left. Phones: under the zoom control, clear of the banner
-     at the bottom of the map. -->
+<!-- Desktop: bottom-left, moving with the projects panel; the open panel sits
+     a step further in so it never covers the projects tab. Phones: under the
+     zoom control, clear of the banner at the bottom of the map. -->
 <div
-	class="absolute z-[1000] md:bottom-6 md:left-4 max-md:top-[5.5rem] max-md:left-2.5"
-	style="transform: translateX({$sidebarOpen ? '24rem' : '0'}); transition: transform 280ms cubic-bezier(0.4,0,0.2,1);"
+	class="absolute z-[1000] md:bottom-6 {expanded ? 'md:left-10' : 'md:left-4'} max-md:top-[5.5rem] max-md:left-2.5"
+	style="transform: translate({$sidebarShown ? '24rem' : '0'}, {raised ? `-${LIFT_REM}rem` : '0'}); transition: transform 280ms cubic-bezier(0.4,0,0.2,1);"
 >
 	{#if !expanded}
 	<button
-		class="inline-flex items-center gap-1.5 bg-[var(--color-surface)]/95 backdrop-blur border border-[var(--color-border)] rounded-lg px-3 py-2 text-xs text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] cursor-pointer"
+		class="inline-flex items-center gap-1.5 bg-[var(--color-surface)]/95 backdrop-blur border border-[var(--color-border)] rounded-lg px-3 py-2 max-md:min-h-11 text-xs text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] cursor-pointer"
 		bind:this={openButton}
 		aria-expanded="false"
 		onclick={() => setExpanded(true)}
 	><Info size={14} class="text-[var(--color-accent)]" /> Legend</button>
 	{:else}
-		<div class="bg-[var(--color-surface)]/95 backdrop-blur border border-[var(--color-border)] rounded-xl p-3 shadow-lg w-[15rem] max-h-[calc(100vh-14rem)] overflow-y-auto">
+		<div
+			class="bg-[var(--color-surface)]/95 backdrop-blur border border-[var(--color-border)] rounded-xl p-3 shadow-lg w-[15rem] overflow-y-auto"
+			style="max-height: calc(100vh - {ceilingRem}rem);"
+		>
 			<div class="flex items-center justify-between mb-2">
 				<span class="text-xs font-semibold text-[var(--color-text)]">Legend</span>
 				<button
 					bind:this={closeButton}
 					aria-label="Collapse legend"
 					aria-expanded="true"
-					class="text-[var(--color-text-muted)] hover:text-[var(--color-text)] cursor-pointer"
+					class="hit-area text-[var(--color-text-muted)] hover:text-[var(--color-text)] cursor-pointer"
 					onclick={() => setExpanded(false)}
 				><Minus size={14} /></button>
 			</div>

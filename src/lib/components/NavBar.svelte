@@ -13,7 +13,7 @@
 </script>
 
 <nav class="h-12 shrink-0 flex items-center justify-between gap-3 px-4 max-md:px-3 bg-[var(--color-surface)] border-b border-[var(--color-border)]">
-	<a href="/" class="flex items-center gap-2 min-w-0 font-bold text-base tracking-tight">
+	<a href="/" class="flex items-center gap-2 min-w-0 max-md:min-h-11 font-bold text-base tracking-tight">
 		<!-- Tasmania silhouette, generated from the live boundary data -->
 		<svg viewBox="0 0 20.1 24" class="h-5 w-auto shrink-0" aria-hidden="true">
 			<path
@@ -30,7 +30,7 @@
 			<a
 				href={link.href}
 				aria-current={isActive(link.href) ? 'page' : undefined}
-				class="text-sm font-medium px-3 py-1.5 rounded-lg border transition-colors {isActive(link.href)
+				class="inline-flex items-center max-md:min-h-11 text-sm font-medium px-3 py-1.5 rounded-lg border transition-colors {isActive(link.href)
 					? 'border-[var(--color-accent)] text-[var(--color-accent)]'
 					: 'border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:border-[var(--color-border)]'}"
 			>{link.label}</a>

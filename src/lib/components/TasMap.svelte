@@ -9,6 +9,7 @@
 	import { TASMANIA_CENTER, TASMANIA_ZOOM } from '$lib/tasmania-geo';
 	import { formatCurrency, budgetPercent, currentCost, filterProjects, isRedFlag, delayMonths } from '$lib/metrics';
 	import { FLAG_SVG_DANGER } from '$lib/icons';
+	import { TOKENS } from '$lib/tokens';
 	import tasmaniaGeoJson from '$lib/tasmania-boundary.json';
 
 	let mapContainer: HTMLDivElement;
@@ -21,6 +22,8 @@
 	let darkTiles: any;
 	let satTiles: any;
 	let L: any;
+	// Markers currently drawn, so a near-miss tap can find the closest one.
+	let drawn: { marker: any; project: Project }[] = [];
 
 	// Leaflet setup is async (dynamic imports), and Svelte never awaits an async
 	// onMount's return value — a cleanup returned from there would never run. So
@@ -40,7 +43,7 @@
 		L.circleMarker([p.lat, p.lng], {
 			radius: markerRadius(p) + 8,
 			fill: false,
-			color: '#d7a25c',
+			color: TOKENS.accent,
 			weight: 3,
 			opacity: 0.95,
 			className: 'tas-selected-ring'
@@ -50,6 +53,9 @@
 	function markerRadius(p: Project): number {
 		return Math.max(8, Math.min(20, Math.sqrt(p.budget / 1_000_000) * 1.8));
 	}
+
+	// Figures in the hover tooltip are set in mono like everywhere else.
+	const fig = (s: string) => `<span class="font-mono">${s}</span>`;
 
 	function createMarker(p: Project) {
 		const cfg = STATUS_CONFIG[p.status];
@@ -75,7 +81,7 @@
 			<div style="font-family: 'IBM Plex Sans', system-ui; font-size: 12px; line-height: 1.4;">
 				<strong>${isRedFlag(p) ? FLAG_SVG_DANGER : ''}${p.name}</strong><br/>
 				<span style="color: ${cfg.color};">${cfg.label}</span> · ${govCfg.shortLabel} · ${fundCfg.label}<br/>
-				${p.spent != null ? `${formatCurrency(p.spent)} spent of ${formatCurrency(p.budget)} (${budgetPercent(p)}%)` : `Est. cost ${formatCurrency(p.budget)}`}${late ? ` · <span style="color:#e0933a;">${late}mo late</span>` : ''}
+				${p.spent != null ? `${fig(formatCurrency(p.spent))} spent of ${fig(formatCurrency(p.budget))} (${fig(`${budgetPercent(p)}%`)})` : `Est. cost ${fig(formatCurrency(p.budget))}`}${late ? ` · <span class="font-mono" style="color:${TOKENS.warning};">${late}mo late</span>` : ''}
 			</div>
 		`, {
 			direction: 'top',
@@ -113,6 +119,7 @@
 	) {
 		if (!markersLayer || !L) return;
 		markersLayer.clearLayers();
+		drawn = [];
 		if (flagsLayer) flagsLayer.clearLayers();
 		if (heatLayer) map.removeLayer(heatLayer);
 		if (connectionsLayer) connectionsLayer.clearLayers();
@@ -130,7 +137,8 @@
 					radius: 35,
 					blur: 25,
 					maxZoom: 12,
-					gradient: { 0.2: '#3fa39e', 0.4: '#5aa84f', 0.6: '#e0933a', 0.8: '#df5a39', 1.0: '#c0432a' }
+					// Cool to hot along the palette; the last stop is a deeper ember for the peak.
+					gradient: { 0.2: TOKENS.statusUnderBudget, 0.4: TOKENS.success, 0.6: TOKENS.warning, 0.8: TOKENS.danger, 1.0: '#c0432a' }
 				}).addTo(map);
 			} catch {
 				// leaflet.heat not loaded
@@ -143,13 +151,14 @@
 				L.circleMarker([p.lat, p.lng], {
 					radius: markerRadius(p) + 5,
 					fill: false,
-					color: '#df5a39',
+					color: TOKENS.danger,
 					weight: 2,
 					opacity: 0.75,
 					dashArray: '2 3'
 				}).addTo(flagsLayer);
 			}
 			const marker = createMarker(p);
+			drawn.push({ marker, project: p });
 			markersLayer.addLayer(marker);
 		});
 
@@ -165,7 +174,7 @@
 					if (!related) return;
 					if (!filtered.some((f) => f.id === rid)) return;
 					L.polyline([[p.lat, p.lng], [related.lat, related.lng]], {
-						color: '#d7a25c',
+						color: TOKENS.accent,
 						weight: 1.5,
 						opacity: 0.5,
 						dashArray: '6 6'
@@ -235,16 +244,16 @@
 		// so the island reads as a lit shoreline rather than a CAD outline.
 		L.geoJSON(tasmaniaGeoJson, {
 			style: {
-				color: '#34b893',
+				color: TOKENS.coastGlow,
 				weight: 7,
 				opacity: 0.14,
-				fillColor: '#34b893',
+				fillColor: TOKENS.coastGlow,
 				fillOpacity: 0.05
 			}
 		}).addTo(map);
 		L.geoJSON(tasmaniaGeoJson, {
 			style: {
-				color: '#86e3c0',
+				color: TOKENS.coastLine,
 				weight: 1.25,
 				opacity: 0.85,
 				fill: false
@@ -267,8 +276,8 @@
 						html: `<div style="
 							display:flex;align-items:center;justify-content:center;
 							width:${size}px;height:${size}px;border-radius:50%;
-							background:rgba(215,162,92,0.22);border:2px solid #d7a25c;
-							color:#edf3ea;font-weight:700;font-size:13px;font-family:'IBM Plex Sans',system-ui;
+							background:color-mix(in srgb, var(--color-accent) 22%, transparent);border:2px solid var(--color-accent);
+							color:var(--color-text);font-weight:700;font-size:13px;font-family:var(--font-mono);font-variant-numeric:tabular-nums;
 						">${count}</div>`,
 						className: '',
 						iconSize: [size, size]
@@ -290,6 +299,29 @@
 
 		connectionsLayer = L.layerGroup().addTo(map);
 		selectionLayer = L.layerGroup().addTo(map);
+
+		// The smallest markers are 16px across, too small a target for a finger.
+		// Their drawn size carries meaning (budget), so instead of inflating them a
+		// tap that lands within 22px of a marker's centre opens the nearest one.
+		const coarse = window.matchMedia('(pointer: coarse)');
+		map.on('click', (e: any) => {
+			const oe = e.originalEvent as PointerEvent | undefined;
+			const finger = oe?.pointerType ? oe.pointerType !== 'mouse' : coarse.matches;
+			if (!finger) return;
+			// A direct hit on a marker or cluster has already been handled.
+			if ((oe?.target as Element | null)?.closest?.('.leaflet-interactive, .leaflet-marker-icon')) return;
+			let nearest: Project | null = null;
+			let best = 22;
+			for (const { marker, project } of drawn) {
+				if (!map.hasLayer(marker)) continue; // folded into a cluster
+				const d = map.latLngToContainerPoint(marker.getLatLng()).distanceTo(e.containerPoint);
+				if (d <= best) {
+					best = d;
+					nearest = project;
+				}
+			}
+			if (nearest) selectedProject.set(nearest);
+		});
 
 		// Keep Leaflet's internal size in sync with the container (stacked
 		// mobile layout, window resizes) so panes never render at stale sizes.
@@ -344,9 +376,9 @@
 		pointer-events: none;
 		z-index: 1;
 		background:
-			radial-gradient(120% 90% at 35% 115%, rgba(52, 184, 147, 0.10), transparent 55%),
-			radial-gradient(90% 80% at 70% 120%, rgba(90, 168, 79, 0.08), transparent 50%),
-			radial-gradient(70% 60% at 55% 125%, rgba(215, 162, 92, 0.06), transparent 55%);
+			radial-gradient(120% 90% at 35% 115%, color-mix(in srgb, var(--color-coast-glow) 10%, transparent), transparent 55%),
+			radial-gradient(90% 80% at 70% 120%, color-mix(in srgb, var(--color-success) 8%, transparent), transparent 50%),
+			radial-gradient(70% 60% at 55% 125%, color-mix(in srgb, var(--color-accent) 6%, transparent), transparent 55%);
 		animation: tas-aurora-breathe 26s ease-in-out infinite;
 	}
 	@keyframes tas-aurora-breathe {
@@ -359,15 +391,15 @@
 		}
 	}
 	:global(.tas-tooltip) {
-		background: rgba(12, 20, 16, 0.95) !important;
-		color: #edf3ea !important;
-		border: 1px solid #2c3f34 !important;
+		background: color-mix(in srgb, var(--color-bg) 95%, transparent) !important;
+		color: var(--color-text) !important;
+		border: 1px solid var(--color-border) !important;
 		border-radius: 8px !important;
 		padding: 8px 12px !important;
 		box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
 	}
 	:global(.tas-tooltip::before) {
-		border-top-color: rgba(12, 20, 16, 0.95) !important;
+		border-top-color: color-mix(in srgb, var(--color-bg) 95%, transparent) !important;
 	}
 	:global(.leaflet-popup-content-wrapper) {
 		border-radius: 12px !important;

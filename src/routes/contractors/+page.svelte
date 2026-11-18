@@ -54,9 +54,13 @@
 		}
 	}
 
-	function openOnMap(c: ContractorStats) {
+	const mapHref = (c: ContractorStats) => `/?contractor=${encodeURIComponent(c.name)}`;
+
+	function rowClick(e: MouseEvent, c: ContractorStats) {
+		// A click on the name is the link's own business.
+		if ((e.target as Element).closest('a')) return;
 		filterContractor.set(c.name);
-		goto(`/?contractor=${encodeURIComponent(c.name)}`);
+		goto(mapHref(c));
 	}
 
 	function pct(n: number): string {
@@ -84,8 +88,8 @@
 </svelte:head>
 
 <div class="h-full overflow-y-auto bg-[var(--color-bg)]">
-	<div class="max-w-4xl mx-auto p-4 md:p-6">
-		<h1 class="text-2xl font-bold tracking-tight">Contractor scorecards</h1>
+	<main class="max-w-4xl mx-auto p-4 md:p-6">
+		<h1 class="text-xl font-bold tracking-tight">Contractor scorecards</h1>
 		<p class="text-[0.8125rem] text-[var(--color-text-muted)] mt-1 max-w-[65ch]">
 			Who delivers on budget and who doesn't, across every named contractor on the board.
 			Overrun is money-weighted, so one large blowout counts for more than several small
@@ -99,22 +103,22 @@
 				<div class="text-[0.6875rem] text-[var(--color-text-muted)]">Biggest overrun</div>
 				{#if worst && worst.overrunPct > 0}
 					<div class="flex items-baseline gap-2 mt-1.5">
-						<span class="text-[2rem] leading-none font-bold tabular-nums text-[var(--color-danger)]">{pct(worst.overrunPct)}</span>
+						<span class="text-[1.375rem] leading-none font-mono font-bold text-[var(--color-danger)]">{pct(worst.overrunPct)}</span>
 						<span class="text-sm font-semibold text-[var(--color-text)]">{worst.name}</span>
 					</div>
 					<p class="text-[0.6875rem] text-[var(--color-text-muted)] mt-2">Money-weighted across that contractor's projects.</p>
 				{:else}
-					<div class="text-[2rem] leading-none font-bold mt-1.5 text-[var(--color-success)]">None</div>
+					<div class="text-[1.375rem] leading-none font-bold mt-1.5 text-[var(--color-success)]">None</div>
 					<p class="text-[0.6875rem] text-[var(--color-text-muted)] mt-2">No contractor is spending over budget so far.</p>
 				{/if}
 			</div>
 			<div class="flex md:flex-col md:w-44 justify-around md:justify-center gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl px-4 py-3">
 				<div class="flex items-baseline gap-1.5">
-					<span class="text-lg font-bold tabular-nums">{stats.ranked.length}</span>
+					<span class="text-[0.9375rem] font-mono font-semibold">{stats.ranked.length}</span>
 					<span class="text-xs text-[var(--color-text-muted)]">contractors</span>
 				</div>
 				<div class="flex items-baseline gap-1.5">
-					<span class="text-lg font-bold tabular-nums">{formatCurrency(combinedBudget)}</span>
+					<span class="text-[0.9375rem] font-mono font-semibold">{formatCurrency(combinedBudget)}</span>
 					<span class="text-xs text-[var(--color-text-muted)]">combined budget</span>
 				</div>
 			</div>
@@ -143,17 +147,22 @@
 				</thead>
 				<tbody>
 					{#each rows as c (c.name)}
+						<!-- The contractor's name is the real link, for keyboards and screen
+						     readers. The row click is a larger mouse target for the same link. -->
+						<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
 						<tr
-							onclick={() => openOnMap(c)}
-							onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openOnMap(c); } }}
-							tabindex="0"
-							role="link"
-							aria-label="Show {c.name} projects on the map"
+							onclick={(e) => rowClick(e, c)}
 							class="border-b border-[var(--color-border)] last:border-b-0 hover:bg-[var(--color-surface-hover)] transition-colors cursor-pointer"
 						>
-							<td class="px-3 py-2.5 font-semibold">{c.name}</td>
-							<td class="px-3 py-2.5 text-right tabular-nums">{c.projects}</td>
-							<td class="px-3 py-2.5 text-right tabular-nums">{formatCurrency(c.totalBudget)}</td>
+							<td class="px-3 py-2.5 font-semibold">
+								<a
+									href={mapHref(c)}
+									onclick={() => filterContractor.set(c.name)}
+									class="hover:underline underline-offset-2"
+								>{c.name}<span class="sr-only">: show projects on the map</span></a>
+							</td>
+							<td class="px-3 py-2.5 text-right font-mono">{c.projects}</td>
+							<td class="px-3 py-2.5 text-right font-mono">{formatCurrency(c.totalBudget)}</td>
 							<td class="px-3 py-2.5 text-right">
 								{#if c.overrunPct > 0}
 									<span class="inline-flex items-center justify-end gap-2">
@@ -169,12 +178,12 @@
 									<span class="text-[var(--color-text-muted)]" title="Spending is at or below budget so far">none</span>
 								{/if}
 							</td>
-							<td class="px-3 py-2.5 text-right tabular-nums {c.flagged > 0 ? 'text-[var(--color-warning)] font-semibold' : 'text-[var(--color-text-muted)]'}">
+							<td class="px-3 py-2.5 text-right font-mono {c.flagged > 0 ? 'text-[var(--color-danger)] font-semibold' : 'text-[var(--color-text-muted)]'}">
 								{#if c.flagged > 0}
 									<span class="inline-flex items-center justify-end gap-1"><Flag size={13} />{c.flagged}</span>
 								{:else}0{/if}
 							</td>
-							<td class="px-3 py-2.5 text-right font-mono tabular-nums">{Math.round(c.cleanPct * 100)}%</td>
+							<td class="px-3 py-2.5 text-right font-mono">{Math.round(c.cleanPct * 100)}%</td>
 						</tr>
 					{/each}
 				</tbody>
@@ -188,5 +197,5 @@
 			{/if}
 			<p class="italic">Figures come from the source cited on each project. Contractors are listed only where a source names them.</p>
 		</div>
-	</div>
+	</main>
 </div>

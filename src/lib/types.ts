@@ -1,3 +1,5 @@
+import { TOKENS } from './tokens';
+
 export type ProjectStatus = 'on_budget' | 'over_budget' | 'under_budget' | 'completed' | 'cancelled';
 export type ProjectCategory = 'transport' | 'health' | 'education' | 'utilities' | 'housing' | 'environment' | 'community' | 'other';
 export type FundingType = 'public' | 'ppp' | 'gov_funded_private' | 'gov_contracted';
@@ -56,18 +58,20 @@ export interface Project {
 }
 
 export const FUNDER_CONFIG: Record<keyof FundingBreakdown, { label: string; color: string }> = {
-	federal: { label: 'Federal', color: '#9a8ad6' },
-	state: { label: 'State', color: '#3fa39e' },
-	local: { label: 'Local', color: '#5aa84f' },
-	private: { label: 'Private', color: '#e0933a' }
+	federal: { label: 'Federal', color: TOKENS.tierFederal },
+	state: { label: 'State', color: TOKENS.tierState },
+	local: { label: 'Local', color: TOKENS.tierLocal },
+	private: { label: 'Private', color: TOKENS.fundPrivate }
 };
 
+// Chip text uses a lighter tint of each status hue so it holds 4.5:1 on the
+// 15% wash; the fills themselves come from the tokens.
 export const STATUS_CONFIG: Record<ProjectStatus, { label: string; color: string; bgClass: string }> = {
-	on_budget: { label: 'On Budget', color: '#5aa84f', bgClass: 'bg-[#5aa84f]/15 text-[#7cc070]' },
-	over_budget: { label: 'Over Budget', color: '#df5a39', bgClass: 'bg-[#df5a39]/15 text-[#ec8366]' },
-	under_budget: { label: 'Under Budget', color: '#3fa39e', bgClass: 'bg-[#3fa39e]/15 text-[#63c0bb]' },
-	completed: { label: 'Completed', color: '#ab8ad6', bgClass: 'bg-[#ab8ad6]/15 text-[#c2a8e3]' },
-	cancelled: { label: 'Cancelled', color: '#889085', bgClass: 'bg-[#889085]/15 text-[#a8b0a4]' }
+	on_budget: { label: 'On Budget', color: TOKENS.statusOnBudget, bgClass: 'bg-[var(--color-status-on-budget)]/15 text-[#7cc070]' },
+	over_budget: { label: 'Over Budget', color: TOKENS.statusOverBudget, bgClass: 'bg-[var(--color-status-over-budget)]/15 text-[#ec8366]' },
+	under_budget: { label: 'Under Budget', color: TOKENS.statusUnderBudget, bgClass: 'bg-[var(--color-status-under-budget)]/15 text-[#63c0bb]' },
+	completed: { label: 'Completed', color: TOKENS.statusCompleted, bgClass: 'bg-[var(--color-status-completed)]/15 text-[#c2a8e3]' },
+	cancelled: { label: 'Cancelled', color: TOKENS.statusCancelled, bgClass: 'bg-[var(--color-status-cancelled)]/15 text-[#a8b0a4]' }
 };
 
 export const CATEGORY_CONFIG: Record<ProjectCategory, { label: string }> = {
@@ -82,9 +86,9 @@ export const CATEGORY_CONFIG: Record<ProjectCategory, { label: string }> = {
 };
 
 export const GOVERNMENT_LEVEL_CONFIG: Record<GovernmentLevel, { label: string; shortLabel: string; color: string; description: string }> = {
-	federal: { label: 'Federal Government', shortLabel: 'Federal', color: '#9a8ad6', description: 'Led and mainly funded by the Australian Government' },
-	state: { label: 'State Government', shortLabel: 'State', color: '#3fa39e', description: 'Led by the Tasmanian state government' },
-	local: { label: 'Local Council', shortLabel: 'Council', color: '#5aa84f', description: 'Led by a local council' }
+	federal: { label: 'Federal Government', shortLabel: 'Federal', color: TOKENS.tierFederal, description: 'Led and mainly funded by the Australian Government' },
+	state: { label: 'State Government', shortLabel: 'State', color: TOKENS.tierState, description: 'Led by the Tasmanian state government' },
+	local: { label: 'Local Council', shortLabel: 'Council', color: TOKENS.tierLocal, description: 'Led by a local council' }
 };
 
 export const FUNDING_CONFIG: Record<FundingType, { label: string; shortLabel: string; dashArray: string; borderStyle: string; description: string }> = {

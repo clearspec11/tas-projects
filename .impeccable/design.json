@@ -17,7 +17,9 @@
       "status-under-budget": { "role": "secondary", "displayName": "Tarn Teal (Under Budget / State)", "canonical": "#3fa39e", "tonalRamp": ["#0e2e2c", "#15433f", "#1e5f5a", "#287b75", "#33938c", "#3fa39e", "#63c0bb", "#9adbd6"] },
       "status-completed": { "role": "secondary", "displayName": "Dusk Mauve (Completed)", "canonical": "#ab8ad6", "tonalRamp": ["#2a1d3a", "#3d2b54", "#543c75", "#6c4f96", "#8a6bbb", "#ab8ad6", "#c2a8e3", "#dbcaf0"] },
       "status-cancelled": { "role": "secondary", "displayName": "Lichen Grey (Cancelled)", "canonical": "#889085", "tonalRamp": ["#2a2e2b", "#3c423d", "#525a53", "#697069", "#7a827b", "#889085", "#a8b0a4", "#c8cec5"] },
-      "tier-federal": { "role": "tertiary", "displayName": "Federal Iris", "canonical": "#9a8ad6", "tonalRamp": ["#241d3a", "#352b54", "#4a3c75", "#604f96", "#7d6bbb", "#9a8ad6", "#b6a8e3", "#d2caf0"] }
+      "tier-federal": { "role": "tertiary", "displayName": "Federal Iris", "canonical": "#9a8ad6", "tonalRamp": ["#241d3a", "#352b54", "#4a3c75", "#604f96", "#7d6bbb", "#9a8ad6", "#b6a8e3", "#d2caf0"] },
+      "coast-glow": { "role": "tertiary", "displayName": "Shoreline Glow (map atmosphere)", "canonical": "#34b893", "tonalRamp": ["#0d2e25", "#144538", "#1c5f4d", "#257c64", "#2d9c7e", "#34b893", "#6fd0b3", "#a9e4d3"] },
+      "coast-line": { "role": "tertiary", "displayName": "Shoreline Line (map atmosphere)", "canonical": "#86e3c0", "tonalRamp": ["#1f3a30", "#315a4b", "#447d68", "#58a086", "#6fc4a4", "#86e3c0", "#aeecd5", "#d5f6ea"] }
     },
     "typographyMeta": {
       "stat": { "displayName": "Stat", "purpose": "Headline accountability figures: dollar totals, the over-budget count, sidebar stat tiles. Mono, tabular-nums." },
