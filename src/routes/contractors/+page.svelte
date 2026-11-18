@@ -126,11 +126,13 @@
 				<thead>
 					<tr>
 						{#each columns as col}
-							<th class="px-3 py-2.5 border-b border-[var(--color-border)] {col.align}">
+							<th
+								class="px-3 py-2.5 border-b border-[var(--color-border)] {col.align}"
+								aria-sort={sortCol === col.key ? (sortDesc ? 'descending' : 'ascending') : undefined}
+							>
 								<button
 									onclick={() => setSort(col.key)}
 									title={col.key === 'overrun' ? undefined : col.title}
-									aria-sort={sortCol === col.key ? (sortDesc ? 'descending' : 'ascending') : undefined}
 									class="text-[0.6875rem] font-semibold cursor-pointer transition-colors {sortCol === col.key ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'}"
 								>
 									{col.label}{sortCol === col.key ? (sortDesc ? ' ↓' : ' ↑') : ''}
@@ -184,7 +186,7 @@
 			{#if stats.unattributed > 0}
 				<p>{stats.unattributed} projects have no named contractor and are not ranked.</p>
 			{/if}
-			<p class="italic">Figures are illustrative seed data. Follow each project's source for official numbers.</p>
+			<p class="italic">Figures come from the source cited on each project. Contractors are listed only where a source names them.</p>
 		</div>
 	</div>
 </div>

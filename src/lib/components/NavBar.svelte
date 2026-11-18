@@ -13,7 +13,7 @@
 </script>
 
 <nav class="h-12 shrink-0 flex items-center justify-between gap-3 px-4 max-md:px-3 bg-[var(--color-surface)] border-b border-[var(--color-border)]">
-	<a href="/" class="flex items-center gap-2 font-bold text-base tracking-tight">
+	<a href="/" class="flex items-center gap-2 min-w-0 font-bold text-base tracking-tight">
 		<!-- Tasmania silhouette, generated from the live boundary data -->
 		<svg viewBox="0 0 20.1 24" class="h-5 w-auto shrink-0" aria-hidden="true">
 			<path
@@ -22,10 +22,10 @@
 				stroke="var(--color-accent)" stroke-width="1" stroke-linejoin="round"
 			/>
 		</svg>
-		<span><span class="text-[var(--color-accent)]">TAS</span> Project Tracker</span>
+		<span class="truncate whitespace-nowrap"><span class="text-[var(--color-accent)]">TAS</span> Project Tracker</span>
 		<span class="max-md:hidden text-[0.6875rem] font-normal text-[var(--color-text-muted)] ml-1 mt-0.5">Tasmanian Public Infrastructure Monitor</span>
 	</a>
-	<div class="flex gap-1">
+	<div class="flex gap-1 shrink-0">
 		{#each links as link}
 			<a
 				href={link.href}

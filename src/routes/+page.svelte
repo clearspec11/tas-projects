@@ -9,7 +9,7 @@
 	} from '$lib/stores';
 	import { SEED_PROJECTS } from '$lib/seed-data';
 	import { loadProjects } from '$lib/data';
-	import type { SortKey } from '$lib/metrics';
+	import { parseViewState, serializeViewState } from '$lib/url-state';
 	import TasMap from '$lib/components/TasMap.svelte';
 	import Sidebar from '$lib/components/Sidebar.svelte';
 	import ProjectDetail from '$lib/components/ProjectDetail.svelte';
@@ -32,26 +32,19 @@
 		($searchQuery !== '' ? 1 : 0)
 	);
 
-	const DEFAULTS = {
-		cat: 'all', status: 'all', funding: 'all', gov: 'all',
-		q: '', sort: 'variance', y0: 2008, y1: 2036
-	};
-
 	function applyFromUrl() {
-		const sp = new URLSearchParams(window.location.search);
-		if (sp.get('cat')) filterCategory.set(sp.get('cat') as any);
-		if (sp.get('status')) filterStatus.set(sp.get('status') as any);
-		if (sp.get('funding')) filterFunding.set(sp.get('funding') as any);
-		if (sp.get('gov')) filterGovernmentLevel.set(sp.get('gov') as any);
-		if (sp.get('q')) searchQuery.set(sp.get('q')!);
-		if (sp.get('flag') === '1') filterFlagged.set(true);
-		if (sp.get('contractor')) filterContractor.set(sp.get('contractor'));
-		if (sp.get('sort')) sortKey.set(sp.get('sort') as SortKey);
-		const y0 = Number(sp.get('y0')), y1 = Number(sp.get('y1'));
-		if (y0 && y1) timelineRange.set([y0, y1]);
-		const pid = sp.get('p');
-		if (pid) {
-			const proj = get(projects).find((p) => p.id === pid);
+		const view = parseViewState(window.location.search);
+		if (view.category) filterCategory.set(view.category);
+		if (view.status) filterStatus.set(view.status);
+		if (view.funding) filterFunding.set(view.funding);
+		if (view.governmentLevel) filterGovernmentLevel.set(view.governmentLevel);
+		if (view.query) searchQuery.set(view.query);
+		if (view.flagged) filterFlagged.set(true);
+		if (view.contractor) filterContractor.set(view.contractor);
+		if (view.sort) sortKey.set(view.sort);
+		if (view.range) timelineRange.set(view.range);
+		if (view.projectId) {
+			const proj = get(projects).find((p) => p.id === view.projectId);
 			if (proj) {
 				selectedProject.set(proj);
 				setTimeout(() => mapComponent?.flyTo(proj.lat, proj.lng), 300);
@@ -60,25 +53,18 @@
 	}
 
 	function syncUrl() {
-		const sp = new URLSearchParams();
-		const set = (k: string, v: string | number, def: string | number) => {
-			if (String(v) !== String(def)) sp.set(k, String(v));
-		};
-		set('cat', get(filterCategory), DEFAULTS.cat);
-		set('status', get(filterStatus), DEFAULTS.status);
-		set('funding', get(filterFunding), DEFAULTS.funding);
-		set('gov', get(filterGovernmentLevel), DEFAULTS.gov);
-		set('q', get(searchQuery), DEFAULTS.q);
-		if (get(filterFlagged)) sp.set('flag', '1');
-		const contractor = get(filterContractor);
-		if (contractor) sp.set('contractor', contractor);
-		set('sort', get(sortKey), DEFAULTS.sort);
-		const range = get(timelineRange);
-		set('y0', range[0], DEFAULTS.y0);
-		set('y1', range[1], DEFAULTS.y1);
-		const sel = get(selectedProject);
-		if (sel) sp.set('p', sel.id);
-		const qs = sp.toString();
+		const qs = serializeViewState({
+			category: get(filterCategory),
+			status: get(filterStatus),
+			funding: get(filterFunding),
+			governmentLevel: get(filterGovernmentLevel),
+			query: get(searchQuery),
+			flagged: get(filterFlagged),
+			contractor: get(filterContractor),
+			sort: get(sortKey),
+			range: get(timelineRange),
+			projectId: get(selectedProject)?.id ?? null
+		});
 		const url = qs ? `?${qs}` : window.location.pathname;
 		// Router may not be initialized on the very first call (during mount); ignore until it is.
 		try {
@@ -121,7 +107,12 @@
 		const typing = ['INPUT', 'SELECT', 'TEXTAREA'].includes(target?.tagName);
 		if (e.key === '/' && !typing) {
 			e.preventDefault();
-			document.getElementById('project-search')?.focus();
+			// The sidebar is mounted twice (phone list view and desktop panel), so
+			// pick the search box that is actually on screen, opening the desktop
+			// panel first if it is tucked away.
+			sidebarOpen.set(true);
+			const boxes = document.querySelectorAll<HTMLInputElement>('[data-project-search]');
+			[...boxes].find((el) => el.offsetParent !== null)?.focus();
 		} else if (e.key === 'Escape' && !typing) {
 			selectedProject.set(null);
 		}
@@ -131,7 +122,7 @@
 <svelte:window onkeydown={handleKeydown} />
 
 <svelte:head>
-	<title>TAS Project Tracker — Tasmanian Public Infrastructure</title>
+	<title>TAS Project Tracker: Tasmanian Public Infrastructure</title>
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
 	<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -197,9 +188,10 @@
 			<StoryBanner />
 			<MapControls />
 			<SeaOverlay />
-			<!-- Legend and timeline are desktop affordances; they'd bury a phone map. -->
+			<!-- The legend starts as a single button on every screen, so phones get
+			     the map key too. The timeline stays desktop-only. -->
+			<MapLegend />
 			<div class="contents max-md:hidden">
-				<MapLegend />
 				<TimelineSlider />
 			</div>
 		</main>

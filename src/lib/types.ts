@@ -25,14 +25,18 @@ export interface Project {
 	category: ProjectCategory;
 	status: ProjectStatus;
 	funding_type: FundingType;
+	// Latest official estimated total cost.
 	budget: number;
-	spent: number;
+	// Money actually paid out so far. null when no source publishes it; an
+	// estimate must never be stored here.
+	spent: number | null;
 	// First publicly announced total cost, for original-vs-current comparison.
 	original_budget?: number;
 	lat: number;
 	lng: number;
 	location_name: string;
-	start_date: string;
+	// null when no source gives a start date.
+	start_date: string | null;
 	expected_end_date: string | null;
 	// When a completed project actually finished (vs the promised expected_end_date).
 	actual_end_date?: string | null;
@@ -40,6 +44,9 @@ export interface Project {
 	related_project_ids: string[];
 	source_url?: string;
 	funding_breakdown?: FundingBreakdown;
+	// Plain-language caveat or explanation shown with the funding split, e.g.
+	// when a share is proposed rather than committed, or dollars aren't published.
+	funding_note?: string;
 	// Cost-escalation trail from successive budget papers, oldest first.
 	budget_history?: BudgetSnapshot[];
 	// Date this row's figures were last checked against the cited source.

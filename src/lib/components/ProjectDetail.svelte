@@ -66,8 +66,8 @@
 				<span title={govCfg.description} class="text-xs px-2 py-0.5 rounded-full font-medium" style="background: {govCfg.color}20; color: {govCfg.color};">
 					{govCfg.shortLabel}
 				</span>
-				<span title={fundCfg.description} class="text-xs px-2 py-0.5 rounded-full font-medium bg-[var(--color-surface-hover)] text-[var(--color-text-muted)]">
-					{fundCfg.label}
+				<span class="text-xs px-2 py-0.5 rounded-full font-medium bg-[var(--color-surface-hover)] text-[var(--color-text-muted)]">
+					<InfoTip term={fundCfg.label} text="{fundCfg.description}." />
 				</span>
 			</div>
 			<p class="text-[0.6875rem] text-[var(--color-text-muted)] mt-1.5 leading-snug">
@@ -77,27 +77,36 @@
 
 		<!-- Budget breakdown -->
 		<div class="p-4 space-y-3">
-			<div>
-				<div class="flex justify-between text-xs mb-1">
-					<span class="text-[var(--color-text-muted)]">Budget Usage <InfoTip text={GLOSSARY.budget_usage} /></span>
-					<span class="font-mono font-bold" style="color: {cfg.color}">{pct}%</span>
+			{#if pct != null}
+				<div>
+					<div class="flex justify-between text-xs mb-1">
+						<span class="text-[var(--color-text-muted)]">Budget Usage <InfoTip text={GLOSSARY.budget_usage} /></span>
+						<span class="font-mono font-bold" style="color: {cfg.color}">{pct}%</span>
+					</div>
+					<div class="bg-[var(--color-bg)] rounded-full h-3">
+						<div
+							class="h-full rounded-full transition-all"
+							style="width: {Math.min(100, pct)}%; background: {cfg.color};"
+						></div>
+					</div>
 				</div>
-				<div class="bg-[var(--color-bg)] rounded-full h-3">
-					<div
-						class="h-full rounded-full transition-all"
-						style="width: {Math.min(100, pct)}%; background: {cfg.color};"
-					></div>
-				</div>
-			</div>
+			{/if}
 
 			<div class="grid grid-cols-2 gap-3">
 				<div class="bg-[var(--color-bg)] rounded-lg p-3">
-					<div class="text-[0.6875rem] text-[var(--color-text-muted)]">Budget</div>
+					<div class="text-[0.6875rem] text-[var(--color-text-muted)]">Estimated cost</div>
 					<div class="text-xl font-bold tabular-nums mt-0.5">{formatCurrency(p.budget)}</div>
+					{#if p.original_budget && p.original_budget !== p.budget}
+						<div class="text-[0.6875rem] text-[var(--color-text-muted)] mt-0.5">first announced {formatCurrency(p.original_budget)}</div>
+					{/if}
 				</div>
 				<div class="bg-[var(--color-bg)] rounded-lg p-3">
-					<div class="text-[0.6875rem] text-[var(--color-text-muted)]">Spent</div>
-					<div class="text-xl font-bold tabular-nums mt-0.5" style="color: {cfg.color}">{formatCurrency(p.spent)}</div>
+					<div class="text-[0.6875rem] text-[var(--color-text-muted)]">{p.status === 'completed' ? 'Final cost' : 'Spent so far'}</div>
+					{#if p.spent != null}
+						<div class="text-xl font-bold tabular-nums mt-0.5" style="color: {cfg.color}">{formatCurrency(p.spent)}</div>
+					{:else}
+						<div class="text-[0.9375rem] font-semibold mt-1 text-[var(--color-text-muted)]">Not published</div>
+					{/if}
 				</div>
 			</div>
 
@@ -133,9 +142,11 @@
 			<div>
 				<div class="flex justify-between items-baseline mb-1.5">
 					<span class="text-[0.6875rem] text-[var(--color-text-muted)]">
-						Who pays {funding.estimated ? '· est.' : ''}
+						Who pays {funding.estimated && !p.funding_note ? '· est.' : ''}
 					</span>
 				</div>
+				<!-- Where the split isn't published we say so, rather than draw a guess. -->
+				{#if !(funding.estimated && p.funding_note)}
 				<div class="flex h-3 rounded-full overflow-hidden bg-[var(--color-bg)]">
 					{#each FUNDER_KEYS as key}
 						{@const amount = funding.breakdown[key]}
@@ -159,7 +170,10 @@
 						{/if}
 					{/each}
 				</div>
-				{#if funding.estimated}
+				{/if}
+				{#if p.funding_note}
+					<p class="text-[0.6875rem] text-[var(--color-text-muted)] mt-1.5 leading-snug">{p.funding_note}</p>
+				{:else if funding.estimated}
 					<p class="text-[0.625rem] text-[var(--color-text-muted)] mt-1.5 italic">Estimated from governing tier and delivery model. See source for actual figures.</p>
 				{/if}
 			</div>
@@ -170,14 +184,22 @@
 			<p class="text-[var(--color-text)]/85 leading-relaxed [text-wrap:pretty]">{p.description}</p>
 
 			<div class="grid grid-cols-2 gap-x-4 gap-y-1 pt-2 border-t border-[var(--color-border)]">
-				<div>
-					<span class="text-[var(--color-text-muted)]">Started</span>
-					<span class="ml-1 font-medium">{formatDate(p.start_date)}</span>
-				</div>
+				{#if p.start_date}
+					<div>
+						<span class="text-[var(--color-text-muted)]">Started</span>
+						<span class="ml-1 font-medium">{formatDate(p.start_date)}</span>
+					</div>
+				{/if}
 				{#if p.expected_end_date}
 					<div>
-						<span class="text-[var(--color-text-muted)]">Expected</span>
+						<span class="text-[var(--color-text-muted)]">{p.actual_end_date ? "Promised" : "Expected"}</span>
 						<span class="ml-1 font-medium">{formatDate(p.expected_end_date)}</span>
+					</div>
+				{/if}
+				{#if p.actual_end_date}
+					<div>
+						<span class="text-[var(--color-text-muted)]">Finished</span>
+						<span class="ml-1 font-medium">{formatDate(p.actual_end_date)}</span>
 					</div>
 				{/if}
 				{#if p.contractor}
@@ -192,11 +214,11 @@
 			{#if isVerified(p)}
 				<div class="flex items-center gap-1.5 mt-2 text-[0.6875rem] text-[var(--color-success)]">
 					<Check size={13} class="shrink-0" />
-					<span>Figures verified against source{p.last_verified ? `, last checked ${formatDate(p.last_verified)}` : ''}.</span>
+					<span>Figures checked against the cited source{p.last_verified ? `, last checked ${formatDate(p.last_verified)}` : ''}.</span>
 				</div>
 			{:else}
 				<div class="mt-2 px-2.5 py-1.5 rounded-lg bg-[var(--color-warning)]/10 border border-[var(--color-warning)]/30 text-[0.6875rem] text-[var(--color-warning)] leading-snug">
-					Illustrative figures — not yet verified against an official source.
+					Illustrative figures: not yet verified against an official source.
 				</div>
 			{/if}
 

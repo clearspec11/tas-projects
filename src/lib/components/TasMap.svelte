@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import {
 		projects, selectedProject, filterCategory, filterStatus,
 		filterFunding, filterGovernmentLevel, filterFlagged, filterContractor, searchQuery, timelineRange, showHeatmap,
@@ -7,7 +7,7 @@
 	} from '$lib/stores';
 	import { STATUS_CONFIG, CATEGORY_CONFIG, FUNDING_CONFIG, GOVERNMENT_LEVEL_CONFIG, type Project } from '$lib/types';
 	import { TASMANIA_CENTER, TASMANIA_ZOOM } from '$lib/tasmania-geo';
-	import { formatCurrency, budgetPercent, filterProjects, isRedFlag, delayMonths } from '$lib/metrics';
+	import { formatCurrency, budgetPercent, currentCost, filterProjects, isRedFlag, delayMonths } from '$lib/metrics';
 	import { FLAG_SVG_DANGER } from '$lib/icons';
 	import tasmaniaGeoJson from '$lib/tasmania-boundary.json';
 
@@ -21,6 +21,17 @@
 	let darkTiles: any;
 	let satTiles: any;
 	let L: any;
+
+	// Leaflet setup is async (dynamic imports), and Svelte never awaits an async
+	// onMount's return value — a cleanup returned from there would never run. So
+	// the teardown is parked here and invoked from a synchronous onDestroy.
+	let cleanup: (() => void) | undefined;
+	let destroyed = false;
+	onDestroy(() => {
+		destroyed = true;
+		cleanup?.();
+	});
+
 	// Accent ring marking the currently selected project on the map
 	function drawSelection(p: Project | null) {
 		if (!selectionLayer || !L) return;
@@ -63,8 +74,8 @@
 		marker.bindTooltip(`
 			<div style="font-family: 'IBM Plex Sans', system-ui; font-size: 12px; line-height: 1.4;">
 				<strong>${isRedFlag(p) ? FLAG_SVG_DANGER : ''}${p.name}</strong><br/>
-				<span style="color: ${cfg.color};">${cfg.label}</span> · ${govCfg.shortLabel} · ${fundCfg.shortLabel}<br/>
-				${formatCurrency(p.spent)} / ${formatCurrency(p.budget)} (${budgetPercent(p)}%)${late ? ` · <span style="color:#e0933a;">${late}mo late</span>` : ''}
+				<span style="color: ${cfg.color};">${cfg.label}</span> · ${govCfg.shortLabel} · ${fundCfg.label}<br/>
+				${p.spent != null ? `${formatCurrency(p.spent)} spent of ${formatCurrency(p.budget)} (${budgetPercent(p)}%)` : `Est. cost ${formatCurrency(p.budget)}`}${late ? ` · <span style="color:#e0933a;">${late}mo late</span>` : ''}
 			</div>
 		`, {
 			direction: 'top',
@@ -83,7 +94,7 @@
 			if (!el) return;
 			el.setAttribute('tabindex', '0');
 			el.setAttribute('role', 'button');
-			el.setAttribute('aria-label', `${p.name}, ${cfg.label}, ${formatCurrency(p.spent)} of ${formatCurrency(p.budget)}`);
+			el.setAttribute('aria-label', `${p.name}, ${cfg.label}, ${p.spent != null ? `${formatCurrency(p.spent)} spent of ${formatCurrency(p.budget)}` : `estimated cost ${formatCurrency(p.budget)}`}`);
 			el.addEventListener('keydown', (e: KeyboardEvent) => {
 				if (e.key === 'Enter' || e.key === ' ') {
 					e.preventDefault();
@@ -113,7 +124,7 @@
 		});
 
 		if (heatmap) {
-			const heatData = filtered.map((p) => [p.lat, p.lng, p.spent / 1_000_000]);
+			const heatData = filtered.map((p) => [p.lat, p.lng, currentCost(p) / 1_000_000]);
 			try {
 				heatLayer = (L as any).heatLayer(heatData, {
 					radius: 35,
@@ -282,11 +293,13 @@
 			selectedProject.subscribe((p) => drawSelection(p))
 		];
 
-		return () => {
+		cleanup = () => {
 			unsubs.forEach((u) => u());
 			resizeObserver.disconnect();
 			map.remove();
 		};
+		// Unmounted while the dynamic imports were still in flight: tear down now.
+		if (destroyed) cleanup();
 	});
 
 	export function flyTo(lat: number, lng: number) {

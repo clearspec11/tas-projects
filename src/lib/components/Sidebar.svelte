@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { projects, selectedProject, filterCategory, filterStatus, filterFunding, filterGovernmentLevel, filterFlagged, filterContractor, searchQuery, sortKey } from '$lib/stores';
+	import InfoTip from './InfoTip.svelte';
+	import { FUNDING_MODELS_EXPLAINED } from '$lib/glossary';
 	import { STATUS_CONFIG, CATEGORY_CONFIG, FUNDING_CONFIG, GOVERNMENT_LEVEL_CONFIG, type Project, type ProjectCategory, type ProjectStatus, type FundingType, type GovernmentLevel } from '$lib/types';
 	import { timelineRange } from '$lib/stores';
 	import {
@@ -107,8 +109,9 @@
 	];
 
 	const fundingTypes: { value: FundingType | 'all'; label: string }[] = [
-		{ value: 'all', label: 'All Funding' },
-		...Object.entries(FUNDING_CONFIG).map(([k, v]) => ({ value: k as FundingType, label: v.shortLabel }))
+		{ value: 'all', label: 'All funding models' },
+		// Full names, not abbreviations: "PPP" means nothing to most visitors.
+		...Object.entries(FUNDING_CONFIG).map(([k, v]) => ({ value: k as FundingType, label: v.label }))
 	];
 
 	const governmentLevels: { value: GovernmentLevel | 'all'; label: string }[] = [
@@ -168,7 +171,8 @@
 	<!-- Filters: search + status always in view; the rest behind More filters -->
 	<div class="p-3 space-y-2 border-b border-[var(--color-border)]">
 		<input
-			id="project-search"
+			data-project-search
+			aria-label="Search projects"
 			type="text"
 			placeholder="Search projects...  ( / )"
 			value={$searchQuery}
@@ -227,7 +231,8 @@
 						{/each}
 					</select>
 					<select
-						class="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 text-xs text-[var(--color-text)] focus:border-[var(--color-accent)]"
+						aria-label="Funding model"
+						class="flex-1 min-w-0 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 text-xs text-[var(--color-text)] focus:border-[var(--color-accent)]"
 						value={$filterFunding}
 						onchange={(e) => filterFunding.set((e.target as HTMLSelectElement).value as FundingType | 'all')}
 					>
@@ -235,6 +240,7 @@
 							<option value={f.value}>{f.label}</option>
 						{/each}
 					</select>
+					<span class="self-center"><InfoTip text={FUNDING_MODELS_EXPLAINED} /></span>
 				</div>
 				<div class="flex gap-2">
 					<select
@@ -283,7 +289,7 @@
 							<span class="truncate">{project.name}</span>
 						</div>
 						<div class="text-xs text-[var(--color-text-muted)] mt-0.5">
-							{project.council ?? project.location_name}{#if !isVerified(project)}<span title="Illustrative figures — not yet verified against an official source"> · illustrative</span>{/if}
+							{project.council ?? project.location_name}{#if !isVerified(project)}<span title="Illustrative figures: not yet verified against an official source"> · illustrative</span>{/if}
 						</div>
 					</div>
 					<div class="flex flex-col items-end gap-0.5">
@@ -296,14 +302,19 @@
 					</div>
 				</div>
 				<div class="mt-2 flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
-					<span>{formatCurrency(project.spent)} / {formatCurrency(project.budget)}</span>
-					<div class="flex-1 bg-[var(--color-bg)] rounded-full h-1.5">
-						<div
-							class="h-full rounded-full transition-all"
-							style="width: {Math.min(100, pct)}%; background: {cfg.color};"
-						></div>
-					</div>
-					<span class="font-mono">{pct}%</span>
+					{#if project.spent != null && pct != null}
+						<span>{formatCurrency(project.spent)} / {formatCurrency(project.budget)}</span>
+						<div class="flex-1 bg-[var(--color-bg)] rounded-full h-1.5">
+							<div
+								class="h-full rounded-full transition-all"
+								style="width: {Math.min(100, pct)}%; background: {cfg.color};"
+							></div>
+						</div>
+						<span class="font-mono">{pct}%</span>
+					{:else}
+						<span>Est. cost <span class="font-mono text-[var(--color-text)]">{formatCurrency(project.budget)}</span></span>
+						<span class="ml-auto">spend not published</span>
+					{/if}
 				</div>
 				{#if v > 0 || late}
 					<div class="mt-1 flex items-center gap-2 text-[0.6875rem]">
