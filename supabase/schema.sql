@@ -16,7 +16,8 @@ create table if not exists projects (
   government_level text not null check (government_level in ('federal','state','local')),
   council text,
   budget bigint not null,
-  spent bigint not null default 0,
+  -- Money actually paid out so far; null when no source publishes it.
+  spent bigint,
   original_budget bigint,
   lat double precision not null,
   lng double precision not null,
@@ -34,6 +35,10 @@ create table if not exists projects (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- Existing tables created before spend became optional.
+alter table projects alter column spent drop not null;
+alter table projects alter column spent drop default;
 
 -- Public read-only access (anon key); writes require the service role.
 alter table projects enable row level security;

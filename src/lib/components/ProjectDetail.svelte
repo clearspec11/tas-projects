@@ -77,27 +77,36 @@
 
 		<!-- Budget breakdown -->
 		<div class="p-4 space-y-3">
-			<div>
-				<div class="flex justify-between text-xs mb-1">
-					<span class="text-[var(--color-text-muted)]">Budget Usage <InfoTip text={GLOSSARY.budget_usage} /></span>
-					<span class="font-mono font-bold" style="color: {cfg.color}">{pct}%</span>
+			{#if pct != null}
+				<div>
+					<div class="flex justify-between text-xs mb-1">
+						<span class="text-[var(--color-text-muted)]">Budget Usage <InfoTip text={GLOSSARY.budget_usage} /></span>
+						<span class="font-mono font-bold" style="color: {cfg.color}">{pct}%</span>
+					</div>
+					<div class="bg-[var(--color-bg)] rounded-full h-3">
+						<div
+							class="h-full rounded-full transition-all"
+							style="width: {Math.min(100, pct)}%; background: {cfg.color};"
+						></div>
+					</div>
 				</div>
-				<div class="bg-[var(--color-bg)] rounded-full h-3">
-					<div
-						class="h-full rounded-full transition-all"
-						style="width: {Math.min(100, pct)}%; background: {cfg.color};"
-					></div>
-				</div>
-			</div>
+			{/if}
 
 			<div class="grid grid-cols-2 gap-3">
 				<div class="bg-[var(--color-bg)] rounded-lg p-3">
-					<div class="text-[0.6875rem] text-[var(--color-text-muted)]">Budget</div>
+					<div class="text-[0.6875rem] text-[var(--color-text-muted)]">Estimated cost</div>
 					<div class="text-xl font-bold tabular-nums mt-0.5">{formatCurrency(p.budget)}</div>
+					{#if p.original_budget && p.original_budget !== p.budget}
+						<div class="text-[0.6875rem] text-[var(--color-text-muted)] mt-0.5">first announced {formatCurrency(p.original_budget)}</div>
+					{/if}
 				</div>
 				<div class="bg-[var(--color-bg)] rounded-lg p-3">
-					<div class="text-[0.6875rem] text-[var(--color-text-muted)]">Spent</div>
-					<div class="text-xl font-bold tabular-nums mt-0.5" style="color: {cfg.color}">{formatCurrency(p.spent)}</div>
+					<div class="text-[0.6875rem] text-[var(--color-text-muted)]">{p.status === 'completed' ? 'Final cost' : 'Spent so far'}</div>
+					{#if p.spent != null}
+						<div class="text-xl font-bold tabular-nums mt-0.5" style="color: {cfg.color}">{formatCurrency(p.spent)}</div>
+					{:else}
+						<div class="text-[0.9375rem] font-semibold mt-1 text-[var(--color-text-muted)]">Not published</div>
+					{/if}
 				</div>
 			</div>
 
@@ -176,8 +185,14 @@
 				</div>
 				{#if p.expected_end_date}
 					<div>
-						<span class="text-[var(--color-text-muted)]">Expected</span>
+						<span class="text-[var(--color-text-muted)]">{p.actual_end_date ? "Promised" : "Expected"}</span>
 						<span class="ml-1 font-medium">{formatDate(p.expected_end_date)}</span>
+					</div>
+				{/if}
+				{#if p.actual_end_date}
+					<div>
+						<span class="text-[var(--color-text-muted)]">Finished</span>
+						<span class="ml-1 font-medium">{formatDate(p.actual_end_date)}</span>
 					</div>
 				{/if}
 				{#if p.contractor}

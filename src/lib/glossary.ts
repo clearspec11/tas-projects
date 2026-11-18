@@ -2,12 +2,12 @@
 // One place so the wording stays consistent wherever a term is explained.
 export const GLOSSARY = {
 	variance:
-		'How far spending sits above or below the budget. A positive figure means the project is over.',
+		'How far the cost now sits above or below the first announced figure. A positive figure means the project is over.',
 	tier:
 		'Which level of government funds the project — federal, state, or local council. The marker ring shows it.',
 	overrun:
-		"Total spent against total budget across a contractor's projects, money-weighted so one large blowout counts for more than several small on-budget jobs.",
-	budget_usage: 'Share of the budget spent so far. Over 100% means spending has passed the budget.',
+		"How far the combined cost of a contractor's projects has grown past their first announced cost, money-weighted so one large blowout counts for more than several small on-budget jobs.",
+	budget_usage: 'Share of the current cost estimate paid out so far. Shown only where a spend figure has been published.',
 	funding_model:
 		'How the project is paid for and delivered — fully public, built under contract by a private firm, or a public-private partnership.',
 	flagged: 'Over budget by more than 15%, or past its expected finish date (and not yet complete).'

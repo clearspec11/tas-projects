@@ -296,14 +296,19 @@
 					</div>
 				</div>
 				<div class="mt-2 flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
-					<span>{formatCurrency(project.spent)} / {formatCurrency(project.budget)}</span>
-					<div class="flex-1 bg-[var(--color-bg)] rounded-full h-1.5">
-						<div
-							class="h-full rounded-full transition-all"
-							style="width: {Math.min(100, pct)}%; background: {cfg.color};"
-						></div>
-					</div>
-					<span class="font-mono">{pct}%</span>
+					{#if project.spent != null && pct != null}
+						<span>{formatCurrency(project.spent)} / {formatCurrency(project.budget)}</span>
+						<div class="flex-1 bg-[var(--color-bg)] rounded-full h-1.5">
+							<div
+								class="h-full rounded-full transition-all"
+								style="width: {Math.min(100, pct)}%; background: {cfg.color};"
+							></div>
+						</div>
+						<span class="font-mono">{pct}%</span>
+					{:else}
+						<span>Est. cost <span class="font-mono text-[var(--color-text)]">{formatCurrency(project.budget)}</span></span>
+						<span class="ml-auto">spend not published</span>
+					{/if}
 				</div>
 				{#if v > 0 || late}
 					<div class="mt-1 flex items-center gap-2 text-[0.6875rem]">

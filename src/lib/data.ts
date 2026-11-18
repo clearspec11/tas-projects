@@ -22,7 +22,7 @@ function rowToProject(r: Record<string, unknown>): Project {
 		government_level: r.government_level as Project['government_level'],
 		council: (r.council as string) ?? undefined,
 		budget: Number(r.budget ?? 0),
-		spent: Number(r.spent ?? 0),
+		spent: r.spent != null ? Number(r.spent) : null,
 		original_budget: r.original_budget != null ? Number(r.original_budget) : undefined,
 		lat: Number(r.lat),
 		lng: Number(r.lng),

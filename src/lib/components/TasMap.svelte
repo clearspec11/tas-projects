@@ -7,7 +7,7 @@
 	} from '$lib/stores';
 	import { STATUS_CONFIG, CATEGORY_CONFIG, FUNDING_CONFIG, GOVERNMENT_LEVEL_CONFIG, type Project } from '$lib/types';
 	import { TASMANIA_CENTER, TASMANIA_ZOOM } from '$lib/tasmania-geo';
-	import { formatCurrency, budgetPercent, filterProjects, isRedFlag, delayMonths } from '$lib/metrics';
+	import { formatCurrency, budgetPercent, currentCost, filterProjects, isRedFlag, delayMonths } from '$lib/metrics';
 	import { FLAG_SVG_DANGER } from '$lib/icons';
 	import tasmaniaGeoJson from '$lib/tasmania-boundary.json';
 
@@ -75,7 +75,7 @@
 			<div style="font-family: 'IBM Plex Sans', system-ui; font-size: 12px; line-height: 1.4;">
 				<strong>${isRedFlag(p) ? FLAG_SVG_DANGER : ''}${p.name}</strong><br/>
 				<span style="color: ${cfg.color};">${cfg.label}</span> · ${govCfg.shortLabel} · ${fundCfg.shortLabel}<br/>
-				${formatCurrency(p.spent)} / ${formatCurrency(p.budget)} (${budgetPercent(p)}%)${late ? ` · <span style="color:#e0933a;">${late}mo late</span>` : ''}
+				${p.spent != null ? `${formatCurrency(p.spent)} spent of ${formatCurrency(p.budget)} (${budgetPercent(p)}%)` : `Est. cost ${formatCurrency(p.budget)}`}${late ? ` · <span style="color:#e0933a;">${late}mo late</span>` : ''}
 			</div>
 		`, {
 			direction: 'top',
@@ -94,7 +94,7 @@
 			if (!el) return;
 			el.setAttribute('tabindex', '0');
 			el.setAttribute('role', 'button');
-			el.setAttribute('aria-label', `${p.name}, ${cfg.label}, ${formatCurrency(p.spent)} of ${formatCurrency(p.budget)}`);
+			el.setAttribute('aria-label', `${p.name}, ${cfg.label}, ${p.spent != null ? `${formatCurrency(p.spent)} spent of ${formatCurrency(p.budget)}` : `estimated cost ${formatCurrency(p.budget)}`}`);
 			el.addEventListener('keydown', (e: KeyboardEvent) => {
 				if (e.key === 'Enter' || e.key === ' ') {
 					e.preventDefault();
@@ -124,7 +124,7 @@
 		});
 
 		if (heatmap) {
-			const heatData = filtered.map((p) => [p.lat, p.lng, p.spent / 1_000_000]);
+			const heatData = filtered.map((p) => [p.lat, p.lng, currentCost(p) / 1_000_000]);
 			try {
 				heatLayer = (L as any).heatLayer(heatData, {
 					radius: 35,

@@ -25,8 +25,11 @@ export interface Project {
 	category: ProjectCategory;
 	status: ProjectStatus;
 	funding_type: FundingType;
+	// Latest official estimated total cost.
 	budget: number;
-	spent: number;
+	// Money actually paid out so far. null when no source publishes it; an
+	// estimate must never be stored here.
+	spent: number | null;
 	// First publicly announced total cost, for original-vs-current comparison.
 	original_budget?: number;
 	lat: number;
