@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="text-scale" content="scale" />
+		<!-- Loaded here, not per route, so every page gets the Plex faces on a direct visit. -->
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+		<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+		<link href="/_app/immutable/entry/start.Bk-Lk45H.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/a64-FzHX.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/BYSslHSr.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/BOeUSahY.js" rel="modulepreload">
+		<link href="/_app/immutable/entry/app.kxzC44lC.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/xihTtKlq.js" rel="modulepreload">
+		<link href="/_app/immutable/nodes/0.CtYNocs-.js" rel="modulepreload">
+		<link href="/_app/immutable/chunks/DERxHzOn.js" rel="modulepreload">
+		<link href="/_app/env.js" rel="modulepreload">
+		
+		<link href="/_app/immutable/assets/0.BiHcmeEB.css" rel="stylesheet">
+	</head>
+	<body data-sveltekit-preload-data="hover">
+		<div style="display: contents">
+			<script>
+				{
+					__sveltekit_1nzf927 = {
+						base: "",
+						env: null
+					};
+
+					const element = document.currentScript.parentElement;
+
+					import("/_app/env.js").then(({ env }) => {
+						__sveltekit_1nzf927.env = env;
+
+						Promise.all([
+							import("/_app/immutable/entry/start.Bk-Lk45H.js"),
+							import("/_app/immutable/entry/app.kxzC44lC.js")
+						]).then(([kit, app]) => {
+							kit.start(app, element);
+						});
+					});
+				}
+			</script>
+		</div>
+	</body>
+</html>
