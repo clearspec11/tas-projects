@@ -186,7 +186,7 @@
 			{#if stats.unattributed > 0}
 				<p>{stats.unattributed} projects have no named contractor and are not ranked.</p>
 			{/if}
-			<p class="italic">Figures are illustrative seed data. Follow each project's source for official numbers.</p>
+			<p class="italic">Figures come from the source cited on each project. Contractors are listed only where a source names them.</p>
 		</div>
 	</div>
 </div>

@@ -331,8 +331,13 @@ export function filterProjects(list: Project[], f: FilterCriteria): Project[] {
 		if (f.flaggedOnly && !isRedFlag(p)) return false;
 		if (f.contractor && p.contractor !== f.contractor) return false;
 		if (f.query && !p.name.toLowerCase().includes(f.query.toLowerCase())) return false;
-		const startYear = new Date(p.start_date).getFullYear();
-		if (startYear < f.range[0] || startYear > f.range[1]) return false;
+		// Place a project on the timeline by its start; where that isn't on
+		// record, by when it finished or is due to.
+		const anchor = p.start_date ?? p.actual_end_date ?? p.expected_end_date;
+		if (anchor) {
+			const year = new Date(anchor).getFullYear();
+			if (year < f.range[0] || year > f.range[1]) return false;
+		}
 		return true;
 	});
 }
@@ -416,7 +421,8 @@ export function projectsToCsv(list: Project[]): string {
 	const cols: (keyof Project)[] = [
 		'id', 'name', 'category', 'status', 'funding_type', 'government_level',
 		'council', 'location_name', 'original_budget', 'budget', 'spent', 'contractor',
-		'start_date', 'expected_end_date', 'actual_end_date', 'lat', 'lng', 'source_url', 'last_verified'
+		'start_date', 'expected_end_date', 'actual_end_date', 'lat', 'lng', 'source_url', 'last_verified',
+		'funding_note'
 	];
 	const esc = (v: unknown) => {
 		const s = v == null ? '' : String(v);

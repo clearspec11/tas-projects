@@ -22,13 +22,15 @@ create table if not exists projects (
   lat double precision not null,
   lng double precision not null,
   location_name text not null,
-  start_date date not null,
+  start_date date,
   expected_end_date date,
   actual_end_date date,
   contractor text,
   related_project_ids text[] not null default '{}',
   source_url text,
   funding_breakdown jsonb,
+  -- Caveat shown with the funding split (proposed shares, unpublished dollars).
+  funding_note text,
   -- Cost-escalation trail: [{ "fiscal_year": "2023-24", "estimated_total_cost": 786000000 }, ...]
   budget_history jsonb,
   last_verified date,
@@ -39,6 +41,8 @@ create table if not exists projects (
 -- Existing tables created before spend became optional.
 alter table projects alter column spent drop not null;
 alter table projects alter column spent drop default;
+alter table projects alter column start_date drop not null;
+alter table projects add column if not exists funding_note text;
 
 -- Public read-only access (anon key); writes require the service role.
 alter table projects enable row level security;

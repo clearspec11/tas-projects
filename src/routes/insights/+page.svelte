@@ -150,7 +150,7 @@
 		</div>
 
 		<p class="mt-3 text-[0.6875rem] text-[var(--color-text-muted)] italic">
-			Many figures are illustrative seed data. Follow each project's source for official numbers.
+			Figures come from the source cited on each project. Funder totals include estimated splits for older projects whose funding split is not published.
 		</p>
 	</div>
 </div>

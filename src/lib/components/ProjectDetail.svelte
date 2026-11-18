@@ -142,9 +142,11 @@
 			<div>
 				<div class="flex justify-between items-baseline mb-1.5">
 					<span class="text-[0.6875rem] text-[var(--color-text-muted)]">
-						Who pays {funding.estimated ? '· est.' : ''}
+						Who pays {funding.estimated && !p.funding_note ? '· est.' : ''}
 					</span>
 				</div>
+				<!-- Where the split isn't published we say so, rather than draw a guess. -->
+				{#if !(funding.estimated && p.funding_note)}
 				<div class="flex h-3 rounded-full overflow-hidden bg-[var(--color-bg)]">
 					{#each FUNDER_KEYS as key}
 						{@const amount = funding.breakdown[key]}
@@ -168,7 +170,10 @@
 						{/if}
 					{/each}
 				</div>
-				{#if funding.estimated}
+				{/if}
+				{#if p.funding_note}
+					<p class="text-[0.6875rem] text-[var(--color-text-muted)] mt-1.5 leading-snug">{p.funding_note}</p>
+				{:else if funding.estimated}
 					<p class="text-[0.625rem] text-[var(--color-text-muted)] mt-1.5 italic">Estimated from governing tier and delivery model. See source for actual figures.</p>
 				{/if}
 			</div>
@@ -179,10 +184,12 @@
 			<p class="text-[var(--color-text)]/85 leading-relaxed [text-wrap:pretty]">{p.description}</p>
 
 			<div class="grid grid-cols-2 gap-x-4 gap-y-1 pt-2 border-t border-[var(--color-border)]">
-				<div>
-					<span class="text-[var(--color-text-muted)]">Started</span>
-					<span class="ml-1 font-medium">{formatDate(p.start_date)}</span>
-				</div>
+				{#if p.start_date}
+					<div>
+						<span class="text-[var(--color-text-muted)]">Started</span>
+						<span class="ml-1 font-medium">{formatDate(p.start_date)}</span>
+					</div>
+				{/if}
 				{#if p.expected_end_date}
 					<div>
 						<span class="text-[var(--color-text-muted)]">{p.actual_end_date ? "Promised" : "Expected"}</span>
@@ -207,7 +214,7 @@
 			{#if isVerified(p)}
 				<div class="flex items-center gap-1.5 mt-2 text-[0.6875rem] text-[var(--color-success)]">
 					<Check size={13} class="shrink-0" />
-					<span>Figures verified against source{p.last_verified ? `, last checked ${formatDate(p.last_verified)}` : ''}.</span>
+					<span>Figures checked against the cited source{p.last_verified ? `, last checked ${formatDate(p.last_verified)}` : ''}.</span>
 				</div>
 			{:else}
 				<div class="mt-2 px-2.5 py-1.5 rounded-lg bg-[var(--color-warning)]/10 border border-[var(--color-warning)]/30 text-[0.6875rem] text-[var(--color-warning)] leading-snug">

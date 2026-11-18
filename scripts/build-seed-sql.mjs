@@ -15,7 +15,8 @@ const COLUMNS = [
 	'id', 'name', 'description', 'category', 'status', 'funding_type', 'government_level',
 	'council', 'budget', 'spent', 'original_budget', 'lat', 'lng', 'location_name',
 	'start_date', 'expected_end_date', 'actual_end_date', 'contractor',
-	'related_project_ids', 'source_url', 'funding_breakdown', 'budget_history', 'last_verified'
+	'related_project_ids', 'source_url', 'funding_breakdown', 'funding_note', 'budget_history',
+	'last_verified'
 ];
 
 const str = (v) => (v == null ? 'null' : `'${String(v).replace(/'/g, "''")}'`);

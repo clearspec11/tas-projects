@@ -35,7 +35,8 @@ export interface Project {
 	lat: number;
 	lng: number;
 	location_name: string;
-	start_date: string;
+	// null when no source gives a start date.
+	start_date: string | null;
 	expected_end_date: string | null;
 	// When a completed project actually finished (vs the promised expected_end_date).
 	actual_end_date?: string | null;
@@ -43,6 +44,9 @@ export interface Project {
 	related_project_ids: string[];
 	source_url?: string;
 	funding_breakdown?: FundingBreakdown;
+	// Plain-language caveat or explanation shown with the funding split, e.g.
+	// when a share is proposed rather than committed, or dollars aren't published.
+	funding_note?: string;
 	// Cost-escalation trail from successive budget papers, oldest first.
 	budget_history?: BudgetSnapshot[];
 	// Date this row's figures were last checked against the cited source.
