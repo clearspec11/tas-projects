@@ -171,7 +171,8 @@
 	<!-- Filters: search + status always in view; the rest behind More filters -->
 	<div class="p-3 space-y-2 border-b border-[var(--color-border)]">
 		<input
-			id="project-search"
+			data-project-search
+			aria-label="Search projects"
 			type="text"
 			placeholder="Search projects...  ( / )"
 			value={$searchQuery}
