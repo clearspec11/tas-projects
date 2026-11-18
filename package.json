@@ -9,26 +9,32 @@
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"test": "vitest run",
+		"test:watch": "vitest"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^7.0.1",
+		"@sveltejs/adapter-static": "^3.0.10",
 		"@sveltejs/kit": "^2.57.0",
 		"@sveltejs/vite-plugin-svelte": "^7.0.0",
+		"@vitest/coverage-v8": "^4.1.8",
 		"svelte": "^5.55.2",
 		"svelte-check": "^4.4.6",
 		"typescript": "^6.0.2",
-		"vite": "^8.0.7"
+		"vite": "^8.0.7",
+		"vitest": "^4.1.8"
 	},
 	"dependencies": {
+		"@lucide/svelte": "^1.21.0",
 		"@supabase/supabase-js": "^2.107.0",
-		"@sveltejs/adapter-static": "^3.0.10",
 		"@tailwindcss/vite": "^4.3.0",
 		"@types/leaflet": "^1.9.21",
 		"@types/leaflet.markercluster": "^1.5.6",
 		"leaflet": "^1.9.4",
 		"leaflet.heat": "^0.2.0",
 		"leaflet.markercluster": "^1.5.3",
+		"melt": "^0.44.0",
 		"tailwindcss": "^4.3.0"
 	}
 }

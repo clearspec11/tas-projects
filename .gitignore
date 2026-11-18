@@ -21,6 +21,8 @@ Thumbs.db
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+.bp-tmp
+scripts/budget-history.json
 
 # Claude Code
 .claude/

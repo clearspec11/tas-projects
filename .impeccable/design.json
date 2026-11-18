@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-27T00:00:00Z",
+  "title": "Design System: TAS Project Tracker",
+  "extensions": {
+    "colorMeta": {
+      "bg": { "role": "neutral", "displayName": "Peat", "canonical": "#0c1410", "tonalRamp": ["#070d0a", "#0c1410", "#14201a", "#1f2d24", "#2c3f34", "#3c5447", "#5d7868", "#9fb1a1"] },
+      "surface": { "role": "neutral", "displayName": "Myrtle Surface", "canonical": "#14201a", "tonalRamp": ["#0c1410", "#14201a", "#1f2d24", "#2c3f34", "#3c5447", "#4f6a5b", "#6f8c7c", "#b4c4b8"] },
+      "surface-hover": { "role": "neutral", "displayName": "Surface Hover", "canonical": "#1f2d24", "tonalRamp": ["#0c1410", "#14201a", "#1f2d24", "#2c3f34", "#3c5447", "#4f6a5b", "#6f8c7c", "#b4c4b8"] },
+      "border": { "role": "neutral", "displayName": "Moss Border", "canonical": "#2c3f34", "tonalRamp": ["#101814", "#1a2620", "#23332b", "#2c3f34", "#3c5447", "#4f6a5b", "#6f8c7c", "#9fb1a1"] },
+      "ink": { "role": "neutral", "displayName": "Snowgum", "canonical": "#edf3ea", "tonalRamp": ["#2c3f34", "#4f6a5b", "#6f8c7c", "#9fb1a1", "#bccabf", "#d6e0d6", "#edf3ea", "#f7faf6"] },
+      "muted": { "role": "neutral", "displayName": "Muted Sage", "canonical": "#9fb1a1", "tonalRamp": ["#2c3f34", "#3c5447", "#5d7868", "#7c9486", "#9fb1a1", "#bccabf", "#d6e0d6", "#edf3ea"] },
+      "accent": { "role": "primary", "displayName": "Huon Pine", "canonical": "#d7a25c", "tonalRamp": ["#3a2a13", "#5e441f", "#84602c", "#a87a39", "#c48f4b", "#d7a25c", "#e3b87f", "#f0d4ad"] },
+      "success": { "role": "secondary", "displayName": "Myrtle Green (On Budget)", "canonical": "#5aa84f", "tonalRamp": ["#15301a", "#1f4625", "#2d6232", "#3d7e40", "#4c934a", "#5aa84f", "#7cc070", "#a8d79f"] },
+      "warning": { "role": "secondary", "displayName": "Ochre (Warning / Private)", "canonical": "#e0933a", "tonalRamp": ["#3a240c", "#5e3a16", "#845320", "#a86c2b", "#c47f33", "#e0933a", "#ebb16f", "#f3cda3"] },
+      "danger": { "role": "secondary", "displayName": "Ember (Over Budget)", "canonical": "#df5a39", "tonalRamp": ["#3a1610", "#5e2218", "#842f20", "#a83d2a", "#c44a33", "#df5a39", "#ec8366", "#f4ad9a"] },
+      "status-under-budget": { "role": "secondary", "displayName": "Tarn Teal (Under Budget / State)", "canonical": "#3fa39e", "tonalRamp": ["#0e2e2c", "#15433f", "#1e5f5a", "#287b75", "#33938c", "#3fa39e", "#63c0bb", "#9adbd6"] },
+      "status-completed": { "role": "secondary", "displayName": "Dusk Mauve (Completed)", "canonical": "#ab8ad6", "tonalRamp": ["#2a1d3a", "#3d2b54", "#543c75", "#6c4f96", "#8a6bbb", "#ab8ad6", "#c2a8e3", "#dbcaf0"] },
+      "status-cancelled": { "role": "secondary", "displayName": "Lichen Grey (Cancelled)", "canonical": "#889085", "tonalRamp": ["#2a2e2b", "#3c423d", "#525a53", "#697069", "#7a827b", "#889085", "#a8b0a4", "#c8cec5"] },
+      "tier-federal": { "role": "tertiary", "displayName": "Federal Iris", "canonical": "#9a8ad6", "tonalRamp": ["#241d3a", "#352b54", "#4a3c75", "#604f96", "#7d6bbb", "#9a8ad6", "#b6a8e3", "#d2caf0"] }
+    },
+    "typographyMeta": {
+      "stat": { "displayName": "Stat", "purpose": "Headline accountability figures: dollar totals, the over-budget count, sidebar stat tiles. Mono, tabular-nums." },
+      "display": { "displayName": "Display", "purpose": "Page and panel headlines and the brand wordmark. The largest sans on screen, product-scale." },
+      "title": { "displayName": "Title", "purpose": "Project names in the list, panel section headers." },
+      "body": { "displayName": "Body", "purpose": "Descriptions and prose. Cap at 65 to 75ch." },
+      "label": { "displayName": "Label", "purpose": "Field labels, legend captions, chip text. The only sanctioned tracked small text." },
+      "mono": { "displayName": "Mono", "purpose": "Inline figures, percentages, timeline year readout." }
+    },
+    "shadows": [
+      { "name": "map-float", "value": "0 10px 15px -3px rgba(0,0,0,0.3), 0 4px 6px -4px rgba(0,0,0,0.3)", "purpose": "The only sanctioned shadow. Panels floating over the Leaflet map: legend, timeline, sea readout, map controls. Paired with backdrop-blur on a surface/95 fill." },
+      { "name": "sidebar-edge", "value": "4px 0 28px rgba(0,0,0,0.45)", "purpose": "Right edge of the desktop sidebar as it slides in over the map, so the overlay reads as lifted above the tiles." }
+    ],
+    "motion": [
+      { "name": "ease-standard", "value": "cubic-bezier(0.4, 0, 0.2, 1)", "purpose": "Default easing for state and slide transitions (sidebar, tab, legend, timeline shift)." },
+      { "name": "duration-panel", "value": "280ms", "purpose": "Sidebar/tab/legend/timeline coordinated slide." },
+      { "name": "duration-state", "value": "150ms", "purpose": "Colour transitions on hover/focus for buttons, nav links, rows." },
+      { "name": "aurora-breathe", "value": "26s ease-in-out infinite", "purpose": "Slow opacity breathing of the aurora-australis glow over the Southern Ocean; disabled under prefers-reduced-motion." },
+      { "name": "ring-pulse", "value": "1.6s ease-out infinite", "purpose": "Selected-marker huon-pine ring pulse; holds still under prefers-reduced-motion." }
+    ],
+    "breakpoints": [
+      { "name": "md", "value": "768px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Stat Tile",
+      "kind": "card",
+      "refersTo": "stat-tile",
+      "description": "Compact accountability figure: a mono number over a sage label, on the deep peat fill. Used in the sidebar stat grid.",
+      "html": "<div class=\"ds-stat-tile\"><div class=\"ds-stat-num\">$9.7B</div><div class=\"ds-stat-label\">Budget</div></div>",
+      "css": ".ds-stat-tile { background: var(--color-bg, #0c1410); border-radius: 8px; padding: 8px; text-align: center; min-width: 84px; } .ds-stat-num { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-weight: 700; font-size: 1.375rem; line-height: 1; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; color: var(--color-accent, #d7a25c); } .ds-stat-label { font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 0.6875rem; color: var(--color-text-muted, #9fb1a1); margin-top: 4px; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Default action. Surface fill, sage text, hairline border; hover lifts text to ink and border to huon-pine. Export, More filters, Clear.",
+      "html": "<button class=\"ds-btn-ghost\">CSV</button>",
+      "css": ".ds-btn-ghost { font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 0.6875rem; color: var(--color-text-muted, #9fb1a1); background: var(--color-surface, #14201a); border: 1px solid var(--color-border, #2c3f34); border-radius: 6px; padding: 6px 10px; cursor: pointer; transition: color 150ms, border-color 150ms; } .ds-btn-ghost:hover { color: var(--color-text, #edf3ea); border-color: var(--color-accent, #d7a25c); } .ds-btn-ghost:focus-visible { outline: 2px solid var(--color-accent, #d7a25c); outline-offset: 2px; }"
+    },
+    {
+      "name": "CTA Button",
+      "kind": "button",
+      "refersTo": "button-cta",
+      "description": "Call to action. Accent text and border on surface; hover fills with accent at 10%. No filled-accent primary exists in the system.",
+      "html": "<button class=\"ds-btn-cta\">See them</button>",
+      "css": ".ds-btn-cta { font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 0.75rem; font-weight: 600; color: var(--color-accent, #d7a25c); background: var(--color-surface, #14201a); border: 1px solid var(--color-accent, #d7a25c); border-radius: 8px; padding: 6px 12px; cursor: pointer; transition: background 150ms; } .ds-btn-cta:hover { background: color-mix(in srgb, var(--color-accent, #d7a25c) 10%, transparent); } .ds-btn-cta:focus-visible { outline: 2px solid var(--color-accent, #d7a25c); outline-offset: 2px; }"
+    },
+    {
+      "name": "Filter Input",
+      "kind": "input",
+      "refersTo": "input-filter",
+      "description": "Search/filter field. Deep peat fill (one step below the surrounding surface), hairline border, border shifts to accent on focus. Placeholder meets body contrast.",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"Search projects...  ( / )\" />",
+      "css": ".ds-input { font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 0.875rem; color: var(--color-text, #edf3ea); background: var(--color-bg, #0c1410); border: 1px solid var(--color-border, #2c3f34); border-radius: 8px; padding: 6px 12px; width: 100%; } .ds-input::placeholder { color: var(--color-text-muted, #9fb1a1); } .ds-input:focus { outline: none; border-color: var(--color-accent, #d7a25c); }"
+    },
+    {
+      "name": "Status Chip",
+      "kind": "chip",
+      "refersTo": "chip-status",
+      "description": "Budget-state pill. Status colour at 15% with a lightened text tint; always carries the status word so colour is never alone.",
+      "html": "<span class=\"ds-chip-status\">Over Budget</span>",
+      "css": ".ds-chip-status { display: inline-block; font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 0.6875rem; font-weight: 600; border-radius: 9999px; padding: 2px 8px; background: color-mix(in srgb, #df5a39 15%, transparent); color: #ec8366; }"
+    },
+    {
+      "name": "Nav Link",
+      "kind": "nav",
+      "refersTo": "nav-link",
+      "description": "Top-bar link. Sage text, transparent border at rest; hover lifts to ink + border; active is accent text + accent border with aria-current.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-link ds-nav-link--active\" aria-current=\"page\">Map</a><a class=\"ds-nav-link\">Insights</a><a class=\"ds-nav-link\">Contractors</a></nav>",
+      "css": ".ds-nav { display: flex; gap: 4px; background: var(--color-surface, #14201a); padding: 8px; } .ds-nav-link { font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 0.875rem; font-weight: 500; color: var(--color-text-muted, #9fb1a1); border: 1px solid transparent; border-radius: 8px; padding: 6px 12px; text-decoration: none; cursor: pointer; transition: color 150ms, border-color 150ms; } .ds-nav-link:hover { color: var(--color-text, #edf3ea); border-color: var(--color-border, #2c3f34); } .ds-nav-link--active { color: var(--color-accent, #d7a25c); border-color: var(--color-accent, #d7a25c); }"
+    },
+    {
+      "name": "Project List Item",
+      "kind": "card",
+      "refersTo": "list-item",
+      "description": "A row in the projects list: title with category/flag icons, status + tier chips, a budget progress bar, and variance. Hover raises to surface-hover. Flat, no shadow.",
+      "html": "<button class=\"ds-list-item\"><div class=\"ds-li-head\"><span class=\"ds-li-title\">Bridgewater Bridge Replacement</span><span class=\"ds-chip-status\">Over Budget</span></div><div class=\"ds-li-meta\">Bridgewater</div><div class=\"ds-li-bar\"><div class=\"ds-li-fill\" style=\"width:100%\"></div></div><div class=\"ds-li-var\">+$210M (36%)</div></button>",
+      "css": ".ds-list-item { display: block; width: 100%; text-align: left; background: var(--color-surface, #14201a); color: var(--color-text, #edf3ea); border: none; border-bottom: 1px solid var(--color-border, #2c3f34); padding: 12px; cursor: pointer; transition: background 150ms; } .ds-list-item:hover { background: var(--color-surface-hover, #1f2d24); } .ds-li-head { display: flex; justify-content: space-between; gap: 8px; align-items: center; } .ds-li-title { font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 0.9375rem; font-weight: 600; } .ds-li-meta { font-size: 0.75rem; color: var(--color-text-muted, #9fb1a1); margin-top: 2px; } .ds-li-bar { background: var(--color-bg, #0c1410); border-radius: 9999px; height: 6px; margin-top: 8px; overflow: hidden; } .ds-li-fill { height: 100%; background: #df5a39; border-radius: 9999px; } .ds-li-var { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 0.6875rem; font-weight: 600; color: #df5a39; margin-top: 4px; }"
+    },
+    {
+      "name": "Floating Map Panel",
+      "kind": "card",
+      "refersTo": "panel-floating",
+      "description": "The one place backdrop-blur and shadow are sanctioned: a panel hovering over live map tiles (legend, timeline, sea readout). 12px corners, surface/95 + blur, map-float shadow.",
+      "html": "<div class=\"ds-panel-float\"><div class=\"ds-panel-title\">Legend</div><div class=\"ds-panel-row\"><span class=\"ds-dot\"></span>On Budget</div></div>",
+      "css": ".ds-panel-float { background: color-mix(in srgb, var(--color-surface, #14201a) 95%, transparent); backdrop-filter: blur(6px); border: 1px solid var(--color-border, #2c3f34); border-radius: 12px; padding: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3), 0 4px 6px -4px rgba(0,0,0,0.3); min-width: 180px; } .ds-panel-title { font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 0.75rem; font-weight: 600; color: var(--color-text, #edf3ea); margin-bottom: 8px; } .ds-panel-row { display: flex; align-items: center; gap: 8px; font-size: 0.6875rem; color: var(--color-text, #edf3ea); } .ds-dot { width: 12px; height: 12px; border-radius: 50%; background: #5aa84f; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Peat and Myrtle After Dark",
+    "overview": "The interface is a Tasmanian wilderness seen after sundown: green peat-and-myrtle neutrals instead of the generic blue-slate of every dashboard, a warm huon-pine and sandstone accent where a SaaS tool would reach for sky-cyan, and an ember red reserved for the things that are on fire (over budget, overdue). The map is the hearth at the centre; everything else is read off it. Depth is built from tone, not decoration: a four-step neutral ramp carries every layer, and the only shadows belong to panels floating over the Leaflet map. Type is one family in two cuts, IBM Plex Sans for everything you read and IBM Plex Mono for every figure you compare, so money reads as data and never as prose. Colour is rationed: the huon-pine accent marks the live thing and nothing else.",
+    "keyCharacteristics": [
+      "Map-led; the whole-island view is the home state, panels orbit it.",
+      "Tonal depth, near-zero shadow; flat by default.",
+      "One typeface family, two cuts (sans for reading, mono for figures).",
+      "Accountability colour vocabulary: ember = over/overdue, never decorative.",
+      "Restrained accent: huon-pine marks the live thing only."
+    ],
+    "rules": [
+      { "name": "The Ember Rule", "body": "#df5a39 means one thing: over budget or overdue. It is never used decoratively, never for a hover, never for a generic primary. If something is ember, it is on fire.", "section": "colors" },
+      { "name": "The One Voice Rule", "body": "The huon-pine accent marks the live thing (current selection, primary action, active nav, focus) and appears on a small fraction of any screen. Its rarity is what makes the selected project legible at a glance.", "section": "colors" },
+      { "name": "The Tier-Within-Family Rule", "body": "Status and governing-tier share hues on purpose (state = under-budget teal, local = on-budget green). Form, not hue, separates them: status is the marker fill, tier is the marker border.", "section": "colors" },
+      { "name": "The Money-Is-Mono Rule", "body": "Every dollar amount, percentage, and count is set in IBM Plex Mono with tabular-nums. If a figure is in the sans body font, it's a bug. Prose is sans; money is mono.", "section": "typography" },
+      { "name": "The Product-Scale Rule", "body": "Headings use a fixed rem scale, never clamp() fluid type. The largest type on any screen is the 22px stat. This is an instrument, not a landing page; nothing shouts.", "section": "typography" },
+      { "name": "The Flat-In-Panel Rule", "body": "Nothing inside a panel casts a shadow. If a sidebar card, list row, or stat tile has a box-shadow, remove it; it should be defined by tone and border. Shadow is reserved for things that float over the map.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep the map the centre of gravity. The whole-island view is home; panels orbit it and slide clear of each other.",
+      "Do set every figure in IBM Plex Mono with tabular-nums (the Money-Is-Mono Rule). Prose in IBM Plex Sans.",
+      "Do reserve #df5a39 ember for over-budget/overdue only (the Ember Rule), always paired with a label or flag icon so status is never colour-alone.",
+      "Do build depth from the bg to surface to surface-hover to border tonal ramp; keep in-panel content flat (the Flat-In-Panel Rule).",
+      "Do mark the live thing with huon-pine #d7a25c and almost nothing else (the One Voice Rule).",
+      "Do keep muted (#9fb1a1) text at 4.5:1 or better on surface; placeholders get the same contrast as body text, never a faint grey.",
+      "Do honour prefers-reduced-motion on every map and panel transition; keep transitions 150 to 250ms.",
+      "Do distinguish real figures from estimates visibly (the illustrative tag), never implying precision the data lacks."
+    ],
+    "donts": [
+      "Don't drift back toward a dry government website: dense bureaucratic tables, blue underlined links, flat hierarchy, PDF-budget-paper coldness.",
+      "Don't reach for crypto/fintech dark glass: neon-on-black, decorative glassmorphism, gradient text, trader-dashboard flourishes. Backdrop-blur is permitted only on panels floating over the map.",
+      "Don't ship the generic SaaS look: identical card grids or the hero-metric template.",
+      "Don't let motion or gradients bury the figures; the number is the point.",
+      "Don't use border-left or border-right greater than 1px as a coloured accent stripe on cards, list items, or callouts.",
+      "Don't put a dollar amount in the sans body font, or set headings with fluid clamp(); this is a fixed-scale instrument.",
+      "Don't nest a card inside a card, or add a shadow to anything that isn't floating over the map."
+    ]
+  }
+}

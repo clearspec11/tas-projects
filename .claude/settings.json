@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la \"c:/Users/leigh/OneDrive/Code/tas-projects/.vscode\" 2>/dev/null; echo \"---root---\"; ls -la \"c:/Users/leigh/OneDrive/Code/.vscode\" 2>/dev/null)",
+      "Read(//c/Users/leigh/OneDrive/Code/**)"
+    ]
+  }
+}

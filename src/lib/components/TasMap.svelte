@@ -2,46 +2,42 @@
 	import { onMount } from 'svelte';
 	import {
 		projects, selectedProject, filterCategory, filterStatus,
-		filterFunding, filterGovernmentLevel, searchQuery, timelineRange, showHeatmap,
-		showConnections, mapStyle
+		filterFunding, filterGovernmentLevel, filterFlagged, filterContractor, searchQuery, timelineRange, showHeatmap,
+		showConnections, mapStyle, mapZoom
 	} from '$lib/stores';
 	import { STATUS_CONFIG, CATEGORY_CONFIG, FUNDING_CONFIG, GOVERNMENT_LEVEL_CONFIG, type Project } from '$lib/types';
 	import { TASMANIA_CENTER, TASMANIA_ZOOM } from '$lib/tasmania-geo';
+	import { formatCurrency, budgetPercent, filterProjects, isRedFlag, delayMonths } from '$lib/metrics';
+	import { FLAG_SVG_DANGER } from '$lib/icons';
 	import tasmaniaGeoJson from '$lib/tasmania-boundary.json';
 
 	let mapContainer: HTMLDivElement;
 	let map: any;
 	let markersLayer: any;
+	let flagsLayer: any;
+	let selectionLayer: any;
 	let heatLayer: any;
 	let connectionsLayer: any;
 	let darkTiles: any;
 	let satTiles: any;
 	let L: any;
-
-	function formatCurrency(n: number): string {
-		if (n >= 1_000_000_000) return `$${(n / 1_000_000_000).toFixed(1)}B`;
-		if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(0)}M`;
-		return `$${(n / 1_000).toFixed(0)}K`;
+	// Accent ring marking the currently selected project on the map
+	function drawSelection(p: Project | null) {
+		if (!selectionLayer || !L) return;
+		selectionLayer.clearLayers();
+		if (!p) return;
+		L.circleMarker([p.lat, p.lng], {
+			radius: markerRadius(p) + 8,
+			fill: false,
+			color: '#d7a25c',
+			weight: 3,
+			opacity: 0.95,
+			className: 'tas-selected-ring'
+		}).addTo(selectionLayer);
 	}
 
-	function budgetPercent(p: Project): number {
-		return Math.round((p.spent / p.budget) * 100);
-	}
-
-	function getFilteredProjects(
-		all: Project[], cat: string, status: string, funding: string,
-		govLevel: string, query: string, range: [number, number]
-	): Project[] {
-		return all.filter((p) => {
-			if (cat !== 'all' && p.category !== cat) return false;
-			if (status !== 'all' && p.status !== status) return false;
-			if (funding !== 'all' && p.funding_type !== funding) return false;
-			if (govLevel !== 'all' && p.government_level !== govLevel) return false;
-			if (query && !p.name.toLowerCase().includes(query.toLowerCase())) return false;
-			const startYear = new Date(p.start_date).getFullYear();
-			if (startYear < range[0] || startYear > range[1]) return false;
-			return true;
-		});
+	function markerRadius(p: Project): number {
+		return Math.max(8, Math.min(20, Math.sqrt(p.budget / 1_000_000) * 1.8));
 	}
 
 	function createMarker(p: Project) {
@@ -50,23 +46,25 @@
 		const catCfg = CATEGORY_CONFIG[p.category];
 
 		const govCfg = GOVERNMENT_LEVEL_CONFIG[p.government_level];
+		const late = delayMonths(p);
 
+		// Two codes on the mark (status fill, tier border) plus the flag halo;
+		// funding/delivery model lives in the tooltip, chips and detail panel.
 		const marker = L.circleMarker([p.lat, p.lng], {
-			radius: Math.max(8, Math.min(20, Math.sqrt(p.budget / 1_000_000) * 1.8)),
+			radius: markerRadius(p),
 			fillColor: cfg.color,
 			fillOpacity: 0.8,
 			color: govCfg.color,
 			weight: 2.5,
-			opacity: 0.9,
-			dashArray: fundCfg.dashArray
+			opacity: 0.9
 		});
 
 		// Hover tooltip
 		marker.bindTooltip(`
-			<div style="font-family: Inter, system-ui; font-size: 12px; line-height: 1.4;">
-				<strong>${p.name}</strong><br/>
-				<span style="color: ${cfg.color};">${cfg.label}</span> · ${fundCfg.shortLabel}<br/>
-				${formatCurrency(p.spent)} / ${formatCurrency(p.budget)} (${budgetPercent(p)}%)
+			<div style="font-family: 'IBM Plex Sans', system-ui; font-size: 12px; line-height: 1.4;">
+				<strong>${isRedFlag(p) ? FLAG_SVG_DANGER : ''}${p.name}</strong><br/>
+				<span style="color: ${cfg.color};">${cfg.label}</span> · ${govCfg.shortLabel} · ${fundCfg.shortLabel}<br/>
+				${formatCurrency(p.spent)} / ${formatCurrency(p.budget)} (${budgetPercent(p)}%)${late ? ` · <span style="color:#e0933a;">${late}mo late</span>` : ''}
 			</div>
 		`, {
 			direction: 'top',
@@ -74,7 +72,25 @@
 			className: 'tas-tooltip'
 		});
 
+		// Tapping/clicking a marker opens the themed detail panel — the single
+		// affordance. (No bindPopup: the old white popup duplicated the panel
+		// and clashed with the dark theme, badly on mobile.)
 		marker.on('click', () => selectedProject.set(p));
+
+		// Keyboard access: circle markers aren't focusable by default
+		marker.on('add', () => {
+			const el = marker.getElement?.();
+			if (!el) return;
+			el.setAttribute('tabindex', '0');
+			el.setAttribute('role', 'button');
+			el.setAttribute('aria-label', `${p.name}, ${cfg.label}, ${formatCurrency(p.spent)} of ${formatCurrency(p.budget)}`);
+			el.addEventListener('keydown', (e: KeyboardEvent) => {
+				if (e.key === 'Enter' || e.key === ' ') {
+					e.preventDefault();
+					selectedProject.set(p);
+				}
+			});
+		});
 
 		return marker;
 	}
@@ -82,14 +98,19 @@
 	function updateMap(
 		all: Project[], cat: string, status: string, funding: string,
 		govLevel: string, query: string, range: [number, number], heatmap: boolean,
-		connections: boolean
+		connections: boolean, flagged: boolean
 	) {
 		if (!markersLayer || !L) return;
 		markersLayer.clearLayers();
+		if (flagsLayer) flagsLayer.clearLayers();
 		if (heatLayer) map.removeLayer(heatLayer);
 		if (connectionsLayer) connectionsLayer.clearLayers();
 
-		const filtered = getFilteredProjects(all, cat, status, funding, govLevel, query, range);
+		const filtered = filterProjects(all, {
+			category: cat as any, status: status as any, funding: funding as any,
+			governmentLevel: govLevel as any, query, range,
+			flaggedOnly: flagged, contractor: $filterContractor
+		});
 
 		if (heatmap) {
 			const heatData = filtered.map((p) => [p.lat, p.lng, p.spent / 1_000_000]);
@@ -98,7 +119,7 @@
 					radius: 35,
 					blur: 25,
 					maxZoom: 12,
-					gradient: { 0.2: '#38bdf8', 0.4: '#22c55e', 0.6: '#f59e0b', 0.8: '#ef4444', 1.0: '#dc2626' }
+					gradient: { 0.2: '#3fa39e', 0.4: '#5aa84f', 0.6: '#e0933a', 0.8: '#df5a39', 1.0: '#c0432a' }
 				}).addTo(map);
 			} catch {
 				// leaflet.heat not loaded
@@ -106,6 +127,17 @@
 		}
 
 		filtered.forEach((p) => {
+			// Red-flag halo behind the marker (own layer so it doesn't affect cluster counts)
+			if (flagsLayer && isRedFlag(p)) {
+				L.circleMarker([p.lat, p.lng], {
+					radius: markerRadius(p) + 5,
+					fill: false,
+					color: '#df5a39',
+					weight: 2,
+					opacity: 0.75,
+					dashArray: '2 3'
+				}).addTo(flagsLayer);
+			}
 			const marker = createMarker(p);
 			markersLayer.addLayer(marker);
 		});
@@ -122,7 +154,7 @@
 					if (!related) return;
 					if (!filtered.some((f) => f.id === rid)) return;
 					L.polyline([[p.lat, p.lng], [related.lat, related.lng]], {
-						color: '#f59e0b',
+						color: '#d7a25c',
 						weight: 1.5,
 						opacity: 0.5,
 						dashArray: '6 6'
@@ -161,6 +193,10 @@
 			maxZoom: 14
 		});
 
+		// Mirror zoom so the sea overlay can fade past the whole-island view.
+		mapZoom.set(map.getZoom());
+		map.on('zoomend', () => mapZoom.set(map.getZoom()));
+
 		darkTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
 			attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
 			subdomains: 'abcd'
@@ -170,15 +206,28 @@
 			attribution: '&copy; Esri'
 		});
 
+		// Luminous coastline: a wide soft glow under a thin bright stroke,
+		// so the island reads as a lit shoreline rather than a CAD outline.
 		L.geoJSON(tasmaniaGeoJson, {
 			style: {
-				color: '#38bdf8',
-				weight: 2,
-				fillColor: '#38bdf8',
-				fillOpacity: 0.06,
-				dashArray: '6 4'
+				color: '#34b893',
+				weight: 7,
+				opacity: 0.14,
+				fillColor: '#34b893',
+				fillOpacity: 0.05
 			}
 		}).addTo(map);
+		L.geoJSON(tasmaniaGeoJson, {
+			style: {
+				color: '#86e3c0',
+				weight: 1.25,
+				opacity: 0.85,
+				fill: false
+			}
+		}).addTo(map);
+
+		// Red-flag halos sit beneath the markers
+		flagsLayer = L.layerGroup().addTo(map);
 
 		// Use MarkerClusterGroup if available, else plain LayerGroup
 		try {
@@ -193,8 +242,8 @@
 						html: `<div style="
 							display:flex;align-items:center;justify-content:center;
 							width:${size}px;height:${size}px;border-radius:50%;
-							background:rgba(56,189,248,0.25);border:2px solid #38bdf8;
-							color:#f1f5f9;font-weight:700;font-size:13px;font-family:Inter,system-ui;
+							background:rgba(215,162,92,0.22);border:2px solid #d7a25c;
+							color:#edf3ea;font-weight:700;font-size:13px;font-family:'IBM Plex Sans',system-ui;
 						">${count}</div>`,
 						className: '',
 						iconSize: [size, size]
@@ -206,9 +255,15 @@
 		}
 
 		connectionsLayer = L.layerGroup().addTo(map);
+		selectionLayer = L.layerGroup().addTo(map);
+
+		// Keep Leaflet's internal size in sync with the container (stacked
+		// mobile layout, window resizes) so panes never render at stale sizes.
+		const resizeObserver = new ResizeObserver(() => map?.invalidateSize());
+		resizeObserver.observe(mapContainer);
 
 		function redraw() {
-			updateMap($projects, $filterCategory, $filterStatus, $filterFunding, $filterGovernmentLevel, $searchQuery, $timelineRange, $showHeatmap, $showConnections);
+			updateMap($projects, $filterCategory, $filterStatus, $filterFunding, $filterGovernmentLevel, $searchQuery, $timelineRange, $showHeatmap, $showConnections, $filterFlagged);
 		}
 
 		const unsubs = [
@@ -217,15 +272,19 @@
 			filterStatus.subscribe(redraw),
 			filterFunding.subscribe(redraw),
 			filterGovernmentLevel.subscribe(redraw),
+			filterFlagged.subscribe(redraw),
+			filterContractor.subscribe(redraw),
 			searchQuery.subscribe(redraw),
 			timelineRange.subscribe(redraw),
 			showHeatmap.subscribe(redraw),
 			showConnections.subscribe(redraw),
-			mapStyle.subscribe((s) => switchTiles(s))
+			mapStyle.subscribe((s) => switchTiles(s)),
+			selectedProject.subscribe((p) => drawSelection(p))
 		];
 
 		return () => {
 			unsubs.forEach((u) => u());
+			resizeObserver.disconnect();
 			map.remove();
 		};
 	});
@@ -235,21 +294,62 @@
 	}
 </script>
 
-<div bind:this={mapContainer} class="w-full h-full"></div>
+<div class="relative w-full h-full">
+	<div bind:this={mapContainer} class="w-full h-full"></div>
+	<!-- Aurora australis over the Southern Ocean: atmosphere, not data -->
+	<div class="tas-aurora" aria-hidden="true"></div>
+</div>
 
 <style>
+	.tas-aurora {
+		position: absolute;
+		inset: auto 0 0 0;
+		height: 42%;
+		pointer-events: none;
+		z-index: 1;
+		background:
+			radial-gradient(120% 90% at 35% 115%, rgba(52, 184, 147, 0.10), transparent 55%),
+			radial-gradient(90% 80% at 70% 120%, rgba(90, 168, 79, 0.08), transparent 50%),
+			radial-gradient(70% 60% at 55% 125%, rgba(215, 162, 92, 0.06), transparent 55%);
+		animation: tas-aurora-breathe 26s ease-in-out infinite;
+	}
+	@keyframes tas-aurora-breathe {
+		0%, 100% { opacity: 0.65; }
+		50% { opacity: 1; }
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.tas-aurora {
+			animation: none;
+		}
+	}
 	:global(.tas-tooltip) {
-		background: rgba(15, 23, 42, 0.95) !important;
-		color: #f1f5f9 !important;
-		border: 1px solid #334155 !important;
+		background: rgba(12, 20, 16, 0.95) !important;
+		color: #edf3ea !important;
+		border: 1px solid #2c3f34 !important;
 		border-radius: 8px !important;
 		padding: 8px 12px !important;
 		box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
 	}
 	:global(.tas-tooltip::before) {
-		border-top-color: rgba(15, 23, 42, 0.95) !important;
+		border-top-color: rgba(12, 20, 16, 0.95) !important;
 	}
 	:global(.leaflet-popup-content-wrapper) {
 		border-radius: 12px !important;
+	}
+	:global(.tas-selected-ring) {
+		animation: tas-ring-pulse 1.6s ease-out infinite;
+	}
+	@keyframes tas-ring-pulse {
+		0%, 100% { stroke-opacity: 0.95; }
+		50% { stroke-opacity: 0.35; }
+	}
+	@media (prefers-reduced-motion: reduce) {
+		:global(.tas-selected-ring) {
+			animation: none;
+		}
+	}
+	:global(.leaflet-interactive:focus-visible) {
+		outline: 2px solid var(--color-accent);
+		outline-offset: 2px;
 	}
 </style>
