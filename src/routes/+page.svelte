@@ -197,9 +197,10 @@
 			<StoryBanner />
 			<MapControls />
 			<SeaOverlay />
-			<!-- Legend and timeline are desktop affordances; they'd bury a phone map. -->
+			<!-- The legend starts as a single button on every screen, so phones get
+			     the map key too. The timeline stays desktop-only. -->
+			<MapLegend />
 			<div class="contents max-md:hidden">
-				<MapLegend />
 				<TimelineSlider />
 			</div>
 		</main>

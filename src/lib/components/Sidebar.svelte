@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { projects, selectedProject, filterCategory, filterStatus, filterFunding, filterGovernmentLevel, filterFlagged, filterContractor, searchQuery, sortKey } from '$lib/stores';
+	import InfoTip from './InfoTip.svelte';
+	import { FUNDING_MODELS_EXPLAINED } from '$lib/glossary';
 	import { STATUS_CONFIG, CATEGORY_CONFIG, FUNDING_CONFIG, GOVERNMENT_LEVEL_CONFIG, type Project, type ProjectCategory, type ProjectStatus, type FundingType, type GovernmentLevel } from '$lib/types';
 	import { timelineRange } from '$lib/stores';
 	import {
@@ -107,8 +109,9 @@
 	];
 
 	const fundingTypes: { value: FundingType | 'all'; label: string }[] = [
-		{ value: 'all', label: 'All Funding' },
-		...Object.entries(FUNDING_CONFIG).map(([k, v]) => ({ value: k as FundingType, label: v.shortLabel }))
+		{ value: 'all', label: 'All funding models' },
+		// Full names, not abbreviations: "PPP" means nothing to most visitors.
+		...Object.entries(FUNDING_CONFIG).map(([k, v]) => ({ value: k as FundingType, label: v.label }))
 	];
 
 	const governmentLevels: { value: GovernmentLevel | 'all'; label: string }[] = [
@@ -227,7 +230,8 @@
 						{/each}
 					</select>
 					<select
-						class="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 text-xs text-[var(--color-text)] focus:border-[var(--color-accent)]"
+						aria-label="Funding model"
+						class="flex-1 min-w-0 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 text-xs text-[var(--color-text)] focus:border-[var(--color-accent)]"
 						value={$filterFunding}
 						onchange={(e) => filterFunding.set((e.target as HTMLSelectElement).value as FundingType | 'all')}
 					>
@@ -235,6 +239,7 @@
 							<option value={f.value}>{f.label}</option>
 						{/each}
 					</select>
+					<span class="self-center"><InfoTip text={FUNDING_MODELS_EXPLAINED} /></span>
 				</div>
 				<div class="flex gap-2">
 					<select

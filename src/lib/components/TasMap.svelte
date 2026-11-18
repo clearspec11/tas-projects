@@ -74,7 +74,7 @@
 		marker.bindTooltip(`
 			<div style="font-family: 'IBM Plex Sans', system-ui; font-size: 12px; line-height: 1.4;">
 				<strong>${isRedFlag(p) ? FLAG_SVG_DANGER : ''}${p.name}</strong><br/>
-				<span style="color: ${cfg.color};">${cfg.label}</span> · ${govCfg.shortLabel} · ${fundCfg.shortLabel}<br/>
+				<span style="color: ${cfg.color};">${cfg.label}</span> · ${govCfg.shortLabel} · ${fundCfg.label}<br/>
 				${p.spent != null ? `${formatCurrency(p.spent)} spent of ${formatCurrency(p.budget)} (${budgetPercent(p)}%)` : `Est. cost ${formatCurrency(p.budget)}`}${late ? ` · <span style="color:#e0933a;">${late}mo late</span>` : ''}
 			</div>
 		`, {

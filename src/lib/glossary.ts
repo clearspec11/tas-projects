@@ -15,6 +15,10 @@ export const GLOSSARY = {
 
 export type GlossaryTerm = keyof typeof GLOSSARY;
 
+// The funding models spelled out together, for the filter where only names show.
+export const FUNDING_MODELS_EXPLAINED =
+	'How a project is paid for and delivered. Fully Public: paid for and delivered by government. Government-Contracted: paid for by government, built by a private contractor. Government-Funded Private: a privately owned project built with public money. Public-Private Partnership: government and private investors share the cost and the risk.';
+
 // One-paragraph orientation for someone seeing the map for the first time.
 export const MAP_ORIENTATION =
 	'Each circle is a public project. The fill colour shows its budget status, the ring shows which level of government funds it, and the size reflects the budget. A red dashed halo marks a project that is over budget or running late.';

@@ -1,32 +1,59 @@
 <script lang="ts">
 	import { STATUS_CONFIG, GOVERNMENT_LEVEL_CONFIG } from '$lib/types';
-	import { Flag, Minus } from '@lucide/svelte';
+	import { onMount } from 'svelte';
+	import { Flag, Minus, Info } from '@lucide/svelte';
 	import InfoTip from './InfoTip.svelte';
 	import { GLOSSARY, MAP_ORIENTATION } from '$lib/glossary';
 	import { sidebarOpen } from '$lib/stores';
 
-	let expanded = $state(true);
+	// Collapsed by default so the first view of the map isn't crowded; the
+	// choice is remembered for returning visitors.
+	const KEY = 'tas-legend-open';
+	let expanded = $state(false);
+
+	onMount(() => {
+		try {
+			expanded = localStorage.getItem(KEY) === '1';
+		} catch {
+			// storage unavailable; stay collapsed
+		}
+	});
+
+	function setExpanded(open: boolean) {
+		expanded = open;
+		try {
+			localStorage.setItem(KEY, open ? '1' : '0');
+		} catch {
+			// storage unavailable; the choice just won't persist
+		}
+	}
 </script>
 
+<!-- Desktop: bottom-left. Phones: under the zoom control, clear of the banner
+     at the bottom of the map. -->
 <div
-	class="absolute bottom-6 left-4 z-[1000]"
+	class="absolute z-[1000] md:bottom-6 md:left-4 max-md:top-[5.5rem] max-md:left-2.5"
 	style="transform: translateX({$sidebarOpen ? '24rem' : '0'}); transition: transform 280ms cubic-bezier(0.4,0,0.2,1);"
 >
+	{#if !expanded}
 	<button
-		class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg px-3 py-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] cursor-pointer mb-1 {expanded ? 'hidden' : ''}"
-		onclick={() => expanded = true}
-	>Legend</button>
-
-	{#if expanded}
-		<div class="bg-[var(--color-surface)]/95 backdrop-blur border border-[var(--color-border)] rounded-xl p-3 shadow-lg min-w-[180px]">
+		class="inline-flex items-center gap-1.5 bg-[var(--color-surface)]/95 backdrop-blur border border-[var(--color-border)] rounded-lg px-3 py-2 text-xs text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] cursor-pointer"
+		aria-expanded="false"
+		onclick={() => setExpanded(true)}
+	><Info size={14} class="text-[var(--color-accent)]" /> Legend</button>
+	{:else}
+		<div class="bg-[var(--color-surface)]/95 backdrop-blur border border-[var(--color-border)] rounded-xl p-3 shadow-lg w-[15rem] max-h-[calc(100vh-14rem)] overflow-y-auto">
 			<div class="flex items-center justify-between mb-2">
-				<span class="flex items-center gap-1 text-xs font-semibold text-[var(--color-text)]">Legend <InfoTip text={MAP_ORIENTATION} iconSize={12} /></span>
+				<span class="text-xs font-semibold text-[var(--color-text)]">Legend</span>
 				<button
 					aria-label="Collapse legend"
 					class="text-[var(--color-text-muted)] hover:text-[var(--color-text)] cursor-pointer"
-					onclick={() => expanded = false}
+					onclick={() => setExpanded(false)}
 				><Minus size={14} /></button>
 			</div>
+
+			<!-- The orientation is plain text, not a hover tip, so touch users get it. -->
+			<p class="text-[0.6875rem] leading-snug text-[var(--color-text-muted)] mb-2.5">{MAP_ORIENTATION}</p>
 
 			<!-- Status colors -->
 			<div class="mb-2">

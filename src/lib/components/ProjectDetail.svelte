@@ -66,8 +66,8 @@
 				<span title={govCfg.description} class="text-xs px-2 py-0.5 rounded-full font-medium" style="background: {govCfg.color}20; color: {govCfg.color};">
 					{govCfg.shortLabel}
 				</span>
-				<span title={fundCfg.description} class="text-xs px-2 py-0.5 rounded-full font-medium bg-[var(--color-surface-hover)] text-[var(--color-text-muted)]">
-					{fundCfg.label}
+				<span class="text-xs px-2 py-0.5 rounded-full font-medium bg-[var(--color-surface-hover)] text-[var(--color-text-muted)]">
+					<InfoTip term={fundCfg.label} text="{fundCfg.description}." />
 				</span>
 			</div>
 			<p class="text-[0.6875rem] text-[var(--color-text-muted)] mt-1.5 leading-snug">
