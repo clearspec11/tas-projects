@@ -22,7 +22,7 @@
 				stroke="var(--color-accent)" stroke-width="1" stroke-linejoin="round"
 			/>
 		</svg>
-		<span class="truncate whitespace-nowrap"><span class="text-[var(--color-accent)]">TAS</span> Project Tracker</span>
+		<span class="whitespace-nowrap"><span class="text-[var(--color-accent)]">TAS</span>&#32;<span class="max-sm:sr-only">Project Tracker</span></span>
 		<span class="max-md:hidden text-[0.6875rem] font-normal text-[var(--color-text-muted)] ml-1 mt-0.5">Tasmanian Public Infrastructure Monitor</span>
 	</a>
 	<div class="flex gap-1 shrink-0">

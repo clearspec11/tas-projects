@@ -6,6 +6,8 @@
 	import { loadProjects } from '$lib/data';
 	import { contractorStats, formatCurrency, type ContractorStats } from '$lib/metrics';
 	import { Flag } from '@lucide/svelte';
+	import { cubicOut } from 'svelte/easing';
+	import { dur } from '$lib/motion';
 	import InfoTip from '$lib/components/InfoTip.svelte';
 	import { GLOSSARY } from '$lib/glossary';
 
@@ -54,6 +56,20 @@
 		}
 	}
 
+	// Re-sorting glides each row to its new place, so a contractor can be
+	// followed up or down the board instead of jumping. Instant under reduced motion.
+	// A plain translate from the measured positions: svelte's flip also scales the
+	// offset by rounded heights, which nudges fractional-height rows at the start.
+	function glide(_node: Element, { from, to }: { from: DOMRect; to: DOMRect }) {
+		const dx = from.left - to.left;
+		const dy = from.top - to.top;
+		return {
+			duration: dur(240),
+			easing: cubicOut,
+			css: (_t: number, u: number) => `transform: translate(${u * dx}px, ${u * dy}px)`
+		};
+	}
+
 	const mapHref = (c: ContractorStats) => `/?contractor=${encodeURIComponent(c.name)}`;
 
 	function rowClick(e: MouseEvent, c: ContractorStats) {
@@ -73,13 +89,14 @@
 	// in-progress project isn't an achievement, just earliness.
 	const barMax = $derived(Math.max(0.01, ...stats.ranked.map((c) => c.overrunPct)));
 
-	const columns: { key: Col; label: string; align: string; title?: string }[] = [
+	// Fixed widths on the figure columns, so a re-sort never shifts them sideways.
+	const columns: { key: Col; label: string; align: string; width?: string; title?: string }[] = [
 		{ key: 'name', label: 'Contractor', align: 'text-left' },
-		{ key: 'projects', label: 'Projects', align: 'text-right' },
-		{ key: 'budget', label: 'Budget', align: 'text-right' },
-		{ key: 'overrun', label: 'Overrun', align: 'text-right', title: 'Money-weighted: total spent vs total budget across their projects' },
-		{ key: 'flagged', label: 'Flags', align: 'text-right', title: 'Projects over budget or overdue' },
-		{ key: 'clean', label: 'Clean record', align: 'text-right', title: 'Share of their projects with no flag' }
+		{ key: 'projects', width: 'w-20', label: 'Projects', align: 'text-right' },
+		{ key: 'budget', width: 'w-24', label: 'Budget', align: 'text-right' },
+		{ key: 'overrun', width: 'w-40', label: 'Overrun', align: 'text-right', title: 'Money-weighted: total spent vs total budget across their projects' },
+		{ key: 'flagged', width: 'w-16', label: 'Flags', align: 'text-right', title: 'Projects over budget or overdue' },
+		{ key: 'clean', width: 'w-28', label: 'Clean record', align: 'text-right', title: 'Share of their projects with no flag' }
 	];
 </script>
 
@@ -87,7 +104,7 @@
 	<title>Contractors — TAS Project Tracker</title>
 </svelte:head>
 
-<div class="h-full overflow-y-auto bg-[var(--color-bg)]">
+<div class="h-full overflow-y-auto [scrollbar-gutter:stable] bg-[var(--color-bg)]">
 	<main class="max-w-4xl mx-auto p-4 md:p-6">
 		<h1 class="text-xl font-bold tracking-tight">Contractor scorecards</h1>
 		<p class="text-[0.8125rem] text-[var(--color-text-muted)] mt-1 max-w-[65ch]">
@@ -112,34 +129,78 @@
 					<p class="text-[0.6875rem] text-[var(--color-text-muted)] mt-2">No contractor is spending over budget so far.</p>
 				{/if}
 			</div>
-			<div class="flex md:flex-col md:w-44 justify-around md:justify-center gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl px-4 py-3">
-				<div class="flex items-baseline gap-1.5">
+			<div class="flex md:flex-col md:w-56 justify-around md:justify-center gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl px-4 py-3">
+				<div class="flex items-baseline gap-1.5 whitespace-nowrap">
 					<span class="text-[0.9375rem] font-mono font-semibold">{stats.ranked.length}</span>
 					<span class="text-xs text-[var(--color-text-muted)]">contractors</span>
 				</div>
-				<div class="flex items-baseline gap-1.5">
+				<div class="flex items-baseline gap-1.5 whitespace-nowrap">
 					<span class="text-[0.9375rem] font-mono font-semibold">{formatCurrency(combinedBudget)}</span>
 					<span class="text-xs text-[var(--color-text-muted)]">combined budget</span>
 				</div>
 			</div>
 		</div>
 
-		<!-- Scorecard table -->
-		<div class="mt-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl overflow-x-auto">
-			<table class="w-full min-w-[640px] text-[0.8125rem] border-collapse">
+		<!-- Phones: one row per contractor, overrun beside the name so the figure
+		     the board is ranked by never sits off-screen. -->
+		<div class="md:hidden mt-4">
+			<div class="flex items-center justify-between gap-3 mb-2">
+				<label for="sort-mobile" class="text-[0.6875rem] text-[var(--color-text-muted)]">Sort by</label>
+				<select
+					id="sort-mobile"
+					value={sortCol}
+					onchange={(e) => { const c = e.currentTarget.value as Col; sortCol = c; sortDesc = c !== 'name'; }}
+					class="min-h-11 flex-1 max-w-[14rem] bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-3 text-[0.8125rem] text-[var(--color-text)]"
+				>
+					{#each columns as col}<option value={col.key}>{col.label}</option>{/each}
+				</select>
+			</div>
+			<ul class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl overflow-hidden">
+				{#each rows as c (c.name)}
+					<li animate:glide class="border-b border-[var(--color-border)] last:border-b-0 bg-[var(--color-surface)]">
+						<a
+							href={mapHref(c)}
+							onclick={() => filterContractor.set(c.name)}
+							class="block px-3 py-3 active:bg-[var(--color-surface-hover)] focus-visible:outline-offset-[-2px]"
+						>
+							<span class="flex items-baseline justify-between gap-3">
+								<span class="text-[0.8125rem] font-semibold">{c.name}<span class="sr-only">: show projects on the map</span></span>
+								{#if c.overrunPct > 0}
+									<span class="shrink-0 font-mono font-medium text-[0.8125rem] text-[var(--color-danger)]">{pct(c.overrunPct)}<span class="sr-only"> overrun</span></span>
+								{:else}
+									<span class="shrink-0 text-xs text-[var(--color-text-muted)]">no overrun</span>
+								{/if}
+							</span>
+							<span class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-[var(--color-text-muted)]">
+								<span><span class="font-mono text-[var(--color-text)]">{c.projects}</span> {c.projects === 1 ? 'project' : 'projects'}</span>
+								<span><span class="font-mono text-[var(--color-text)]">{formatCurrency(c.totalBudget)}</span> budget</span>
+								{#if c.flagged > 0}
+									<span class="inline-flex items-center gap-1 text-[var(--color-danger)]"><Flag size={12} /><span class="font-mono">{c.flagged}</span> flagged</span>
+								{/if}
+								<span><span class="font-mono text-[var(--color-text)]">{Math.round(c.cleanPct * 100)}%</span> clean</span>
+							</span>
+						</a>
+					</li>
+				{/each}
+			</ul>
+		</div>
+
+		<!-- Scorecard table (tablet and up) -->
+		<div class="max-md:hidden mt-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl overflow-x-auto overflow-y-hidden">
+			<table class="w-full min-w-[640px] text-[0.8125rem] border-separate border-spacing-0 table-fixed">
 				<thead>
 					<tr>
 						{#each columns as col}
 							<th
-								class="px-3 py-2.5 border-b border-[var(--color-border)] {col.align}"
+								class="px-3 py-2.5 border-b border-[var(--color-border)] {col.align} {col.width ?? ''}"
 								aria-sort={sortCol === col.key ? (sortDesc ? 'descending' : 'ascending') : undefined}
 							>
 								<button
 									onclick={() => setSort(col.key)}
 									title={col.key === 'overrun' ? undefined : col.title}
-									class="text-[0.6875rem] font-semibold cursor-pointer transition-colors {sortCol === col.key ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'}"
+									class="text-[0.6875rem] font-semibold whitespace-nowrap cursor-pointer transition-colors {sortCol === col.key ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'}"
 								>
-									{col.label}{sortCol === col.key ? (sortDesc ? ' ↓' : ' ↑') : ''}
+									{col.label}<span class="inline-block w-[1.1em] text-center {sortCol === col.key ? '' : 'invisible'}" aria-hidden="true">{sortCol === col.key && !sortDesc ? '↑' : '↓'}</span>
 								</button>{#if col.key === 'overrun'}<span class="ml-1"><InfoTip text={GLOSSARY.overrun} iconSize={11} /></span>{/if}
 							</th>
 						{/each}
@@ -151,8 +212,9 @@
 						     readers. The row click is a larger mouse target for the same link. -->
 						<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
 						<tr
+							animate:glide
 							onclick={(e) => rowClick(e, c)}
-							class="border-b border-[var(--color-border)] last:border-b-0 hover:bg-[var(--color-surface-hover)] transition-colors cursor-pointer"
+							class="[&>td]:border-b [&>td]:border-[var(--color-border)] last:[&>td]:border-b-0 bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)] transition-colors cursor-pointer"
 						>
 							<td class="px-3 py-2.5 font-semibold">
 								<a
@@ -191,7 +253,7 @@
 		</div>
 
 		<div class="mt-3 space-y-1 text-[0.6875rem] text-[var(--color-text-muted)]">
-			<p>Click a contractor to see their projects on the map.</p>
+			<p><span class="md:hidden">Tap</span><span class="max-md:hidden">Click</span> a contractor to see their projects on the map.</p>
 			{#if stats.unattributed > 0}
 				<p>{stats.unattributed} projects have no named contractor and are not ranked.</p>
 			{/if}

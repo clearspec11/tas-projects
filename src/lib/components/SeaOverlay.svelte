@@ -23,7 +23,7 @@
 	     every zoom and pan instead of colliding with the island. Sits below the
 	     zoom control and slides clear of the sidebar when the panel opens. -->
 	<div
-		class="max-md:hidden absolute top-20 left-4 w-[14rem] select-none pointer-events-none rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/80 backdrop-blur-sm px-3.5 py-3"
+		class="max-md:hidden absolute top-[5.5rem] left-4 w-[14rem] select-none pointer-events-none rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/80 backdrop-blur-sm px-3.5 py-3"
 		style="z-index: 750; opacity: {shown ? 1 : 0}; transform: translateX({$sidebarShown ? '24rem' : '0'}); transition: opacity 220ms ease, transform 280ms cubic-bezier(0.4,0,0.2,1);"
 		aria-hidden={!shown}
 		inert={!shown}
