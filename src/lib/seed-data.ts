@@ -812,13 +812,13 @@ const RAW_PROJECTS: Project[] = [
 		id: 'c21',
 		name: 'Legana Community Sports and Recreation Precinct - Stage 1',
 		description:
-			'Four-court indoor multi-purpose sports facility, clubrooms, function centre and outdoor cricket nets on council land beside Legana Primary School and the Legana oval. The council endorsed the precinct master plan in April 2026, with stage 1 to begin in 2026-27, and its 2026-27 budget sets aside $5.25M to start construction. No total cost has been published; the figure shown is the funding committed so far.',
+			'Stage 1 of a new sports precinct on council land beside Legana Primary School and the Legana oval: four indoor multi-purpose courts, cricket clubrooms with change and match-day facilities, and enabling works. The April 2026 council business case proposes a $20M stage 1 within a master plan estimated at about $40M, with stage 1 to begin in 2026-27 and open in 2028-29 at the earliest. The 2026-27 council budget sets aside $5.25M to start construction. The $20M is a proposal, to be confirmed by cost planning as design develops.',
 		category: 'community',
 		status: 'on_budget',
 		funding_type: 'public',
 		government_level: 'local',
 		council: 'West Tamar Council',
-		budget: 10_000_000,
+		budget: 20_000_000,
 		spent: null,
 		lat: -41.3665,
 		lng: 147.0445,
@@ -828,10 +828,39 @@ const RAW_PROJECTS: Project[] = [
 		actual_end_date: null,
 		contractor: null,
 		related_project_ids: ['c16', '20'],
-		source_url: 'https://www.wtc.tas.gov.au/2026/05/councils-disappointment-over-funding-failure/',
-		funding_breakdown: { federal: 5_000_000, state: 0, local: 5_000_000, private: 0 },
+		source_url: 'https://assets.wtc.tas.gov.au/uploads/2026/04/basketball2.pdf',
+		funding_breakdown: { federal: 5_000_000, state: 0, local: 15_000_000, private: 0 },
 		funding_note:
-			'Committed funding only, not a total cost: $5M from the Australian Government for the indoor facility and $5M from the council for clubrooms, function centre and cricket nets. The council sought a matching $5M from the Tasmanian Government, which the May 2026 state budget did not fund.',
+			'Proposed, not settled. The business case models a $10M grant plus the balance from council sales of Innova Business Park land. The Australian Government has committed $5M. The council sought the other $5M from the Tasmanian Government, which the May 2026 state budget did not fund, so that amount is shown here within the council share.',
+		last_verified: CHECKED_NOV19,
+		created_at: CREATED,
+		updated_at: UPDATED
+	},
+	{
+		id: 'c22',
+		name: 'Beauty Point Foreshore Redevelopment',
+		description:
+			'Redevelopment of the Beauty Point waterfront under the 2020 foreshore master plan: a rebuilt seawall on the Esplanade, a continuous foreshore path, an all-abilities playground, barbecue shelters, parking and a formal water access point. The Australian Government promised $3M in 2019 and the funding agreement arrived in December 2020. The seawall tender was awarded in July 2023 and the foreshore was officially opened on 15 November 2025. No total cost has been published; the figure shown is the federal grant.',
+		category: 'community',
+		status: 'completed',
+		funding_type: 'gov_contracted',
+		government_level: 'local',
+		council: 'West Tamar Council',
+		budget: 3_000_000,
+		spent: null,
+		lat: -41.158,
+		lng: 146.823,
+		location_name: 'Beauty Point',
+		// Start is the month the seawall tender was awarded; preparatory street
+		// works on Flinders Street were finished in 2021.
+		start_date: '2023-07-01',
+		expected_end_date: null,
+		actual_end_date: '2025-11-15',
+		contractor: 'Sheriff Civil Contracting',
+		related_project_ids: [],
+		source_url: 'https://www.wtc.tas.gov.au/beauty-point-foreshore-master-plan/',
+		funding_note:
+			'The only published figure is $3M from the Australian Government. The council has not published a total cost or its own contribution, and the Rotary and Lions clubs helped fund the playground, so no split is shown. Sheriff Civil Contracting is named for the seawall works only.',
 		last_verified: CHECKED_NOV19,
 		created_at: CREATED,
 		updated_at: UPDATED
