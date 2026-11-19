@@ -16,6 +16,7 @@ const BP1_2026 =
 const CREATED = '2024-01-01T00:00:00Z';
 const UPDATED = '2026-11-18T00:00:00Z';
 const CHECKED = '2026-11-18';
+const CHECKED_NOV19 = '2026-11-19';
 
 const RAW_PROJECTS: Project[] = [
 	// ── State and federal projects ──────────────────────────────────────────
@@ -555,6 +556,34 @@ const RAW_PROJECTS: Project[] = [
 		created_at: CREATED,
 		updated_at: UPDATED
 	},
+	{
+		id: '20',
+		name: 'West Tamar Highway Duplication - Freshwater Point Road to Acropolis Drive',
+		description:
+			'Duplication of about 2.4 km of the West Tamar Highway at Legana to two lanes each way, with a central median barrier, upgraded intersections including a roundabout at Bridgenorth Road, signalised pedestrian crossings and a shared path. Estimated at $36M when it went to the Public Works Committee in May 2023. Construction began in 2024 and has been reported complete; no final cost has been found.',
+		category: 'transport',
+		status: 'completed',
+		funding_type: 'gov_contracted',
+		government_level: 'state',
+		budget: 36_000_000,
+		spent: null,
+		lat: -41.372,
+		lng: 147.052,
+		location_name: 'Legana',
+		// Sources give the start only as "2024"; the completion date is not confirmed.
+		start_date: '2024-01-01',
+		expected_end_date: null,
+		actual_end_date: null,
+		contractor: null,
+		related_project_ids: ['c21'],
+		source_url:
+			'https://www.parliament.tas.gov.au/__data/assets/pdf_file/0024/70827/Department-of-State-Growth-submission-West-Tamar-Highway-Upgrades.pdf',
+		funding_note:
+			'Funded from the $84M East and West Tamar Highway Upgrades commitment. The Australian and Tasmanian Government shares for this project are not confirmed from a primary source, so no split is shown.',
+		last_verified: CHECKED_NOV19,
+		created_at: CREATED,
+		updated_at: UPDATED
+	},
 
 	// ── Local council projects (northern Tasmania) ──────────────────────────
 	// Figures from council pages and media releases. Where a council share is
@@ -776,6 +805,34 @@ const RAW_PROJECTS: Project[] = [
 		funding_breakdown: { federal: 250_000, state: 0, local: 950_000, private: 0 },
 		funding_note: 'The council share is the remainder after the stated $250,000 federal contribution.',
 		last_verified: CHECKED,
+		created_at: CREATED,
+		updated_at: UPDATED
+	},
+	{
+		id: 'c21',
+		name: 'Legana Community Sports and Recreation Precinct - Stage 1',
+		description:
+			'Four-court indoor multi-purpose sports facility, clubrooms, function centre and outdoor cricket nets on council land beside Legana Primary School and the Legana oval. The council endorsed the precinct master plan in April 2026, with stage 1 to begin in 2026-27, and its 2026-27 budget sets aside $5.25M to start construction. No total cost has been published; the figure shown is the funding committed so far.',
+		category: 'community',
+		status: 'on_budget',
+		funding_type: 'public',
+		government_level: 'local',
+		council: 'West Tamar Council',
+		budget: 10_000_000,
+		spent: null,
+		lat: -41.3665,
+		lng: 147.0445,
+		location_name: 'Legana',
+		start_date: null,
+		expected_end_date: null,
+		actual_end_date: null,
+		contractor: null,
+		related_project_ids: ['c16', '20'],
+		source_url: 'https://www.wtc.tas.gov.au/2026/05/councils-disappointment-over-funding-failure/',
+		funding_breakdown: { federal: 5_000_000, state: 0, local: 5_000_000, private: 0 },
+		funding_note:
+			'Committed funding only, not a total cost: $5M from the Australian Government for the indoor facility and $5M from the council for clubrooms, function centre and cricket nets. The council sought a matching $5M from the Tasmanian Government, which the May 2026 state budget did not fund.',
+		last_verified: CHECKED_NOV19,
 		created_at: CREATED,
 		updated_at: UPDATED
 	},
