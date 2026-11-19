@@ -4,7 +4,7 @@ All project data lives in [`src/lib/seed-data.ts`](src/lib/seed-data.ts) as the
 `SEED_PROJECTS` array, mirrored to Supabase by
 [`supabase/seed.sql`](supabase/seed.sql). Every project is real and every dollar
 figure is taken from the source cited on that project. Last full check:
-18 November 2026. Projects 20, c21 and c22 were added on 19 November 2026.
+18 November 2026. Projects 20 and c21 to c24 were added on 19 November 2026.
 
 It is not a live feed. Figures change, so each row carries a `last_verified`
 date and a `source_url`.
@@ -72,6 +72,8 @@ All from the lead council's own pages and media releases.
 | c20 | Newstead Flood Levee | City of Launceston | Council share is the remainder. |
 | c21 | Legana Community Sports and Recreation Precinct - Stage 1 | West Tamar | Cost from the council's April 2026 business case: a proposed $20M stage 1 within a master plan of about $40M, both subject to cost planning. $5M federal is committed; the $5M sought from the state was not funded and is counted in the council share. The federal grant program is not named. |
 | c22 | Beauty Point Foreshore Redevelopment | West Tamar | No total cost is published; the $3M shown is the federal grant. Opening date from the council's November 2025 newsletter. Contractor named for the seawall only. Start date is the month the seawall tender was awarded. |
+| c23 | Gravelly Beach Foreshore Project | West Tamar | From the council's End of Term Report 2022-26. Total is the sum of the three listed contributions. Marine and Safety Tasmania's $160,000 is shown as state. Start date and contractor not found. |
+| c24 | Windsor Park Redevelopment | West Tamar | From the End of Term Report. The $2M is approximate. AFL Tasmania gave $74,000; a $499,637 state grant for a Windsor oval resurface is not confirmed as this ground, so no split is shown. |
 
 ## Historical projects (h01 to h11)
 

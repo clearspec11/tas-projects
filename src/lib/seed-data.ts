@@ -860,7 +860,64 @@ const RAW_PROJECTS: Project[] = [
 		related_project_ids: [],
 		source_url: 'https://www.wtc.tas.gov.au/beauty-point-foreshore-master-plan/',
 		funding_note:
-			'The only published figure is $3M from the Australian Government. The council has not published a total cost or its own contribution, and the Rotary and Lions clubs helped fund the playground, so no split is shown. Sheriff Civil Contracting is named for the seawall works only.',
+			'The only published figure is $3M from the Australian Government. The council has not published a total cost or its own contribution, and the Rotary and Lions clubs gave $35,000 each for the playground, so no split is shown. Sheriff Civil Contracting is named for the seawall works only.',
+		last_verified: CHECKED_NOV19,
+		created_at: CREATED,
+		updated_at: UPDATED
+	},
+	{
+		id: 'c23',
+		name: 'Gravelly Beach Foreshore Project',
+		description:
+			'Revitalisation of the Gravelly Beach foreshore under the council master plan, in two precincts. At the playground and boat ramp: a public pontoon with an aluminium gangway, an accessible toilet block and a barbecue shelter. In the village centre: more than 500 m of shared paths and footpaths, parking for at least 30 vehicles and stormwater upgrades. Officially opened in March 2026.',
+		category: 'community',
+		status: 'completed',
+		funding_type: 'public',
+		government_level: 'local',
+		council: 'West Tamar Council',
+		budget: 2_312_764,
+		spent: null,
+		lat: -41.287,
+		lng: 146.975,
+		location_name: 'Gravelly Beach',
+		start_date: null,
+		expected_end_date: null,
+		// The source gives the opening only as March 2026.
+		actual_end_date: '2026-03-31',
+		contractor: null,
+		related_project_ids: ['c22'],
+		source_url: 'https://assets.wtc.tas.gov.au/uploads/2026/09/3200-West-Tamar-Council-End-of-Term-Report_5a.pdf',
+		funding_breakdown: { federal: 2_000_000, state: 160_000, local: 152_764, private: 0 },
+		funding_note:
+			'The total is the sum of the three contributions the council lists: $2M from the Australian Government Community Development Grants Program, $160,000 from Marine and Safety Tasmania (shown as state) and $152,764 from the council. No separate total is published.',
+		last_verified: CHECKED_NOV19,
+		created_at: CREATED,
+		updated_at: UPDATED
+	},
+	{
+		id: 'c24',
+		name: 'Windsor Park Redevelopment',
+		description:
+			'Rebuild of the Windsor Park oval at Riverside, home of the Launceston Football Club: re-levelled surface, new drainage, sand slitting, irrigation, reseeding, perimeter fencing and upgraded lighting. Works began in late 2024 and the ground was officially opened in June 2025. The council describes the total cost as in the vicinity of $2M.',
+		category: 'community',
+		status: 'completed',
+		funding_type: 'public',
+		government_level: 'local',
+		council: 'West Tamar Council',
+		budget: 2_000_000,
+		spent: null,
+		lat: -41.4215,
+		lng: 147.1,
+		location_name: 'Riverside',
+		// Sources give only "late 2024" and "June 2025".
+		start_date: '2024-10-01',
+		expected_end_date: null,
+		actual_end_date: '2025-06-30',
+		contractor: null,
+		related_project_ids: [],
+		source_url: 'https://assets.wtc.tas.gov.au/uploads/2026/09/3200-West-Tamar-Council-End-of-Term-Report_5a.pdf',
+		funding_note:
+			'The $2M is an approximate figure quoted by the mayor. AFL Tasmania gave $74,000. The council grants register also lists $499,637 from the Tasmanian Government for resurfacing a Windsor oval, but it is not confirmed that this is the same ground, so no split is shown.',
 		last_verified: CHECKED_NOV19,
 		created_at: CREATED,
 		updated_at: UPDATED
