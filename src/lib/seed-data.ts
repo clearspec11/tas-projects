@@ -16,6 +16,7 @@ const BP1_2026 =
 const CREATED = '2024-01-01T00:00:00Z';
 const UPDATED = '2026-11-18T00:00:00Z';
 const CHECKED = '2026-11-18';
+const CHECKED_NOV19 = '2026-11-19';
 
 const RAW_PROJECTS: Project[] = [
 	// ── State and federal projects ──────────────────────────────────────────
@@ -555,6 +556,34 @@ const RAW_PROJECTS: Project[] = [
 		created_at: CREATED,
 		updated_at: UPDATED
 	},
+	{
+		id: '20',
+		name: 'West Tamar Highway Duplication - Freshwater Point Road to Acropolis Drive',
+		description:
+			'Duplication of about 2.4 km of the West Tamar Highway at Legana to two lanes each way, with a central median barrier, upgraded intersections including a roundabout at Bridgenorth Road, signalised pedestrian crossings and a shared path. Estimated at $36M when it went to the Public Works Committee in May 2023. Construction began in 2024 and has been reported complete; no final cost has been found.',
+		category: 'transport',
+		status: 'completed',
+		funding_type: 'gov_contracted',
+		government_level: 'state',
+		budget: 36_000_000,
+		spent: null,
+		lat: -41.372,
+		lng: 147.052,
+		location_name: 'Legana',
+		// Sources give the start only as "2024"; the completion date is not confirmed.
+		start_date: '2024-01-01',
+		expected_end_date: null,
+		actual_end_date: null,
+		contractor: null,
+		related_project_ids: ['c21'],
+		source_url:
+			'https://www.parliament.tas.gov.au/__data/assets/pdf_file/0024/70827/Department-of-State-Growth-submission-West-Tamar-Highway-Upgrades.pdf',
+		funding_note:
+			'Funded from the $84M East and West Tamar Highway Upgrades commitment. The Australian and Tasmanian Government shares for this project are not confirmed from a primary source, so no split is shown.',
+		last_verified: CHECKED_NOV19,
+		created_at: CREATED,
+		updated_at: UPDATED
+	},
 
 	// ── Local council projects (northern Tasmania) ──────────────────────────
 	// Figures from council pages and media releases. Where a council share is
@@ -776,6 +805,63 @@ const RAW_PROJECTS: Project[] = [
 		funding_breakdown: { federal: 250_000, state: 0, local: 950_000, private: 0 },
 		funding_note: 'The council share is the remainder after the stated $250,000 federal contribution.',
 		last_verified: CHECKED,
+		created_at: CREATED,
+		updated_at: UPDATED
+	},
+	{
+		id: 'c21',
+		name: 'Legana Community Sports and Recreation Precinct - Stage 1',
+		description:
+			'Stage 1 of a new sports precinct on council land beside Legana Primary School and the Legana oval: four indoor multi-purpose courts, cricket clubrooms with change and match-day facilities, and enabling works. The April 2026 council business case proposes a $20M stage 1 within a master plan estimated at about $40M, with stage 1 to begin in 2026-27 and open in 2028-29 at the earliest. The 2026-27 council budget sets aside $5.25M to start construction. The $20M is a proposal, to be confirmed by cost planning as design develops.',
+		category: 'community',
+		status: 'on_budget',
+		funding_type: 'public',
+		government_level: 'local',
+		council: 'West Tamar Council',
+		budget: 20_000_000,
+		spent: null,
+		lat: -41.3665,
+		lng: 147.0445,
+		location_name: 'Legana',
+		start_date: null,
+		expected_end_date: null,
+		actual_end_date: null,
+		contractor: null,
+		related_project_ids: ['c16', '20'],
+		source_url: 'https://assets.wtc.tas.gov.au/uploads/2026/04/basketball2.pdf',
+		funding_breakdown: { federal: 5_000_000, state: 0, local: 15_000_000, private: 0 },
+		funding_note:
+			'Proposed, not settled. The business case models a $10M grant plus the balance from council sales of Innova Business Park land. The Australian Government has committed $5M. The council sought the other $5M from the Tasmanian Government, which the May 2026 state budget did not fund, so that amount is shown here within the council share.',
+		last_verified: CHECKED_NOV19,
+		created_at: CREATED,
+		updated_at: UPDATED
+	},
+	{
+		id: 'c22',
+		name: 'Beauty Point Foreshore Redevelopment',
+		description:
+			'Redevelopment of the Beauty Point waterfront under the 2020 foreshore master plan: a rebuilt seawall on the Esplanade, a continuous foreshore path, an all-abilities playground, barbecue shelters, parking and a formal water access point. The Australian Government promised $3M in 2019 and the funding agreement arrived in December 2020. The seawall tender was awarded in July 2023 and the foreshore was officially opened on 15 November 2025. No total cost has been published; the figure shown is the federal grant.',
+		category: 'community',
+		status: 'completed',
+		funding_type: 'gov_contracted',
+		government_level: 'local',
+		council: 'West Tamar Council',
+		budget: 3_000_000,
+		spent: null,
+		lat: -41.158,
+		lng: 146.823,
+		location_name: 'Beauty Point',
+		// Start is the month the seawall tender was awarded; preparatory street
+		// works on Flinders Street were finished in 2021.
+		start_date: '2023-07-01',
+		expected_end_date: null,
+		actual_end_date: '2025-11-15',
+		contractor: 'Sheriff Civil Contracting',
+		related_project_ids: [],
+		source_url: 'https://www.wtc.tas.gov.au/beauty-point-foreshore-master-plan/',
+		funding_note:
+			'The only published figure is $3M from the Australian Government. The council has not published a total cost or its own contribution, and the Rotary and Lions clubs helped fund the playground, so no split is shown. Sheriff Civil Contracting is named for the seawall works only.',
+		last_verified: CHECKED_NOV19,
 		created_at: CREATED,
 		updated_at: UPDATED
 	},

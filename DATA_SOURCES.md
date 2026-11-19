@@ -4,7 +4,7 @@ All project data lives in [`src/lib/seed-data.ts`](src/lib/seed-data.ts) as the
 `SEED_PROJECTS` array, mirrored to Supabase by
 [`supabase/seed.sql`](supabase/seed.sql). Every project is real and every dollar
 figure is taken from the source cited on that project. Last full check:
-18 November 2026.
+18 November 2026. Projects 20, c21 and c22 were added on 19 November 2026.
 
 It is not a live feed. Figures change, so each row carries a `last_verified`
 date and a `source_url`.
@@ -54,6 +54,7 @@ far a project has moved from what was first announced.
 | 17 | North West Transmission Developments - Stage 1 | TasNetworks releases, May and Aug 2026 (primary) | Loan, equity and grant overlap, so no split is shown. |
 | 18 | UTAS Stadium Redevelopment | City of Launceston (primary); Pulse Tasmania (secondary) for split, contractor and dates | |
 | 19 | Northern Suburbs Community Recreation Hub | Budget Papers 2023-24 and 2026-27 (primary) | Federal amount not stated. |
+| 20 | West Tamar Highway Duplication - Freshwater Point Road to Acropolis Drive | Department of State Growth submission to the Public Works Committee, 29 May 2023 (primary) | $36M is the 2023 estimate; no final cost found. Start year and completion are from search-result summaries of a federal ministerial release and the State Growth project page, not read directly. Funding split, contractor and completion date not found. |
 
 ## Council projects
 
@@ -69,6 +70,8 @@ All from the lead council's own pages and media releases.
 | c18 | Perth Early Learning Centre | Northern Midlands | Completion is not confirmed from a primary source. |
 | c19 | Launceston City Heart - Stage 1 | City of Launceston | Council gave $19.1M in Aug 2018; listed contributions add to $20.3M. |
 | c20 | Newstead Flood Levee | City of Launceston | Council share is the remainder. |
+| c21 | Legana Community Sports and Recreation Precinct - Stage 1 | West Tamar | Cost from the council's April 2026 business case: a proposed $20M stage 1 within a master plan of about $40M, both subject to cost planning. $5M federal is committed; the $5M sought from the state was not funded and is counted in the council share. The federal grant program is not named. |
+| c22 | Beauty Point Foreshore Redevelopment | West Tamar | No total cost is published; the $3M shown is the federal grant. Opening date from the council's November 2025 newsletter. Contractor named for the seawall only. Start date is the month the seawall tender was awarded. |
 
 ## Historical projects (h01 to h11)
 

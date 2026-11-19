@@ -74,7 +74,7 @@ figure links to where it came from.
 
 ## Evidence on Hand
 
-- 37 real projects with cited figures in `src/lib/seed-data.ts`, mirrored in
+- 40 real projects with cited figures in `src/lib/seed-data.ts`, mirrored in
   `supabase/seed.sql`.
 - Per-project sources, source quality and known gaps in `DATA_SOURCES.md`
   (last full check 18 November 2026).
