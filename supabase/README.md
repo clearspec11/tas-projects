@@ -7,10 +7,11 @@ to seed data automatically (`src/lib/data.ts`).
 ## 1. Create the table
 
 In the Supabase SQL editor, run [`schema.sql`](schema.sql), then
-[`seed.sql`](seed.sql) to populate it with the 29 demo projects.
+[`seed.sql`](seed.sql) to populate it.
 
 `seed.sql` is generated from `src/lib/seed-data.ts` — regenerate it after
-editing the seed data with the one-off node script in the project history, or
+editing the seed data with `node scripts/build-seed-sql.mjs`. Re-running the
+generated file upserts every project and deletes rows no longer in the seed data. Or
 just edit rows directly in Supabase once it's live.
 
 ## 2. Configure the app

@@ -2,9 +2,14 @@
 	// A horizontal bar list: label · track · value. Themeable, responsive, and
 	// accessible. Kept deliberately simple (CSS bars, no charting dep) so it
 	// matches the hand-rolled sparkline and never fights the dark embed.
+	// Plain magnitude gets a quiet sage bar. Colour is spent only where it
+	// means something: a funder's tier, or ember for overruns.
+	const NEUTRAL = 'color-mix(in srgb, var(--color-text-muted) 55%, var(--color-bg))';
+
 	let {
 		data,
-		color = 'var(--color-accent)',
+		color = NEUTRAL,
+		valueColor = 'var(--color-text)',
 		format = (n: number) => String(n),
 		labelWidth = '7rem'
 	}: {
@@ -12,6 +17,9 @@
 		// already have semantic colours (funders, statuses) can carry them through.
 		data: { label: string; value: number; color?: string }[];
 		color?: string;
+		// Figures stay in ink unless the chart's whole subject carries a colour
+		// (the overrun chart passes ember).
+		valueColor?: string;
 		format?: (n: number) => string;
 		labelWidth?: string;
 	} = $props();
@@ -32,7 +40,7 @@
 					style="width: {(d.value / max) * 100}%; background: {d.color ?? color};"
 				></div>
 			</div>
-			<span class="tabular-nums font-medium w-16 text-right" style="color: {d.color ?? color}">{format(d.value)}</span>
+			<span class="font-mono font-medium w-16 text-right" style="color: {valueColor}">{format(d.value)}</span>
 		</div>
 	{/each}
 </div>

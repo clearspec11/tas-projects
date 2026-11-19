@@ -22,16 +22,40 @@ export function formatDate(d: string): string {
 }
 
 // ---- Budget metrics ----
-export function budgetPercent(p: Project): number {
+// Three separate money figures, kept apart on purpose:
+//   original_budget  the first publicly announced total cost (the promise)
+//   budget           the latest official estimated total cost
+//   spent            money actually paid out so far; null when no source publishes it
+// An estimate is never recorded as spend.
+
+// The first announced cost; falls back to the current estimate when no earlier
+// figure is on record.
+export function baselineCost(p: Project): number {
+	return p.original_budget ?? p.budget;
+}
+
+// Where the cost stands now: the final cost of a finished project when it is
+// known, otherwise the latest estimate (or actual spend, if that has passed it).
+export function currentCost(p: Project): number {
+	if (p.status === 'completed' && p.spent != null) return p.spent;
+	return Math.max(p.budget, p.spent ?? 0);
+}
+
+// Share of the current estimate paid out so far. null when spend isn't published.
+export function budgetPercent(p: Project): number | null {
+	if (p.spent == null) return null;
 	return p.budget ? Math.round((p.spent / p.budget) * 100) : 0;
 }
 
+// Cost movement against the first announced figure. Unspent money on a live
+// project is not a saving, so this is never negative until a project finishes.
 export function variance(p: Project): number {
-	return p.spent - p.budget;
+	return currentCost(p) - baselineCost(p);
 }
 
 export function variancePct(p: Project): number {
-	return p.budget ? (p.spent - p.budget) / p.budget : 0;
+	const base = baselineCost(p);
+	return base ? variance(p) / base : 0;
 }
 
 // Months a project is running past its expected end date.
@@ -115,14 +139,14 @@ export function budgetGrowth(p: Project): { first: number; last: number; pct: nu
 // A deliberately simple, honest forecast of a live project's final cost. Not a
 // promise: it takes the strongest available "where this lands" signal and labels
 // which one it used so the UI can show its working.
-//   - revised-estimate: the latest figure from successive budget papers
+//   - revised-estimate: the latest official estimate sits above the first announced cost
 //   - burn-rate: spend-to-date extrapolated over the full schedule
-//   - on-budget: no signal points above the current budget
+//   - on-budget: no signal points above the first announced cost
 // Returns null for finished/cancelled projects and where there's nothing to model.
 export interface Projection {
 	estimate: number; // projected final cost
-	overBy: number; // estimate - budget (negative = tracking under)
-	pct: number; // overBy / budget
+	overBy: number; // estimate - first announced cost
+	pct: number; // overBy / first announced cost
 	method: 'revised-estimate' | 'burn-rate' | 'on-budget';
 	elapsedPct: number; // share of the schedule elapsed, 0..1
 }
@@ -140,8 +164,9 @@ export function projectFinalCost(p: Project, now: Date = new Date()): Projection
 		if (e > s) elapsed = Math.min(1, Math.max(0, (n - s) / (e - s)));
 	}
 
-	let estimate = p.budget;
-	let method: Projection['method'] = 'on-budget';
+	const baseline = baselineCost(p);
+	let estimate = currentCost(p);
+	let method: Projection['method'] = estimate > baseline ? 'revised-estimate' : 'on-budget';
 
 	// Latest revised total cost from the budget-paper trail, if any.
 	const revised = p.budget_history?.length
@@ -154,7 +179,8 @@ export function projectFinalCost(p: Project, now: Date = new Date()): Projection
 
 	// Burn-rate extrapolation, but only once enough schedule has passed that the
 	// rate means something (avoids wild forecasts from a single early invoice).
-	const burn = Number.isFinite(elapsed) && elapsed >= 0.15 && p.spent > 0 ? p.spent / elapsed : null;
+	const spent = p.spent ?? 0;
+	const burn = Number.isFinite(elapsed) && elapsed >= 0.15 && spent > 0 ? spent / elapsed : null;
 	if (burn && burn > estimate) {
 		estimate = burn;
 		method = 'burn-rate';
@@ -163,8 +189,8 @@ export function projectFinalCost(p: Project, now: Date = new Date()): Projection
 	estimate = Math.round(estimate);
 	return {
 		estimate,
-		overBy: estimate - p.budget,
-		pct: (estimate - p.budget) / p.budget,
+		overBy: estimate - baseline,
+		pct: baseline ? (estimate - baseline) / baseline : 0,
 		method,
 		elapsedPct: Number.isFinite(elapsed) ? elapsed : 0
 	};
@@ -221,12 +247,10 @@ export function spendByRegion(list: Project[]): { region: Region; total: number 
 // Headline figures across the book.
 //
 // `overrunPct` is deliberately measured only across projects that have actually
-// run over, money-weighted (their overspend / their budget). Averaging spend
-// against budget over every project instead would mostly measure how much work
-// is still unfinished — a book of half-built projects would report a large
-// "under budget" number, which reads as good news and is not.
+// run over, money-weighted (their cost growth / their first announced cost).
 //
-// `spentPct` reports that progress figure separately and neutrally.
+// `spentPct` is spend progress, measured only across projects whose spend is
+// published, so missing figures don't read as money unspent.
 export function portfolioAverages(list: Project[]): {
 	count: number;
 	totalBudget: number;
@@ -238,17 +262,19 @@ export function portfolioAverages(list: Project[]): {
 } {
 	const count = list.length;
 	const totalBudget = list.reduce((s, p) => s + p.budget, 0);
-	const totalSpent = list.reduce((s, p) => s + p.spent, 0);
+	const withSpend = list.filter((p) => p.spent != null);
+	const totalSpent = withSpend.reduce((s, p) => s + (p.spent ?? 0), 0);
+	const spendBudget = withSpend.reduce((s, p) => s + p.budget, 0);
 
 	const over = list.filter((p) => variance(p) > 0);
-	const overBudgetTotal = over.reduce((s, p) => s + p.budget, 0);
+	const overBudgetTotal = over.reduce((s, p) => s + baselineCost(p), 0);
 	const overspend = over.reduce((s, p) => s + variance(p), 0);
 
 	return {
 		count,
 		totalBudget,
 		avgBudget: count ? Math.round(totalBudget / count) : 0,
-		spentPct: totalBudget ? totalSpent / totalBudget : 0,
+		spentPct: spendBudget ? totalSpent / spendBudget : 0,
 		overrunPct: overBudgetTotal ? overspend / overBudgetTotal : 0,
 		overCount: over.length,
 		flaggedPct: count ? flagged(list) / count : 0
@@ -259,7 +285,7 @@ function flagged(list: Project[]): number {
 	return list.filter((p) => isRedFlag(p)).length;
 }
 
-// Projects ranked by how far spend has run over budget, biggest first.
+// Projects ranked by how far cost has grown past the first announced figure, biggest first.
 // Only those actually over (variance > 0); caller decides how many to show.
 export function overBudgetLeaderboard(list: Project[]): { project: Project; over: number }[] {
 	return list
@@ -305,8 +331,13 @@ export function filterProjects(list: Project[], f: FilterCriteria): Project[] {
 		if (f.flaggedOnly && !isRedFlag(p)) return false;
 		if (f.contractor && p.contractor !== f.contractor) return false;
 		if (f.query && !p.name.toLowerCase().includes(f.query.toLowerCase())) return false;
-		const startYear = new Date(p.start_date).getFullYear();
-		if (startYear < f.range[0] || startYear > f.range[1]) return false;
+		// Place a project on the timeline by its start; where that isn't on
+		// record, by when it finished or is due to.
+		const anchor = p.start_date ?? p.actual_end_date ?? p.expected_end_date;
+		if (anchor) {
+			const year = new Date(anchor).getFullYear();
+			if (year < f.range[0] || year > f.range[1]) return false;
+		}
 		return true;
 	});
 }
@@ -315,10 +346,9 @@ export function filterProjects(list: Project[], f: FilterCriteria): Project[] {
 export interface ContractorStats {
 	name: string;
 	projects: number;
-	totalBudget: number;
-	totalSpent: number;
-	// Money-weighted: (sum spent - sum budget) / sum budget, so one large
-	// blowout outweighs several small on-budget jobs.
+	totalBudget: number; // sum of current estimates
+	// Money-weighted: total cost growth / total first announced cost, so one
+	// large blowout outweighs several small on-budget jobs.
 	overrunPct: number;
 	flagged: number;
 	cleanPct: number; // share of their projects not red-flagged
@@ -339,14 +369,14 @@ export function contractorStats(list: Project[]): { ranked: ContractorStats[]; u
 	const ranked = [...groups.entries()]
 		.map(([name, ps]) => {
 			const totalBudget = ps.reduce((s, p) => s + p.budget, 0);
-			const totalSpent = ps.reduce((s, p) => s + p.spent, 0);
+			const totalBaseline = ps.reduce((s, p) => s + baselineCost(p), 0);
+			const totalCurrent = ps.reduce((s, p) => s + currentCost(p), 0);
 			const flagged = ps.filter((p) => isRedFlag(p)).length;
 			return {
 				name,
 				projects: ps.length,
 				totalBudget,
-				totalSpent,
-				overrunPct: totalBudget ? (totalSpent - totalBudget) / totalBudget : 0,
+				overrunPct: totalBaseline ? (totalCurrent - totalBaseline) / totalBaseline : 0,
 				flagged,
 				cleanPct: ps.length ? (ps.length - flagged) / ps.length : 0
 			};
@@ -390,8 +420,9 @@ export function sortProjects(list: Project[], key: SortKey): Project[] {
 export function projectsToCsv(list: Project[]): string {
 	const cols: (keyof Project)[] = [
 		'id', 'name', 'category', 'status', 'funding_type', 'government_level',
-		'council', 'location_name', 'budget', 'spent', 'contractor',
-		'start_date', 'expected_end_date', 'lat', 'lng', 'source_url'
+		'council', 'location_name', 'original_budget', 'budget', 'spent', 'contractor',
+		'start_date', 'expected_end_date', 'actual_end_date', 'lat', 'lng', 'source_url', 'last_verified',
+		'funding_note'
 	];
 	const esc = (v: unknown) => {
 		const s = v == null ? '' : String(v);
@@ -399,16 +430,17 @@ export function projectsToCsv(list: Project[]): string {
 	};
 	const header = [
 		...cols, 'variance', 'variance_pct', 'delay_months',
-		'fund_federal', 'fund_state', 'fund_local', 'fund_private'
+		'fund_federal', 'fund_state', 'fund_local', 'fund_private', 'funding_split_basis'
 	].join(',');
 	const rows = list.map((p) => {
-		const fb = resolveFundingBreakdown(p).breakdown;
+		const { breakdown: fb, estimated } = resolveFundingBreakdown(p);
 		return [
 			...cols.map((c) => esc(p[c])),
 			esc(variance(p)),
 			esc((variancePct(p) * 100).toFixed(1)),
 			esc(delayMonths(p) ?? ''),
-			esc(fb.federal), esc(fb.state), esc(fb.local), esc(fb.private)
+			esc(fb.federal), esc(fb.state), esc(fb.local), esc(fb.private),
+			esc(estimated ? 'estimated' : 'sourced')
 		].join(',');
 	});
 	return [header, ...rows].join('\n');

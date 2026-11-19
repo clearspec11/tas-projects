@@ -5,6 +5,8 @@ import {
 	budgetPercent,
 	variance,
 	variancePct,
+	baselineCost,
+	currentCost,
 	delayMonths,
 	isRedFlag,
 	filterProjects,
@@ -199,7 +201,7 @@ describe('resolveFundingBreakdown', () => {
 describe('contractorStats', () => {
 	const list = [
 		makeProject({ contractor: 'Acme', budget: 100, spent: 150 }),
-		makeProject({ contractor: 'Acme', budget: 100, spent: 90 }),
+		makeProject({ contractor: 'Acme', status: 'completed', budget: 100, spent: 90 }),
 		makeProject({ contractor: 'Bolt', budget: 100, spent: 100 }),
 		makeProject({ contractor: null, budget: 100, spent: 100 })
 	];
@@ -210,12 +212,49 @@ describe('contractorStats', () => {
 	});
 	it('uses a money-weighted overrun', () => {
 		const acme = contractorStats(list).ranked.find((c) => c.name === 'Acme')!;
-		// (150 + 90) vs (100 + 100) = 240/200 = +20%
+		// (150 + a finished job's final 90) vs (100 + 100) = 240/200 = +20%
 		expect(acme.overrunPct).toBeCloseTo(0.2, 5);
 		expect(acme.projects).toBe(2);
 	});
 	it('ranks the worst overrun first', () => {
 		expect(contractorStats(list).ranked[0].name).toBe('Acme');
+	});
+});
+
+describe('estimate vs spend', () => {
+	it('measures variance from the first announced cost to the current estimate', () => {
+		const p = makeProject({ original_budget: 576, budget: 786, spent: null });
+		expect(baselineCost(p)).toBe(576);
+		expect(currentCost(p)).toBe(786);
+		expect(variance(p)).toBe(210);
+		expect(variancePct(p)).toBeCloseTo(210 / 576);
+		expect(isRedFlag(p, NOW)).toBe(true);
+	});
+	it('reports no budget usage when spend is not published', () => {
+		expect(budgetPercent(makeProject({ spent: null }))).toBeNull();
+		expect(budgetPercent(makeProject({ budget: 200, spent: 50 }))).toBe(25);
+	});
+	it('does not count unspent money on a live project as a saving', () => {
+		expect(variance(makeProject({ budget: 100, spent: 40 }))).toBe(0);
+	});
+	it('counts a finished project that came in under as a saving', () => {
+		expect(variance(makeProject({ status: 'completed', budget: 100, spent: 90 }))).toBe(-10);
+	});
+	it('treats a finished project with no published final cost as on its estimate', () => {
+		expect(variance(makeProject({ status: 'completed', original_budget: 30, budget: 41, spent: null }))).toBe(11);
+	});
+	it('projects from the revised estimate when spend is unknown', () => {
+		const proj = projectFinalCost(makeProject({ original_budget: 100, budget: 130, spent: null }), NOW)!;
+		expect(proj.method).toBe('revised-estimate');
+		expect(proj.overBy).toBe(30);
+	});
+	it('leaves projects without published spend out of the spend-progress figure', () => {
+		const out = portfolioAverages([
+			makeProject({ budget: 100, spent: 50 }),
+			makeProject({ budget: 900, spent: null })
+		]);
+		expect(out.spentPct).toBeCloseTo(0.5);
+		expect(out.totalBudget).toBe(1000);
 	});
 });
 

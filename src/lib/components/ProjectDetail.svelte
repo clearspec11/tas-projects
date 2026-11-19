@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { onMount, tick } from 'svelte';
+	import { MediaQuery } from 'svelte/reactivity';
 	import { selectedProject } from '$lib/stores';
 	import { STATUS_CONFIG, CATEGORY_CONFIG, FUNDING_CONFIG, GOVERNMENT_LEVEL_CONFIG, FUNDER_CONFIG, type FundingBreakdown } from '$lib/types';
 	import { formatCurrencyPrecise as formatCurrency, formatDate, budgetPercent, variance, variancePct, delayMonths, isRedFlag, isVerified, resolveFundingBreakdown } from '$lib/metrics';
@@ -24,6 +26,46 @@
 	function close() {
 		selectedProject.set(null);
 	}
+
+	// Full-screen sheet below md (a dialog over the map or list), a side panel
+	// beside the map from md up.
+	const phone = new MediaQuery('not all and (min-width: 48rem)', false);
+
+	let panel: HTMLDivElement | undefined = $state();
+	let heading: HTMLHeadingElement | undefined = $state();
+
+	// Opening moves focus to the project name, so keyboard and screen reader
+	// users land in the panel and hear what opened. Closing hands focus back to
+	// the marker or list row that opened it.
+	onMount(() => {
+		let openId: string | null = null;
+		// Map markers are SVG paths, list rows are buttons; both can take focus.
+		let opener: HTMLElement | SVGElement | null = null;
+		return selectedProject.subscribe((p) => {
+			const id = p?.id ?? null;
+			if (id === openId) return;
+			const wasOpen = openId !== null;
+			openId = id;
+			// Read the focused element now, before the page under a phone sheet
+			// turns inert and drops it.
+			const el = document.activeElement;
+			const active = el instanceof HTMLElement || el instanceof SVGElement ? el : null;
+			if (id !== null) {
+				const outside = active !== null && active !== document.body && !panel?.contains(active);
+				if (!wasOpen || outside) opener = outside ? active : null;
+				tick().then(() => {
+					if (panel) panel.scrollTop = 0;
+					heading?.focus({ preventScroll: true });
+				});
+			} else {
+				const back = opener;
+				opener = null;
+				tick().then(() => {
+					if (back?.isConnected) back.focus({ preventScroll: true });
+				});
+			}
+		});
+	});
 </script>
 
 {#if $selectedProject}
@@ -40,15 +82,18 @@
 	{@const funding = resolveFundingBreakdown(p)}
 
 	<div
+		bind:this={panel}
+		role={phone.current ? 'dialog' : 'region'}
+		aria-labelledby="project-detail-title"
 		transition:fly={{ y: 12, duration: dur(200), easing: cubicOut }}
-		class="absolute top-14 right-4 w-96 max-h-[calc(100vh-8rem)] max-md:inset-0 max-md:top-0 max-md:w-auto max-md:max-h-none max-md:rounded-none overflow-y-auto bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl shadow-2xl z-[1000]"
+		class="absolute top-14 right-4 w-96 max-h-[calc(100vh-8rem)] max-md:inset-0 max-md:top-0 max-md:w-auto max-md:max-h-none max-md:rounded-none overflow-y-auto bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl shadow-lg z-[1000]"
 	>
 		<!-- Header -->
 		<div class="p-4 border-b border-[var(--color-border)]">
 			<div class="flex items-start justify-between">
 				<div>
 					<div class="flex items-center gap-1.5 text-xs text-[var(--color-text-muted)] mb-1"><CatIcon size={13} /> {catCfg.label}</div>
-					<h2 class="flex items-start gap-1.5 text-xl font-bold leading-tight [text-wrap:balance]">{#if flagged}<Flag size={18} class="shrink-0 mt-1 text-[var(--color-danger)]" aria-label="Flagged" />{/if}<span>{p.name}</span></h2>
+					<h2 bind:this={heading} id="project-detail-title" tabindex="-1" class="flex items-start gap-1.5 text-xl font-bold leading-tight [text-wrap:balance]">{#if flagged}<Flag size={18} class="shrink-0 mt-1 text-[var(--color-danger)]" aria-label="Flagged" />{/if}<span>{p.name}</span></h2>
 					<div class="text-xs text-[var(--color-text-muted)] mt-1">
 					{p.council ? `${p.council} · ` : ''}{p.location_name}
 				</div>
@@ -56,7 +101,7 @@
 				<button
 					onclick={close}
 					aria-label="Close project details"
-					class="shrink-0 -mr-1 -mt-1 w-8 h-8 flex items-center justify-center rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] transition-colors cursor-pointer"
+					class="shrink-0 -mr-2.5 -mt-2.5 w-11 h-11 flex items-center justify-center rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] transition-colors cursor-pointer"
 				><X size={18} /></button>
 			</div>
 			<div class="flex flex-wrap gap-1.5 mt-2">
@@ -66,8 +111,8 @@
 				<span title={govCfg.description} class="text-xs px-2 py-0.5 rounded-full font-medium" style="background: {govCfg.color}20; color: {govCfg.color};">
 					{govCfg.shortLabel}
 				</span>
-				<span title={fundCfg.description} class="text-xs px-2 py-0.5 rounded-full font-medium bg-[var(--color-surface-hover)] text-[var(--color-text-muted)]">
-					{fundCfg.label}
+				<span class="text-xs px-2 py-0.5 rounded-full font-medium bg-[var(--color-surface-hover)] text-[var(--color-text-muted)]">
+					<InfoTip term={fundCfg.label} text="{fundCfg.description}." />
 				</span>
 			</div>
 			<p class="text-[0.6875rem] text-[var(--color-text-muted)] mt-1.5 leading-snug">
@@ -77,27 +122,36 @@
 
 		<!-- Budget breakdown -->
 		<div class="p-4 space-y-3">
-			<div>
-				<div class="flex justify-between text-xs mb-1">
-					<span class="text-[var(--color-text-muted)]">Budget Usage <InfoTip text={GLOSSARY.budget_usage} /></span>
-					<span class="font-mono font-bold" style="color: {cfg.color}">{pct}%</span>
+			{#if pct != null}
+				<div>
+					<div class="flex justify-between text-xs mb-1">
+						<span class="text-[var(--color-text-muted)]">Budget Usage <InfoTip text={GLOSSARY.budget_usage} /></span>
+						<span class="font-mono font-bold" style="color: {cfg.color}">{pct}%</span>
+					</div>
+					<div class="bg-[var(--color-bg)] rounded-full h-3">
+						<div
+							class="h-full rounded-full transition-all"
+							style="width: {Math.min(100, pct)}%; background: {cfg.color};"
+						></div>
+					</div>
 				</div>
-				<div class="bg-[var(--color-bg)] rounded-full h-3">
-					<div
-						class="h-full rounded-full transition-all"
-						style="width: {Math.min(100, pct)}%; background: {cfg.color};"
-					></div>
-				</div>
-			</div>
+			{/if}
 
 			<div class="grid grid-cols-2 gap-3">
 				<div class="bg-[var(--color-bg)] rounded-lg p-3">
-					<div class="text-[0.6875rem] text-[var(--color-text-muted)]">Budget</div>
-					<div class="text-xl font-bold tabular-nums mt-0.5">{formatCurrency(p.budget)}</div>
+					<div class="text-[0.6875rem] text-[var(--color-text-muted)]">Estimated cost</div>
+					<div class="text-xl font-mono font-bold mt-0.5">{formatCurrency(p.budget)}</div>
+					{#if p.original_budget && p.original_budget !== p.budget}
+						<div class="text-[0.6875rem] text-[var(--color-text-muted)] mt-0.5">first announced <span class="font-mono">{formatCurrency(p.original_budget)}</span></div>
+					{/if}
 				</div>
 				<div class="bg-[var(--color-bg)] rounded-lg p-3">
-					<div class="text-[0.6875rem] text-[var(--color-text-muted)]">Spent</div>
-					<div class="text-xl font-bold tabular-nums mt-0.5" style="color: {cfg.color}">{formatCurrency(p.spent)}</div>
+					<div class="text-[0.6875rem] text-[var(--color-text-muted)]">{p.status === 'completed' ? 'Final cost' : 'Spent so far'}</div>
+					{#if p.spent != null}
+						<div class="text-xl font-mono font-bold mt-0.5" style="color: {cfg.color}">{formatCurrency(p.spent)}</div>
+					{:else}
+						<div class="text-[0.9375rem] font-semibold mt-1 text-[var(--color-text-muted)]">Not published</div>
+					{/if}
 				</div>
 			</div>
 
@@ -105,7 +159,7 @@
 				{#if v !== 0}
 					<div class="bg-[var(--color-bg)] rounded-lg p-3 text-center">
 						<div class="text-[0.6875rem] text-[var(--color-text-muted)]">Variance <InfoTip text={GLOSSARY.variance} /></div>
-						<div class="text-xl font-bold tabular-nums mt-0.5" style="color: {v > 0 ? 'var(--color-danger)' : 'var(--color-success)'}">
+						<div class="text-xl font-mono font-bold mt-0.5" style="color: {v > 0 ? 'var(--color-danger)' : 'var(--color-success)'}">
 							{v > 0 ? '+' : ''}{formatCurrency(Math.abs(v))}
 						</div>
 						<div class="text-[0.6875rem] font-mono mt-0.5" style="color: {v > 0 ? 'var(--color-danger)' : 'var(--color-success)'}">
@@ -116,7 +170,7 @@
 				{#if late}
 					<div class="bg-[var(--color-bg)] rounded-lg p-3 text-center">
 						<div class="text-[0.6875rem] text-[var(--color-text-muted)]">Schedule</div>
-						<div class="text-xl font-bold mt-0.5 text-[var(--color-warning)]">{late}mo late</div>
+						<div class="text-xl font-mono font-bold mt-0.5 text-[var(--color-warning)]">{late}mo late</div>
 						<div class="text-[0.6875rem] mt-0.5 text-[var(--color-warning)]">past due date</div>
 					</div>
 				{/if}
@@ -133,9 +187,11 @@
 			<div>
 				<div class="flex justify-between items-baseline mb-1.5">
 					<span class="text-[0.6875rem] text-[var(--color-text-muted)]">
-						Who pays {funding.estimated ? '· est.' : ''}
+						Who pays {funding.estimated && !p.funding_note ? '· est.' : ''}
 					</span>
 				</div>
+				<!-- Where the split isn't published we say so, rather than draw a guess. -->
+				{#if !(funding.estimated && p.funding_note)}
 				<div class="flex h-3 rounded-full overflow-hidden bg-[var(--color-bg)]">
 					{#each FUNDER_KEYS as key}
 						{@const amount = funding.breakdown[key]}
@@ -154,13 +210,16 @@
 							<div class="flex items-center gap-1 text-[0.6875rem]">
 								<span class="w-2 h-2 rounded-full inline-block" style="background: {FUNDER_CONFIG[key].color};"></span>
 								<span class="text-[var(--color-text)]">{FUNDER_CONFIG[key].label}</span>
-								<span class="text-[var(--color-text-muted)]">{formatCurrency(amount)} ({Math.round((amount / p.budget) * 100)}%)</span>
+								<span class="font-mono text-[var(--color-text-muted)]">{formatCurrency(amount)} ({Math.round((amount / p.budget) * 100)}%)</span>
 							</div>
 						{/if}
 					{/each}
 				</div>
-				{#if funding.estimated}
-					<p class="text-[0.625rem] text-[var(--color-text-muted)] mt-1.5 italic">Estimated from governing tier and delivery model. See source for actual figures.</p>
+				{/if}
+				{#if p.funding_note}
+					<p class="text-[0.6875rem] text-[var(--color-text-muted)] mt-1.5 leading-snug">{p.funding_note}</p>
+				{:else if funding.estimated}
+					<p class="text-[0.6875rem] text-[var(--color-text-muted)] mt-1.5 italic">Estimated from governing tier and delivery model. See source for actual figures.</p>
 				{/if}
 			</div>
 		</div>
@@ -170,14 +229,22 @@
 			<p class="text-[var(--color-text)]/85 leading-relaxed [text-wrap:pretty]">{p.description}</p>
 
 			<div class="grid grid-cols-2 gap-x-4 gap-y-1 pt-2 border-t border-[var(--color-border)]">
-				<div>
-					<span class="text-[var(--color-text-muted)]">Started</span>
-					<span class="ml-1 font-medium">{formatDate(p.start_date)}</span>
-				</div>
+				{#if p.start_date}
+					<div>
+						<span class="text-[var(--color-text-muted)]">Started</span>
+						<span class="ml-1 font-medium">{formatDate(p.start_date)}</span>
+					</div>
+				{/if}
 				{#if p.expected_end_date}
 					<div>
-						<span class="text-[var(--color-text-muted)]">Expected</span>
+						<span class="text-[var(--color-text-muted)]">{p.actual_end_date ? "Promised" : "Expected"}</span>
 						<span class="ml-1 font-medium">{formatDate(p.expected_end_date)}</span>
+					</div>
+				{/if}
+				{#if p.actual_end_date}
+					<div>
+						<span class="text-[var(--color-text-muted)]">Finished</span>
+						<span class="ml-1 font-medium">{formatDate(p.actual_end_date)}</span>
 					</div>
 				{/if}
 				{#if p.contractor}
@@ -192,7 +259,7 @@
 			{#if isVerified(p)}
 				<div class="flex items-center gap-1.5 mt-2 text-[0.6875rem] text-[var(--color-success)]">
 					<Check size={13} class="shrink-0" />
-					<span>Figures verified against source{p.last_verified ? `, last checked ${formatDate(p.last_verified)}` : ''}.</span>
+					<span>Figures checked against the cited source{p.last_verified ? `, last checked ${formatDate(p.last_verified)}` : ''}.</span>
 				</div>
 			{:else}
 				<div class="mt-2 px-2.5 py-1.5 rounded-lg bg-[var(--color-warning)]/10 border border-[var(--color-warning)]/30 text-[0.6875rem] text-[var(--color-warning)] leading-snug">
@@ -215,7 +282,7 @@
 			{/if}
 
 			{#if p.source_url?.includes('treasury.tas.gov.au')}
-				<p class="mt-1.5 text-[0.625rem] text-[var(--color-text-muted)] leading-snug">
+				<p class="mt-1.5 text-[0.6875rem] text-[var(--color-text-muted)] leading-snug">
 					Budget figures from the Tasmanian Budget Papers, © State of Tasmania, used under
 					<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer" class="underline hover:text-[var(--color-text)]">CC BY 4.0</a>.
 				</p>

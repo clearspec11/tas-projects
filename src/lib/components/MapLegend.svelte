@@ -1,32 +1,88 @@
 <script lang="ts">
 	import { STATUS_CONFIG, GOVERNMENT_LEVEL_CONFIG } from '$lib/types';
-	import { Flag, Minus } from '@lucide/svelte';
+	import { onMount, tick } from 'svelte';
+	import { Flag, Minus, Info } from '@lucide/svelte';
 	import InfoTip from './InfoTip.svelte';
 	import { GLOSSARY, MAP_ORIENTATION } from '$lib/glossary';
-	import { sidebarOpen } from '$lib/stores';
+	import { sidebarShown, mapStripRem, timelineFits, viewportRem, TIMELINE_REM, MD_REM } from '$lib/stores';
 
-	let expanded = $state(true);
+	// Collapsed by default so the first view of the map isn't crowded; the
+	// choice is remembered for returning visitors.
+	const KEY = 'tas-legend-open';
+	let expanded = $state(false);
+	let openButton: HTMLButtonElement | undefined = $state();
+	let closeButton: HTMLButtonElement | undefined = $state();
+
+	onMount(() => {
+		try {
+			expanded = localStorage.getItem(KEY) === '1';
+		} catch {
+			// storage unavailable; stay collapsed
+		}
+	});
+
+	// The timeline is centred in the open map and the legend sits at its left
+	// edge. Where the strip is too narrow for the two side by side, the legend
+	// rides above the timeline instead of under it.
+	const LIFT_REM = 4;
+	// Left edge to right edge, in rem: the closed button, and the open panel
+	// with the indent that keeps it off the projects tab.
+	const CLOSED_REACH = 1 + 6;
+	const OPEN_REACH = 1 + 1.5 + 15;
+	const raised = $derived(
+		$timelineFits &&
+			($mapStripRem - TIMELINE_REM) / 2 < (expanded ? OPEN_REACH : CLOSED_REACH) + 0.75
+	);
+	// On desktop the open panel stops short of the forecast readout docked
+	// above it; phones have no readout, only the nav, tabs and zoom control.
+	const ceilingRem = $derived($viewportRem < MD_REM ? 14 : raised ? 19 + LIFT_REM : 19);
+
+	async function setExpanded(open: boolean) {
+		expanded = open;
+		try {
+			localStorage.setItem(KEY, open ? '1' : '0');
+		} catch {
+			// storage unavailable; the choice just won't persist
+		}
+		// The button that was pressed is swapped out for its counterpart, so
+		// carry focus across instead of letting it fall back to the page.
+		await tick();
+		(open ? closeButton : openButton)?.focus();
+	}
 </script>
 
+<!-- Desktop: bottom-left, moving with the projects panel; the open panel sits
+     a step further in so it never covers the projects tab. Phones: under the
+     zoom control, clear of the banner at the bottom of the map. -->
 <div
-	class="absolute bottom-6 left-4 z-[1000]"
-	style="transform: translateX({$sidebarOpen ? '24rem' : '0'}); transition: transform 280ms cubic-bezier(0.4,0,0.2,1);"
+	class="absolute z-[1000] md:bottom-6 {expanded ? 'md:left-10' : 'md:left-4'} max-md:top-[5.5rem] max-md:left-2.5"
+	style="transform: translate({$sidebarShown ? '24rem' : '0'}, {raised ? `-${LIFT_REM}rem` : '0'}); transition: transform 280ms cubic-bezier(0.4,0,0.2,1);"
 >
+	{#if !expanded}
 	<button
-		class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg px-3 py-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] cursor-pointer mb-1 {expanded ? 'hidden' : ''}"
-		onclick={() => expanded = true}
-	>Legend</button>
-
-	{#if expanded}
-		<div class="bg-[var(--color-surface)]/95 backdrop-blur border border-[var(--color-border)] rounded-xl p-3 shadow-lg min-w-[180px]">
+		class="inline-flex items-center gap-1.5 bg-[var(--color-surface)]/95 backdrop-blur border border-[var(--color-border)] rounded-lg px-3 py-2 max-md:min-h-11 text-xs text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] cursor-pointer"
+		bind:this={openButton}
+		aria-expanded="false"
+		onclick={() => setExpanded(true)}
+	><Info size={14} class="text-[var(--color-accent)]" /> Legend</button>
+	{:else}
+		<div
+			class="bg-[var(--color-surface)]/95 backdrop-blur border border-[var(--color-border)] rounded-xl p-3 shadow-lg w-[15rem] overflow-y-auto"
+			style="max-height: calc(100vh - {ceilingRem}rem);"
+		>
 			<div class="flex items-center justify-between mb-2">
-				<span class="flex items-center gap-1 text-xs font-semibold text-[var(--color-text)]">Legend <InfoTip text={MAP_ORIENTATION} iconSize={12} /></span>
+				<span class="text-xs font-semibold text-[var(--color-text)]">Legend</span>
 				<button
+					bind:this={closeButton}
 					aria-label="Collapse legend"
-					class="text-[var(--color-text-muted)] hover:text-[var(--color-text)] cursor-pointer"
-					onclick={() => expanded = false}
+					aria-expanded="true"
+					class="hit-area text-[var(--color-text-muted)] hover:text-[var(--color-text)] cursor-pointer"
+					onclick={() => setExpanded(false)}
 				><Minus size={14} /></button>
 			</div>
+
+			<!-- The orientation is plain text, not a hover tip, so touch users get it. -->
+			<p class="text-[0.6875rem] leading-snug text-[var(--color-text-muted)] mb-2.5">{MAP_ORIENTATION}</p>
 
 			<!-- Status colors -->
 			<div class="mb-2">

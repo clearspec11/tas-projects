@@ -19,6 +19,21 @@
 	--color-success: #5aa84f;
 	--color-warning: #e0933a;
 	--color-danger: #df5a39;
+
+	/* Data colours: project status, governing tier, private funding */
+	--color-status-on-budget: #5aa84f;
+	--color-status-over-budget: #df5a39;
+	--color-status-under-budget: #3fa39e;
+	--color-status-completed: #ab8ad6;
+	--color-status-cancelled: #889085;
+	--color-tier-federal: #9a8ad6;
+	--color-tier-state: #3fa39e;
+	--color-tier-local: #5aa84f;
+	--color-fund-private: #e0933a;
+
+	/* Map atmosphere only (shoreline glow, aurora wash); never data */
+	--color-coast-glow: #34b893;
+	--color-coast-line: #86e3c0;
 }
 
 body {
@@ -40,6 +55,27 @@ body {
 :focus-visible {
 	outline: 2px solid var(--color-accent);
 	outline-offset: 2px;
+}
+
+/* Small icon buttons keep their drawn size; the area that takes a click or a
+   tap grows around them (24px with a mouse, 44px under a finger). */
+.hit-area {
+	position: relative;
+}
+.hit-area::after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: max(100%, 1.5rem);
+	height: max(100%, 1.5rem);
+	transform: translate(-50%, -50%);
+}
+@media (pointer: coarse) {
+	.hit-area::after {
+		width: max(100%, 2.75rem);
+		height: max(100%, 2.75rem);
+	}
 }
 
 /* Quiet, themed scrollbars instead of the bright OS default on dark surfaces */
@@ -84,6 +120,12 @@ body {
 .leaflet-tile-pane {
 	/* Desaturate, darken, and cast the basemap toward the peat-and-myrtle neutrals */
 	filter: saturate(0.4) brightness(0.42) sepia(0.4) hue-rotate(55deg);
+}
+
+/* The dark canvas is already near-black, so the pane filter above would bury its
+   roads and place names. Lift just these layers; satellite keeps the full dim. */
+.leaflet-layer.tiles-dark {
+	filter: brightness(1.9) contrast(1.1);
 }
 
 .leaflet-control-zoom a {

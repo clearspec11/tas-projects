@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { projects, selectedProject, filterCategory, filterStatus, filterFunding, filterGovernmentLevel, filterFlagged, filterContractor, searchQuery, sortKey } from '$lib/stores';
+	import InfoTip from './InfoTip.svelte';
+	import { FUNDING_MODELS_EXPLAINED } from '$lib/glossary';
 	import { STATUS_CONFIG, CATEGORY_CONFIG, FUNDING_CONFIG, GOVERNMENT_LEVEL_CONFIG, type Project, type ProjectCategory, type ProjectStatus, type FundingType, type GovernmentLevel } from '$lib/types';
 	import { timelineRange } from '$lib/stores';
 	import {
@@ -16,6 +18,7 @@
 	let showAdvanced = $state(false);
 
 	const DEFAULT_RANGE: [number, number] = [2008, 2036];
+	const YEARS = Array.from({ length: DEFAULT_RANGE[1] - DEFAULT_RANGE[0] + 1 }, (_, i) => DEFAULT_RANGE[0] + i);
 
 	const list = $derived(
 		sortProjects(
@@ -107,8 +110,9 @@
 	];
 
 	const fundingTypes: { value: FundingType | 'all'; label: string }[] = [
-		{ value: 'all', label: 'All Funding' },
-		...Object.entries(FUNDING_CONFIG).map(([k, v]) => ({ value: k as FundingType, label: v.shortLabel }))
+		{ value: 'all', label: 'All funding models' },
+		// Full names, not abbreviations: "PPP" means nothing to most visitors.
+		...Object.entries(FUNDING_CONFIG).map(([k, v]) => ({ value: k as FundingType, label: v.label }))
 	];
 
 	const governmentLevels: { value: GovernmentLevel | 'all'; label: string }[] = [
@@ -125,24 +129,24 @@
 			<button
 				onclick={exportCsv}
 				title="Export filtered projects as CSV"
-				class="text-[0.6875rem] px-2.5 py-1.5 rounded-md border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:border-[var(--color-accent)] transition-colors cursor-pointer"
+				class="text-[0.6875rem] px-2.5 py-1.5 max-md:min-h-11 max-md:px-3.5 rounded-md border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:border-[var(--color-accent)] transition-colors cursor-pointer"
 			>CSV</button>
 			<button
 				onclick={exportJson}
 				title="Export filtered projects as JSON"
-				class="text-[0.6875rem] px-2.5 py-1.5 rounded-md border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:border-[var(--color-accent)] transition-colors cursor-pointer"
+				class="text-[0.6875rem] px-2.5 py-1.5 max-md:min-h-11 max-md:px-3.5 rounded-md border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:border-[var(--color-accent)] transition-colors cursor-pointer"
 			>JSON</button>
 		</div>
 	</div>
 
 	<!-- Stats -->
-	<div class="grid grid-cols-4 gap-1.5 p-3 border-b border-[var(--color-border)]">
+	<div class="grid grid-cols-[1fr_1.45fr_1fr_1fr] gap-1.5 p-3 border-b border-[var(--color-border)]">
 		<div class="bg-[var(--color-bg)] rounded-lg p-2 text-center">
-			<div class="text-[1.375rem] leading-none font-bold tabular-nums text-[var(--color-accent)]">{list.length}</div>
+			<div class="text-[1.375rem] leading-none font-mono font-bold text-[var(--color-accent)]">{list.length}</div>
 			<div class="text-[0.6875rem] text-[var(--color-text-muted)] mt-1">Projects</div>
 		</div>
 		<div class="bg-[var(--color-bg)] rounded-lg p-2 text-center">
-			<div class="text-[1.375rem] leading-none font-bold tabular-nums text-[var(--color-text)]">{formatCurrency(totalBudget(list))}</div>
+			<div class="text-[1.375rem] leading-none font-mono font-bold text-[var(--color-text)]">{formatCurrency(totalBudget(list))}</div>
 			<div class="text-[0.6875rem] text-[var(--color-text-muted)] mt-1">Budget</div>
 		</div>
 		<button
@@ -151,16 +155,16 @@
 			title="Show only over-budget projects"
 			class="bg-[var(--color-bg)] rounded-lg p-2 text-center cursor-pointer border transition-colors {$filterStatus === 'over_budget' ? 'border-[var(--color-danger)]' : 'border-transparent hover:border-[var(--color-border)]'}"
 		>
-			<div class="text-[1.375rem] leading-none font-bold tabular-nums text-[var(--color-danger)]">{overBudgetCount(list)}</div>
+			<div class="text-[1.375rem] leading-none font-mono font-bold text-[var(--color-danger)]">{overBudgetCount(list)}</div>
 			<div class="text-[0.6875rem] text-[var(--color-text-muted)] mt-1">Over</div>
 		</button>
 		<button
 			onclick={toggleFlagged}
 			aria-pressed={$filterFlagged}
 			title="Show only flagged projects (over budget or overdue)"
-			class="bg-[var(--color-bg)] rounded-lg p-2 text-center cursor-pointer border transition-colors {$filterFlagged ? 'border-[var(--color-warning)]' : 'border-transparent hover:border-[var(--color-border)]'}"
+			class="bg-[var(--color-bg)] rounded-lg p-2 text-center cursor-pointer border transition-colors {$filterFlagged ? 'border-[var(--color-danger)]' : 'border-transparent hover:border-[var(--color-border)]'}"
 		>
-			<div class="flex items-center justify-center gap-1 text-[1.375rem] leading-none font-bold text-[var(--color-warning)]"><Flag size={18} />{redFlagCount(list)}</div>
+			<div class="flex items-center justify-center gap-1 text-[1.375rem] leading-none font-mono font-bold text-[var(--color-danger)]"><Flag size={18} />{redFlagCount(list)}</div>
 			<div class="text-[0.6875rem] text-[var(--color-text-muted)] mt-1">Flags</div>
 		</button>
 	</div>
@@ -168,16 +172,18 @@
 	<!-- Filters: search + status always in view; the rest behind More filters -->
 	<div class="p-3 space-y-2 border-b border-[var(--color-border)]">
 		<input
-			id="project-search"
+			data-project-search
+			aria-label="Search projects"
 			type="text"
 			placeholder="Search projects...  ( / )"
 			value={$searchQuery}
-			class="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-3 py-1.5 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-accent)]"
+			class="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-3 py-1.5 max-md:min-h-11 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-accent)]"
 			oninput={(e) => searchQuery.set((e.target as HTMLInputElement).value)}
 		/>
 		<div class="flex gap-2">
 			<select
-				class="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 text-xs text-[var(--color-text)] focus:border-[var(--color-accent)]"
+				aria-label="Status"
+				class="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 max-md:min-h-11 text-xs text-[var(--color-text)] focus:border-[var(--color-accent)]"
 				value={$filterStatus}
 				onchange={(e) => filterStatus.set((e.target as HTMLSelectElement).value as ProjectStatus | 'all')}
 			>
@@ -188,7 +194,7 @@
 			<button
 				onclick={() => (showAdvanced = !showAdvanced)}
 				aria-expanded={showAdvanced}
-				class="text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors cursor-pointer whitespace-nowrap {showAdvanced || advancedCount > 0 ? 'border-[var(--color-accent)] text-[var(--color-accent)]' : 'border-[var(--color-border)] text-[var(--color-text)] hover:border-[var(--color-accent)]'}"
+				class="text-xs font-medium px-3 py-1.5 max-md:min-h-11 rounded-lg border transition-colors cursor-pointer whitespace-nowrap {showAdvanced || advancedCount > 0 ? 'border-[var(--color-accent)] text-[var(--color-accent)]' : 'border-[var(--color-border)] text-[var(--color-text)] hover:border-[var(--color-accent)]'}"
 			>
 				More filters{advancedCount > 0 ? ` (${advancedCount})` : ''}
 			</button>
@@ -196,7 +202,7 @@
 				<button
 					onclick={clearFilters}
 					title="Reset all filters, search and timeline"
-					class="text-xs font-medium px-3 py-1.5 rounded-lg border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:border-[var(--color-accent)] transition-colors cursor-pointer whitespace-nowrap"
+					class="text-xs font-medium px-3 py-1.5 max-md:min-h-11 rounded-lg border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:border-[var(--color-accent)] transition-colors cursor-pointer whitespace-nowrap"
 				>Clear</button>
 			{/if}
 		</div>
@@ -208,7 +214,7 @@
 					<button
 						onclick={() => filterContractor.set(null)}
 						aria-label="Remove contractor filter"
-						class="inline-flex hover:text-[var(--color-text)] leading-none cursor-pointer"
+						class="hit-area inline-flex hover:text-[var(--color-text)] leading-none cursor-pointer"
 					><X size={13} /></button>
 				</span>
 			</div>
@@ -218,7 +224,8 @@
 			<div class="space-y-2 pt-1">
 				<div class="flex gap-2">
 					<select
-						class="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 text-xs text-[var(--color-text)] focus:border-[var(--color-accent)]"
+						aria-label="Category"
+						class="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 max-md:min-h-11 text-xs text-[var(--color-text)] focus:border-[var(--color-accent)]"
 						value={$filterCategory}
 						onchange={(e) => filterCategory.set((e.target as HTMLSelectElement).value as ProjectCategory | 'all')}
 					>
@@ -227,7 +234,8 @@
 						{/each}
 					</select>
 					<select
-						class="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 text-xs text-[var(--color-text)] focus:border-[var(--color-accent)]"
+						aria-label="Funding model"
+						class="flex-1 min-w-0 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 max-md:min-h-11 text-xs text-[var(--color-text)] focus:border-[var(--color-accent)]"
 						value={$filterFunding}
 						onchange={(e) => filterFunding.set((e.target as HTMLSelectElement).value as FundingType | 'all')}
 					>
@@ -235,10 +243,12 @@
 							<option value={f.value}>{f.label}</option>
 						{/each}
 					</select>
+					<span class="self-center"><InfoTip text={FUNDING_MODELS_EXPLAINED} /></span>
 				</div>
 				<div class="flex gap-2">
 					<select
-						class="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 text-xs text-[var(--color-text)] focus:border-[var(--color-accent)]"
+						aria-label="Government level"
+						class="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 max-md:min-h-11 text-xs text-[var(--color-text)] focus:border-[var(--color-accent)]"
 						value={$filterGovernmentLevel}
 						onchange={(e) => filterGovernmentLevel.set((e.target as HTMLSelectElement).value as GovernmentLevel | 'all')}
 					>
@@ -247,13 +257,38 @@
 						{/each}
 					</select>
 					<select
+						aria-label="Sort projects"
 						title="Sort projects"
-						class="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 text-xs text-[var(--color-text)] focus:border-[var(--color-accent)]"
+						class="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 max-md:min-h-11 text-xs text-[var(--color-text)] focus:border-[var(--color-accent)]"
 						value={$sortKey}
 						onchange={(e) => sortKey.set((e.target as HTMLSelectElement).value as SortKey)}
 					>
 						{#each SORT_OPTIONS as o}
 							<option value={o.value}>Sort: {o.label}</option>
+						{/each}
+					</select>
+				</div>
+				<!-- Phones have no room for the map's timeline, so the same year
+				     range is set here instead. -->
+				<div class="md:hidden flex gap-2">
+					<select
+						aria-label="From year"
+						class="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 max-md:min-h-11 text-xs text-[var(--color-text)] focus:border-[var(--color-accent)]"
+						value={$timelineRange[0]}
+						onchange={(e) => timelineRange.set([Number((e.target as HTMLSelectElement).value), $timelineRange[1]])}
+					>
+						{#each YEARS.filter((y) => y <= $timelineRange[1]) as y}
+							<option value={y}>From {y}</option>
+						{/each}
+					</select>
+					<select
+						aria-label="To year"
+						class="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 max-md:min-h-11 text-xs text-[var(--color-text)] focus:border-[var(--color-accent)]"
+						value={$timelineRange[1]}
+						onchange={(e) => timelineRange.set([$timelineRange[0], Number((e.target as HTMLSelectElement).value)])}
+					>
+						{#each YEARS.filter((y) => y >= $timelineRange[0]) as y}
+							<option value={y}>To {y}</option>
 						{/each}
 					</select>
 				</div>
@@ -278,7 +313,7 @@
 				<div class="flex items-start justify-between gap-2">
 					<div class="flex-1 min-w-0">
 						<div class="flex items-center gap-1.5 text-[0.9375rem] font-semibold">
-							{#if flagged}<Flag size={14} class="shrink-0 text-[var(--color-warning)]" aria-label="Over budget or overdue" />{/if}
+							{#if flagged}<Flag size={14} class="shrink-0 text-[var(--color-danger)]" aria-label="Over budget or overdue" />{/if}
 							<CatIcon size={14} class="shrink-0 text-[var(--color-text-muted)]" />
 							<span class="truncate">{project.name}</span>
 						</div>
@@ -296,22 +331,27 @@
 					</div>
 				</div>
 				<div class="mt-2 flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
-					<span>{formatCurrency(project.spent)} / {formatCurrency(project.budget)}</span>
-					<div class="flex-1 bg-[var(--color-bg)] rounded-full h-1.5">
-						<div
-							class="h-full rounded-full transition-all"
-							style="width: {Math.min(100, pct)}%; background: {cfg.color};"
-						></div>
-					</div>
-					<span class="font-mono">{pct}%</span>
+					{#if project.spent != null && pct != null}
+						<span class="font-mono">{formatCurrency(project.spent)} / {formatCurrency(project.budget)}</span>
+						<div class="flex-1 bg-[var(--color-bg)] rounded-full h-1.5">
+							<div
+								class="h-full rounded-full transition-all"
+								style="width: {Math.min(100, pct)}%; background: {cfg.color};"
+							></div>
+						</div>
+						<span class="font-mono">{pct}%</span>
+					{:else}
+						<span>Est. cost <span class="font-mono text-[var(--color-text)]">{formatCurrency(project.budget)}</span></span>
+						<span class="ml-auto">spend not published</span>
+					{/if}
 				</div>
 				{#if v > 0 || late}
 					<div class="mt-1 flex items-center gap-2 text-[0.6875rem]">
 						{#if v > 0}
-							<span class="text-[var(--color-danger)] font-medium">+{formatCurrency(v)} ({Math.round(variancePct(project) * 100)}%)</span>
+							<span class="text-[var(--color-danger)] font-mono font-medium">+{formatCurrency(v)} ({Math.round(variancePct(project) * 100)}%)</span>
 						{/if}
 						{#if late}
-							<span class="text-[var(--color-warning)] font-medium">{late}mo late</span>
+							<span class="text-[var(--color-warning)] font-mono font-medium">{late}mo late</span>
 						{/if}
 					</div>
 				{/if}

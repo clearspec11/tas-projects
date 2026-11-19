@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitest/config';
 
-// metrics.ts is pure TS (no Svelte/$app/$env), so a plain node environment
+// The tested modules are pure TS (data.ts has its Supabase client mocked), so
+// a plain node environment
 // is enough and avoids pulling the SvelteKit plugin into the test run.
 export default defineConfig({
 	test: {
